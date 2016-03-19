@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.FileButton = new System.Windows.Forms.ToolStripMenuItem();
             this.CloseButton = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,7 +50,7 @@
             this.Cell14 = new System.Windows.Forms.RichTextBox();
             this.Cell15 = new System.Windows.Forms.RichTextBox();
             this.Cell16 = new System.Windows.Forms.RichTextBox();
-            this.StartButton = new System.Windows.Forms.Button();
+            this.ConnectButton = new System.Windows.Forms.Button();
             this.CancelButton = new System.Windows.Forms.Button();
             this.wordEntryBox = new System.Windows.Forms.TextBox();
             this.wordEntryBoxLabel = new System.Windows.Forms.Label();
@@ -57,7 +58,7 @@
             this.urlLabel = new System.Windows.Forms.Label();
             this.playerBox = new System.Windows.Forms.TextBox();
             this.playerNameBox = new System.Windows.Forms.Label();
-            this.timeBox = new System.Windows.Forms.TextBox();
+            this.timeLengthBox = new System.Windows.Forms.TextBox();
             this.timeBoxLabel = new System.Windows.Forms.Label();
             this.Player1NameBox = new System.Windows.Forms.TextBox();
             this.Player2NameBox = new System.Windows.Forms.TextBox();
@@ -72,7 +73,8 @@
             this.Player1WordLabel = new System.Windows.Forms.Label();
             this.Player2WordLabel = new System.Windows.Forms.Label();
             this.timerLabel = new System.Windows.Forms.Label();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.timerDisplayBox = new System.Windows.Forms.RichTextBox();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -101,7 +103,7 @@
             // CloseButton
             // 
             this.CloseButton.Name = "CloseButton";
-            this.CloseButton.Size = new System.Drawing.Size(152, 22);
+            this.CloseButton.Size = new System.Drawing.Size(103, 22);
             this.CloseButton.Text = "Close";
             this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);
             // 
@@ -327,20 +329,21 @@
             this.Cell16.Text = "";
             this.Cell16.UseWaitCursor = true;
             // 
-            // StartButton
+            // ConnectButton
             // 
-            this.StartButton.Location = new System.Drawing.Point(182, 89);
-            this.StartButton.Name = "StartButton";
-            this.StartButton.Size = new System.Drawing.Size(153, 39);
-            this.StartButton.TabIndex = 3;
-            this.StartButton.Text = "Start";
-            this.StartButton.UseVisualStyleBackColor = true;
+            this.ConnectButton.Location = new System.Drawing.Point(182, 105);
+            this.ConnectButton.Name = "ConnectButton";
+            this.ConnectButton.Size = new System.Drawing.Size(153, 20);
+            this.ConnectButton.TabIndex = 3;
+            this.ConnectButton.Text = "Connect";
+            this.ConnectButton.UseVisualStyleBackColor = true;
+            this.ConnectButton.Click += new System.EventHandler(this.ConnectButton_Click);
             // 
             // CancelButton
             // 
-            this.CancelButton.Location = new System.Drawing.Point(182, 132);
+            this.CancelButton.Location = new System.Drawing.Point(182, 131);
             this.CancelButton.Name = "CancelButton";
-            this.CancelButton.Size = new System.Drawing.Size(153, 41);
+            this.CancelButton.Size = new System.Drawing.Size(153, 20);
             this.CancelButton.TabIndex = 4;
             this.CancelButton.Text = "Cancel";
             this.CancelButton.UseVisualStyleBackColor = true;
@@ -349,7 +352,7 @@
             // 
             this.wordEntryBox.Location = new System.Drawing.Point(22, 182);
             this.wordEntryBox.Name = "wordEntryBox";
-            this.wordEntryBox.Size = new System.Drawing.Size(321, 20);
+            this.wordEntryBox.Size = new System.Drawing.Size(331, 20);
             this.wordEntryBox.TabIndex = 5;
             // 
             // wordEntryBoxLabel
@@ -396,12 +399,12 @@
             this.playerNameBox.TabIndex = 10;
             this.playerNameBox.Text = "Enter username:";
             // 
-            // timeBox
+            // timeLengthBox
             // 
-            this.timeBox.Location = new System.Drawing.Point(22, 132);
-            this.timeBox.Name = "timeBox";
-            this.timeBox.Size = new System.Drawing.Size(128, 20);
-            this.timeBox.TabIndex = 11;
+            this.timeLengthBox.Location = new System.Drawing.Point(22, 132);
+            this.timeLengthBox.Name = "timeLengthBox";
+            this.timeLengthBox.Size = new System.Drawing.Size(128, 20);
+            this.timeLengthBox.TabIndex = 11;
             // 
             // timeBoxLabel
             // 
@@ -418,6 +421,7 @@
             this.Player1NameBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.Player1NameBox.Location = new System.Drawing.Point(476, 42);
             this.Player1NameBox.Name = "Player1NameBox";
+            this.Player1NameBox.ReadOnly = true;
             this.Player1NameBox.Size = new System.Drawing.Size(175, 20);
             this.Player1NameBox.TabIndex = 13;
             // 
@@ -426,6 +430,7 @@
             this.Player2NameBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.Player2NameBox.Location = new System.Drawing.Point(734, 43);
             this.Player2NameBox.Name = "Player2NameBox";
+            this.Player2NameBox.ReadOnly = true;
             this.Player2NameBox.Size = new System.Drawing.Size(172, 20);
             this.Player2NameBox.TabIndex = 14;
             // 
@@ -434,6 +439,7 @@
             this.Player1ScoreBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.Player1ScoreBox.Location = new System.Drawing.Point(476, 77);
             this.Player1ScoreBox.Name = "Player1ScoreBox";
+            this.Player1ScoreBox.ReadOnly = true;
             this.Player1ScoreBox.Size = new System.Drawing.Size(175, 20);
             this.Player1ScoreBox.TabIndex = 15;
             // 
@@ -442,6 +448,7 @@
             this.Player2ScoreBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.Player2ScoreBox.Location = new System.Drawing.Point(734, 77);
             this.Player2ScoreBox.Name = "Player2ScoreBox";
+            this.Player2ScoreBox.ReadOnly = true;
             this.Player2ScoreBox.Size = new System.Drawing.Size(172, 20);
             this.Player2ScoreBox.TabIndex = 16;
             // 
@@ -535,21 +542,22 @@
             this.timerLabel.TabIndex = 25;
             this.timerLabel.Text = "Time Remaining:";
             // 
-            // richTextBox1
+            // timerDisplayBox
             // 
-            this.richTextBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
-            this.richTextBox1.Location = new System.Drawing.Point(182, 48);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(153, 37);
-            this.richTextBox1.TabIndex = 26;
-            this.richTextBox1.Text = "";
+            this.timerDisplayBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
+            this.timerDisplayBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.timerDisplayBox.Location = new System.Drawing.Point(182, 48);
+            this.timerDisplayBox.Name = "timerDisplayBox";
+            this.timerDisplayBox.Size = new System.Drawing.Size(153, 37);
+            this.timerDisplayBox.TabIndex = 26;
+            this.timerDisplayBox.Text = "";
             // 
             // BoggleWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(958, 596);
-            this.Controls.Add(this.richTextBox1);
+            this.Controls.Add(this.timerDisplayBox);
             this.Controls.Add(this.timerLabel);
             this.Controls.Add(this.Player2WordLabel);
             this.Controls.Add(this.Player1WordLabel);
@@ -564,7 +572,7 @@
             this.Controls.Add(this.Player2NameBox);
             this.Controls.Add(this.Player1NameBox);
             this.Controls.Add(this.timeBoxLabel);
-            this.Controls.Add(this.timeBox);
+            this.Controls.Add(this.timeLengthBox);
             this.Controls.Add(this.playerNameBox);
             this.Controls.Add(this.playerBox);
             this.Controls.Add(this.urlLabel);
@@ -572,7 +580,7 @@
             this.Controls.Add(this.wordEntryBoxLabel);
             this.Controls.Add(this.wordEntryBox);
             this.Controls.Add(this.CancelButton);
-            this.Controls.Add(this.StartButton);
+            this.Controls.Add(this.ConnectButton);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
@@ -609,7 +617,7 @@
         private System.Windows.Forms.RichTextBox Cell14;
         private System.Windows.Forms.RichTextBox Cell15;
         private System.Windows.Forms.RichTextBox Cell16;
-        private System.Windows.Forms.Button StartButton;
+        private System.Windows.Forms.Button ConnectButton;
         private System.Windows.Forms.Button CancelButton;
         private System.Windows.Forms.TextBox wordEntryBox;
         private System.Windows.Forms.Label wordEntryBoxLabel;
@@ -617,7 +625,7 @@
         private System.Windows.Forms.Label urlLabel;
         private System.Windows.Forms.TextBox playerBox;
         private System.Windows.Forms.Label playerNameBox;
-        private System.Windows.Forms.TextBox timeBox;
+        private System.Windows.Forms.TextBox timeLengthBox;
         private System.Windows.Forms.Label timeBoxLabel;
         private System.Windows.Forms.TextBox Player1NameBox;
         private System.Windows.Forms.TextBox Player2NameBox;
@@ -632,7 +640,8 @@
         private System.Windows.Forms.Label Player1WordLabel;
         private System.Windows.Forms.Label Player2WordLabel;
         private System.Windows.Forms.Label timerLabel;
-        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.RichTextBox timerDisplayBox;
+        private System.Windows.Forms.Timer timer1;
     }
 }
 

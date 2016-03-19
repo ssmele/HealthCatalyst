@@ -13,8 +13,17 @@ namespace BoggleClient
 
         event Action HelpEvent;
 
+        event Action ConnectEvent;
+
         void closeWindow();
         
+
+        string timeLengthBox { set; get; }
+        string timerDisplayBox { set; get; }
+        string player1ScoreBox { set; }
+        string player2ScoreBox { set; }
+        string player1NameBox { set; }
+        string playerBox { set; get; }
         string Cell1 { set; get; }
         string Cell2 { set; get; }
         string Cell3 { set; get; }

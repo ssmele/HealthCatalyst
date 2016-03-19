@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BoggleClient;
 
 namespace BoggleClient
 {
@@ -222,6 +223,68 @@ namespace BoggleClient
             }
         }
 
+        string IBoggleWindow.playerBox
+        {
+            get
+            {
+                return playerBox.Text;
+            }
+            set
+            {
+                playerBox.Text = value;
+            }
+        }
+
+        public string player1NameBox
+        {
+            set
+            {
+                Player1NameBox.Text = value;
+            }
+        }
+
+        public string player1ScoreBox
+        {
+            set
+            {
+                Player1ScoreBox.Text = value;
+            }
+        }
+
+        public string player2ScoreBox
+        {
+            set
+            {
+                Player2ScoreBox.Text = value;
+            }
+        }
+
+        string IBoggleWindow.timeLengthBox
+        {
+            get
+            {
+                return timeLengthBox.Text;
+            }
+
+            set
+            {
+                timeLengthBox.Text = value;
+            }
+        }
+
+        string IBoggleWindow.timerDisplayBox
+        {
+            get
+            {
+                return timerDisplayBox.Text;
+            }
+
+            set
+            {
+                timerDisplayBox.Text = value;
+            }
+        }
+
         public BoggleWindow()
         {
             InitializeComponent();
@@ -243,14 +306,13 @@ namespace BoggleClient
             Cell14.SelectionAlignment = HorizontalAlignment.Center;
             Cell15.SelectionAlignment = HorizontalAlignment.Center;
             Cell16.SelectionAlignment = HorizontalAlignment.Center;
+            
         }
 
         
         public event Action CloseWindowEvent;
-
         public event Action HelpEvent;
-
-
+        public event Action ConnectEvent;
 
         private void CloseButton_Click(object sender, EventArgs e)
         {
@@ -275,6 +337,31 @@ namespace BoggleClient
             Close();
         }
 
+        private void ConnectButton_Click(object sender, EventArgs e)
+        {
+            if (ConnectEvent != null)
+            {
+                ConnectEvent();
+            }
+        }
 
+
+        private void decrementTime(object o, EventArgs sender)
+        {
+            //Gets current time.
+            int currentTime = int.Parse(timerDisplayBox.Text);
+            //Sets new time. 
+            timerDisplayBox.Text = (currentTime--).ToString();
+        }
+
+       public async void startTimer(object o, RoutedEventHandler)
+        {
+            
+            timer1.Interval = 1000;
+            timer1.Tick += decrementTime;
+            timer1.Start();
+            
+
+        }
     }
 }

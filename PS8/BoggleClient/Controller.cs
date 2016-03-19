@@ -3,6 +3,7 @@ using System.Text;
 using System.Dynamic;
 using System.Net.Http;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace BoggleClient
 {
@@ -12,15 +13,24 @@ namespace BoggleClient
         private IBoggleWindow window;
 
         //Represents the client we will accessing. 
-        private HttpClient client;
+        //private HttpClient client;
 
         public Controller(IBoggleWindow window)
         {
             this.window = window;
             //Calls method to create new client. 
-            client = CreateClient();
+            //client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc");
             window.CloseWindowEvent += HandleCloseWindowEvent;
             window.HelpEvent += HandleHelpEvent;
+            window.ConnectEvent += HandleConnectEvent;
+        }
+
+        public void HandleConnectEvent()
+        {
+            window.player1NameBox = window.playerBox;
+            window.player1ScoreBox = "0";
+            window.player2ScoreBox = "0";
+            window.timerDisplayBox = window.timeLengthBox;
         }
 
         public void HandleCloseWindowEvent()
@@ -30,8 +40,11 @@ namespace BoggleClient
 
         public void HandleHelpEvent()
         {
+            string x = getTest();
             //string x = createUser("stone");
+            window.playerBox = x;
             refreshBoard("abcdefgejdlhdofi");
+
         }
 
         public void refreshBoard(string boardString)
@@ -62,7 +75,7 @@ namespace BoggleClient
         /// <returns></returns>
         public string createUser(string nickname)
         {
-            using (client)
+            using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
             {
                 dynamic data = new ExpandoObject();
                 data.Nickname = nickname;
@@ -74,35 +87,55 @@ namespace BoggleClient
                 {
                     string result = response.Content.ReadAsStringAsync().Result;
                     dynamic newRepo = JsonConvert.DeserializeObject(result);
-                    Console.WriteLine("User Token:");
-                    Console.WriteLine(newRepo);
+                    return newRepo;
                 }
                 else
                 {
-                    Console.WriteLine("Error creating repo: " + response.StatusCode);
-                    Console.WriteLine(response.ReasonPhrase);
+                    return response.ReasonPhrase;
                 }
             }
-
-            return "idk";
-            
         }
-        
+
+
+        /// <summary>
+        /// My attempt to make a post. 
+        /// </summary>
+        /// <param name="nickname"></param>
+        /// <returns></returns>
+        public string getTest()
+        {
+            using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
+            {
+                
+                HttpResponseMessage response = client.GetAsync("").Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return response.StatusCode.ToString(); 
+                }
+                else
+                {
+                    return response.StatusCode.ToString();
+            }
+            }
+            }
+
 
 
         /// <summary>
         /// Creates an HttpClient for communicating with GitHub.  The GitHub API requires specific information
         /// to appear in each request header.
         /// </summary>
-        HttpClient CreateClient()
+        HttpClient CreateClient(string url)
         {
             // Create a client whose base address is the GitHub server
             HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("http://bogglecs3500s16.azurewebsites.net/BoggleService.svc");
+            client.BaseAddress = new Uri(url);
 
             // Tell the server that the client will accept this particular type of response data
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+            //client.DefaultRequestHeaders.Accept.Clear();
+            //client.DefaultRequestHeaders.Add("Accept", "application/json");
+            
 
             // There is more client configuration to do, depending on the request.
             return client;
