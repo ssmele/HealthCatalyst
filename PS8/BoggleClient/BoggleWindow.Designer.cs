@@ -552,6 +552,10 @@
             this.timerDisplayBox.TabIndex = 26;
             this.timerDisplayBox.Text = "";
             // 
+            // timer1
+            // 
+            this.timer1.Interval = 1000;
+            // 
             // BoggleWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);

@@ -306,10 +306,33 @@ namespace BoggleClient
             Cell14.SelectionAlignment = HorizontalAlignment.Center;
             Cell15.SelectionAlignment = HorizontalAlignment.Center;
             Cell16.SelectionAlignment = HorizontalAlignment.Center;
-            
+            timer1.Tick += Timer1_Tick;
+        }
+
+        private void Timer1_Tick(object sender, EventArgs e)
+        {
+            //Gets current time.
+            int currentTime = int.Parse(timerDisplayBox.Text);
+            if(currentTime <= 0)
+            {
+                timer1.Stop();
+                return;
+            }
+            //Sets new time. 
+            int newTime = --currentTime;
+            timerDisplayBox.Text = newTime.ToString();
+        }
+
+        private async void startTimer()
+        {
+            timer1.Interval = 1000;
+            timer1.Start();
         }
 
         
+
+
+
         public event Action CloseWindowEvent;
         public event Action HelpEvent;
         public event Action ConnectEvent;
@@ -343,25 +366,8 @@ namespace BoggleClient
             {
                 ConnectEvent();
             }
-        }
-
-
-        private void decrementTime(object o, EventArgs sender)
-        {
-            //Gets current time.
-            int currentTime = int.Parse(timerDisplayBox.Text);
-            //Sets new time. 
-            timerDisplayBox.Text = (currentTime--).ToString();
-        }
-
-       public async void startTimer(object o, RoutedEventHandler)
-        {
+            startTimer();
             
-            timer1.Interval = 1000;
-            timer1.Tick += decrementTime;
-            timer1.Start();
-            
-
         }
     }
 }
