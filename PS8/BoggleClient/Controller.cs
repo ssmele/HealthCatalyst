@@ -40,9 +40,9 @@ namespace BoggleClient
 
         public void HandleHelpEvent()
         {
-            string x = getTest();
+            //string x = getTest();
             //string x = createUser("stone");
-            window.playerBox = x;
+            //window.playerBox = x;
             refreshBoard("abcdefgejdlhdofi");
 
         }
