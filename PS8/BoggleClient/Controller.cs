@@ -30,7 +30,7 @@ namespace BoggleClient
 
         public void HandleHelpEvent()
         {
-            string x = createUser("stone");
+            //string x = createUser("stone");
             refreshBoard("abcdefgejdlhdofi");
         }
 

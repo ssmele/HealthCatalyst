@@ -275,6 +275,6 @@ namespace BoggleClient
             Close();
         }
 
-       
+
     }
 }
