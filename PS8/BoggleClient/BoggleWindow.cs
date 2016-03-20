@@ -285,10 +285,50 @@ namespace BoggleClient
             }
         }
 
+        string IBoggleWindow.statusBox
+        {
+            get
+            {
+                return statusBox.Text;
+            }
+
+            set
+            {
+                statusBox.Text = value;
+            }
+        }
+
+        public bool connectButton
+        {
+            get
+            {
+                return ConnectButton.Enabled;
+            }
+
+            set
+            {
+                ConnectButton.Enabled = value;
+            }
+        }
+
+        public bool cancelButton
+        {
+            get
+            {
+                return CancelButton.Enabled;
+            }
+
+            set
+            {
+                CancelButton.Enabled = value;
+            }
+        }
+
         public BoggleWindow()
         {
             InitializeComponent();
             Text = "Boggle";
+            CancelButton.Enabled = false;
             //Sets all cells to align in the center. 
             Cell1.SelectionAlignment = HorizontalAlignment.Center;
             Cell2.SelectionAlignment = HorizontalAlignment.Center;
@@ -311,6 +351,7 @@ namespace BoggleClient
 
         private void Timer1_Tick(object sender, EventArgs e)
         {
+            //TODO:when nothing is in timebox. or 5 or 120
             //Gets current time.
             int currentTime = int.Parse(timerDisplayBox.Text);
             if(currentTime <= 0)
@@ -323,7 +364,7 @@ namespace BoggleClient
             timerDisplayBox.Text = newTime.ToString();
         }
 
-        private async void startTimer()
+        private void startTimer()
         {
             timer1.Interval = 1000;
             timer1.Start();
@@ -366,8 +407,18 @@ namespace BoggleClient
             {
                 ConnectEvent();
             }
-            startTimer();
+            //startTimer();
             
+        }
+
+        public void helpWindow()
+        {
+            MessageBox.Show("How to start the game:\nEnter a URL to connect to another player, enter a username for yourself, and enter a time duration for each round.\nIf no time duration is set, the default is 60 seconds\n Once this information is entered, click Connect.\n Once another player connects, the game will start");
+        }
+
+        public void errorMessage(string message)
+        {
+            MessageBox.Show(message);
         }
     }
 }

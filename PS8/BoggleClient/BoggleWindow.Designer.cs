@@ -75,6 +75,8 @@
             this.timerLabel = new System.Windows.Forms.Label();
             this.timerDisplayBox = new System.Windows.Forms.RichTextBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.statusLabel = new System.Windows.Forms.Label();
+            this.statusBox = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -556,11 +558,34 @@
             // 
             this.timer1.Interval = 1000;
             // 
+            // statusLabel
+            // 
+            this.statusLabel.AutoSize = true;
+            this.statusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.statusLabel.ForeColor = System.Drawing.Color.Black;
+            this.statusLabel.Location = new System.Drawing.Point(806, 6);
+            this.statusLabel.Name = "statusLabel";
+            this.statusLabel.Size = new System.Drawing.Size(61, 18);
+            this.statusLabel.TabIndex = 27;
+            this.statusLabel.Text = "Status:";
+            // 
+            // statusBox
+            // 
+            this.statusBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.statusBox.ForeColor = System.Drawing.Color.Red;
+            this.statusBox.Location = new System.Drawing.Point(863, 4);
+            this.statusBox.Name = "statusBox";
+            this.statusBox.ReadOnly = true;
+            this.statusBox.Size = new System.Drawing.Size(83, 22);
+            this.statusBox.TabIndex = 28;
+            // 
             // BoggleWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(958, 596);
+            this.Controls.Add(this.statusBox);
+            this.Controls.Add(this.statusLabel);
             this.Controls.Add(this.timerDisplayBox);
             this.Controls.Add(this.timerLabel);
             this.Controls.Add(this.Player2WordLabel);
@@ -646,6 +671,8 @@
         private System.Windows.Forms.Label timerLabel;
         private System.Windows.Forms.RichTextBox timerDisplayBox;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Label statusLabel;
+        private System.Windows.Forms.TextBox statusBox;
     }
 }
 

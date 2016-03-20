@@ -16,8 +16,11 @@ namespace BoggleClient
         event Action ConnectEvent;
 
         void closeWindow();
-        
-
+        void helpWindow();
+        void errorMessage(string message);
+        string statusBox { set; get; }
+        bool connectButton { set; get; }
+        bool cancelButton { set; get; }
         string timeLengthBox { set; get; }
         string timerDisplayBox { set; get; }
         string player1ScoreBox { set; }

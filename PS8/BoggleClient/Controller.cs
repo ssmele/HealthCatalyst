@@ -18,11 +18,13 @@ namespace BoggleClient
         public Controller(IBoggleWindow window)
         {
             this.window = window;
+            
             //Calls method to create new client. 
             //client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc");
             window.CloseWindowEvent += HandleCloseWindowEvent;
             window.HelpEvent += HandleHelpEvent;
             window.ConnectEvent += HandleConnectEvent;
+            
         }
 
         public void HandleConnectEvent()
@@ -30,7 +32,42 @@ namespace BoggleClient
             window.player1NameBox = window.playerBox;
             window.player1ScoreBox = "0";
             window.player2ScoreBox = "0";
-            window.timerDisplayBox = window.timeLengthBox;
+            window.statusBox = "Pending";
+            window.connectButton = false;
+            window.cancelButton = true;
+            if (window.timeLengthBox == "")
+            {
+                window.timeLengthBox = "60";
+            }
+            else
+            {
+                window.timerDisplayBox = window.timeLengthBox;
+            }
+
+
+            //Create user and get token.  (Asynchronas)
+            string player1Token = createUser(window.playerBox);
+
+            //JoinGame
+            //string response = joinGame(player1Token, window.timeLengthBox);
+
+            //if 202 call pending.
+                    // can cancel
+                    // activeGame bool is false
+
+            //if 201 call created.
+                // activeGame = true
+                // Cancel button inactive
+                // Connect button inactive
+                // start timer
+
+
+  
+
+
+           
+            
+            
         }
 
         public void HandleCloseWindowEvent()
@@ -41,9 +78,10 @@ namespace BoggleClient
         public void HandleHelpEvent()
         {
             //string x = getTest();
-            //string x = createUser("stone");
+            //string x = createUser("");
             //window.playerBox = x;
-            refreshBoard("abcdefgejdlhdofi");
+            //refreshBoard("abcdefgejdlhdofi");
+            window.helpWindow();
 
         }
 
@@ -81,13 +119,18 @@ namespace BoggleClient
                 data.Nickname = nickname;
 
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8,"application/json");
-                HttpResponseMessage response = client.PostAsync("/users", content).Result;
+                HttpResponseMessage response = client.PostAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/users", content).Result;
 
                 if (response.IsSuccessStatusCode)
                 {
                     string result = response.Content.ReadAsStringAsync().Result;
-                    dynamic newRepo = JsonConvert.DeserializeObject(result);
-                    return newRepo;
+                    dynamic responseData = JsonConvert.DeserializeObject(result);
+                    return responseData.UserToken;
+                }
+                else if (response.StatusCode.ToString() == "Forbidden")
+                {
+                    window.errorMessage("Invalid username. Try again.");
+                    return "";
                 }
                 else
                 {
@@ -107,7 +150,9 @@ namespace BoggleClient
             using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
             {
                 
-                HttpResponseMessage response = client.GetAsync("").Result;
+                HttpResponseMessage response = client.GetAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/users").Result;
+
+
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -133,8 +178,8 @@ namespace BoggleClient
             client.BaseAddress = new Uri(url);
 
             // Tell the server that the client will accept this particular type of response data
-            //client.DefaultRequestHeaders.Accept.Clear();
-            //client.DefaultRequestHeaders.Add("Accept", "application/json");
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
             
 
             // There is more client configuration to do, depending on the request.
