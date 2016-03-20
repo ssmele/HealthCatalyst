@@ -42,31 +42,31 @@ namespace BoggleClient
             }
             window.timerDisplayBox = window.timeLengthBox;
             
-            window.startTimer();
 
             //Create user and get token.  (Asynchronas)
             string player1Token = await createUser(window.playerBox);
-            window.player2NameBox = player1Token;
-            //JoinGame
-            //string response = joinGame(player1Token, window.timeLengthBox);
+            string player2Token = await createUser("asdfasdf");
+            //Attempgint to JoinGame
+            string response = await joinGame(player1Token, int.Parse(window.timeLengthBox));
+            string response2 = await joinGame(player2Token, int.Parse(window.timeLengthBox));
 
             //if 202 call pending.
-                    // can cancel
-                    // activeGame bool is false
+            // can cancel
+            // activeGame bool is false
 
             //if 201 call created.
-                // activeGame = true
-                // Cancel button inactive
-                // Connect button inactive
-                // start timer
+            // activeGame = true
+            // Cancel button inactive
+            // Connect button inactive
+            // start timer
 
 
-  
 
 
-           
-            
-            
+
+
+
+
         }
 
         public void HandleCloseWindowEvent()
@@ -143,6 +143,43 @@ namespace BoggleClient
                     window.errorMessage("Unknow error.");
                     return "";
                 }
+            }
+        }
+
+
+
+        public async Task<string> joinGame(string playerToken, int timeGiven)
+        {
+            using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
+            {
+                //Setting up nickname to give to server.
+                dynamic data = new ExpandoObject();
+                data.UserToken = playerToken;
+                data.TimeLimit = timeGiven;
+
+                //Setting header and payload. 
+                StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+
+                //Setting up post.
+                Task<HttpResponseMessage> getGameID = client.PostAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/games", content);
+                
+                //Awaiting post result.
+                HttpResponseMessage response = await getGameID;
+                if(response.StatusCode.ToString() == "Created")
+                {
+                    string result = response.Content.ReadAsStringAsync().Result;
+                    dynamic responseData = JsonConvert.DeserializeObject(result);
+                    return responseData.GameID;
+                }
+                else if (response.StatusCode.ToString() == "Accepted")
+                {
+                    string result = response.Content.ReadAsStringAsync().Result;
+                    dynamic responseData = JsonConvert.DeserializeObject(result);
+                    return responseData.GameID;
+                }
+                
+
+                return "";
             }
         }
 
