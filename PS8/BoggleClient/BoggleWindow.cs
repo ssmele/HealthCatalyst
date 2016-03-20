@@ -324,6 +324,14 @@ namespace BoggleClient
             }
         }
 
+        public string player2NameBox
+        {
+            set
+            {
+                Player2NameBox.Text = value;
+            }
+        }
+
         public BoggleWindow()
         {
             InitializeComponent();
@@ -364,7 +372,7 @@ namespace BoggleClient
             timerDisplayBox.Text = newTime.ToString();
         }
 
-        private void startTimer()
+        public void startTimer()
         {
             timer1.Interval = 1000;
             timer1.Start();

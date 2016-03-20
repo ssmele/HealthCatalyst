@@ -15,6 +15,8 @@ namespace BoggleClient
 
         event Action ConnectEvent;
 
+        void startTimer();
+
         void closeWindow();
         void helpWindow();
         void errorMessage(string message);
@@ -26,6 +28,7 @@ namespace BoggleClient
         string player1ScoreBox { set; }
         string player2ScoreBox { set; }
         string player1NameBox { set; }
+        string player2NameBox { set; }
         string playerBox { set; get; }
         string Cell1 { set; get; }
         string Cell2 { set; get; }

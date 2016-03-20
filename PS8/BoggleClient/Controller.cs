@@ -12,6 +12,7 @@ namespace BoggleClient
 
         private IBoggleWindow window;
 
+        private string player1Token;
         //Represents the client we will accessing. 
         //private HttpClient client;
 
@@ -27,7 +28,7 @@ namespace BoggleClient
             
         }
 
-        public void HandleConnectEvent()
+        public async void HandleConnectEvent()
         {
             window.player1NameBox = window.playerBox;
             window.player1ScoreBox = "0";
@@ -39,15 +40,13 @@ namespace BoggleClient
             {
                 window.timeLengthBox = "60";
             }
-            else
-            {
-                window.timerDisplayBox = window.timeLengthBox;
-            }
-
+            window.timerDisplayBox = window.timeLengthBox;
+            
+            window.startTimer();
 
             //Create user and get token.  (Asynchronas)
-            string player1Token = createUser(window.playerBox);
-
+            string player1Token = await createUser(window.playerBox);
+            window.player2NameBox = player1Token;
             //JoinGame
             //string response = joinGame(player1Token, window.timeLengthBox);
 
@@ -111,15 +110,22 @@ namespace BoggleClient
         /// </summary>
         /// <param name="nickname"></param>
         /// <returns></returns>
-        public string createUser(string nickname)
+        public async Task<string> createUser(string nickname)
         {
             using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
             {
+                //Setting up nickname to give to server.
                 dynamic data = new ExpandoObject();
                 data.Nickname = nickname;
 
+                //Setting header and payload. 
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8,"application/json");
-                HttpResponseMessage response = client.PostAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/users", content).Result;
+                
+                //Setting up post.
+                Task<HttpResponseMessage> getUserToken = client.PostAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/users", content);
+
+                //Awaiting post result.
+                HttpResponseMessage response = await getUserToken;
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -134,7 +140,8 @@ namespace BoggleClient
                 }
                 else
                 {
-                    return response.ReasonPhrase;
+                    window.errorMessage("Unknow error.");
+                    return "";
                 }
             }
         }
