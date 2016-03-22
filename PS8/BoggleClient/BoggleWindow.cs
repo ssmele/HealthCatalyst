@@ -250,14 +250,14 @@ namespace BoggleClient
         private readonly object sync = new object();
 
         public string player1ScoreBox
-        { 
+        {
             set
             {
                 //I THINK I DID THIS RIGHT IS IT NECESSARY IDK!!!!
-                    lock (sync)
-                    {
-                        Player1ScoreBox.Text = value;
-                    }
+                lock (sync)
+                {
+                    Player1ScoreBox.Text = value;
+                }
             }
             get
             {
@@ -392,7 +392,7 @@ namespace BoggleClient
             //TODO:when nothing is in timebox. or 5 or 120
             //Gets current time.
             int currentTime = int.Parse(timerDisplayBox.Text);
-            if(currentTime <= 0)
+            if (currentTime <= 0)
             {
                 timer1.Stop();
                 return;
@@ -408,7 +408,7 @@ namespace BoggleClient
             timer1.Start();
         }
 
-        
+
 
 
 
@@ -419,7 +419,7 @@ namespace BoggleClient
 
         private void CloseButton_Click(object sender, EventArgs e)
         {
-            if(CloseWindowEvent != null)
+            if (CloseWindowEvent != null)
             {
                 CloseWindowEvent();
             }
@@ -447,12 +447,12 @@ namespace BoggleClient
                 ConnectEvent();
             }
             //startTimer();
-            
+
         }
 
         public void helpWindow()
         {
-            MessageBox.Show("How to start the game:\nEnter a URL to connect to another player, enter a username for yourself, and enter a time duration for each round.\nIf no time duration is set, the default is 60 seconds\n Once this information is entered, click Connect.\n Once another player connects, the game will start","Help",MessageBoxButtons.OK);
+            MessageBox.Show("How to start the game:\nEnter a URL to connect to another player, enter a username for yourself, and enter a time duration for each round.\nIf no time duration is set, the default is 60 seconds\n Once this information is entered, click Connect.\n Once another player connects, the game will start", "Help", MessageBoxButtons.OK);
         }
 
         public void errorMessage(string message)
@@ -462,16 +462,13 @@ namespace BoggleClient
 
         private void wordEntryBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (statusBox.Text == "Active")
+            //Checks to see if the key pressed is the enter key if it is then continue on with the event. 
+            if (statusBox.Text == "Active" && e.KeyChar == '\r')
             {
-                //Checks to see if the key pressed is the enter key if it is then continue on with the event. 
-                if (e.KeyChar == '\r')
+                e.Handled = true;
+                if (WordSubmitEvent != null)
                 {
-                    e.Handled = true;
-                    if (WordSubmitEvent != null)
-                    {
-                        WordSubmitEvent(wordEntryBox.Text);
-                    }
+                    WordSubmitEvent(wordEntryBox.Text);
                 }
             }
         }

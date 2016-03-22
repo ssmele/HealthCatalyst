@@ -251,6 +251,39 @@ namespace BoggleClient
             }
         }
 
+        /// <summary>
+        /// This method asynchronlsy cancels a join request for the player1Token. 
+        /// </summary>
+        public async void cancelJoin()
+        {
+            using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
+            {
+                //Setting up nickname to give to server.
+                dynamic data = new ExpandoObject();
+                data.UserToken = player1Token;
+
+
+                //Setting header and payload. 
+                StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+
+                //Setting up post.
+                Task<HttpResponseMessage> cancelGame = client.PutAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/games", content);
+
+                //Awaiting post result.
+                HttpResponseMessage response = await cancelGame;
+
+
+                if (response.IsSuccessStatusCode)
+                {
+                    //GAME CANCELED
+                }
+                else
+                {
+                    //INVALID USERTOKEN oR NOT IN PENDING GAME
+                }
+                
+            }
+        }
 
         /// <summary>
         /// My attempt to make a post. 
