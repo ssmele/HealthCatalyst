@@ -243,11 +243,25 @@ namespace BoggleClient
             }
         }
 
+        //TODO:FIGURE OUT WHERE SYNC GOES.
+        /// <summary>
+        /// I DONT KNOW WHERE THIS GOES!!!
+        /// </summary>
+        private readonly object sync = new object();
+
         public string player1ScoreBox
-        {
+        { 
             set
             {
-                Player1ScoreBox.Text = value;
+                //I THINK I DID THIS RIGHT IS IT NECESSARY IDK!!!!
+                    lock (sync)
+                    {
+                        Player1ScoreBox.Text = value;
+                    }
+            }
+            get
+            {
+                return Player1ScoreBox.Text;
             }
         }
 
@@ -332,6 +346,22 @@ namespace BoggleClient
             }
         }
 
+        string IBoggleWindow.wordEntryBox
+        {
+            get
+            {
+                return wordEntryBox.Text;
+            }
+        }
+
+        string IBoggleWindow.urlTextBox
+        {
+            get
+            {
+                return urlTextBox.Text;
+            }
+        }
+
         public BoggleWindow()
         {
             InitializeComponent();
@@ -385,6 +415,7 @@ namespace BoggleClient
         public event Action CloseWindowEvent;
         public event Action HelpEvent;
         public event Action ConnectEvent;
+        public event Action<string> WordSubmitEvent;
 
         private void CloseButton_Click(object sender, EventArgs e)
         {
@@ -421,12 +452,28 @@ namespace BoggleClient
 
         public void helpWindow()
         {
-            MessageBox.Show("How to start the game:\nEnter a URL to connect to another player, enter a username for yourself, and enter a time duration for each round.\nIf no time duration is set, the default is 60 seconds\n Once this information is entered, click Connect.\n Once another player connects, the game will start");
+            MessageBox.Show("How to start the game:\nEnter a URL to connect to another player, enter a username for yourself, and enter a time duration for each round.\nIf no time duration is set, the default is 60 seconds\n Once this information is entered, click Connect.\n Once another player connects, the game will start","Help",MessageBoxButtons.OK);
         }
 
         public void errorMessage(string message)
         {
             MessageBox.Show(message);
+        }
+
+        private void wordEntryBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (statusBox.Text == "Active")
+            {
+                //Checks to see if the key pressed is the enter key if it is then continue on with the event. 
+                if (e.KeyChar == '\r')
+                {
+                    e.Handled = true;
+                    if (WordSubmitEvent != null)
+                    {
+                        WordSubmitEvent(wordEntryBox.Text);
+                    }
+                }
+            }
         }
     }
 }
