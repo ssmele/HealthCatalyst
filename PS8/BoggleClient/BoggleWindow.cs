@@ -426,6 +426,7 @@ namespace BoggleClient
         public event Action HelpEvent;
         public event Action ConnectEvent;
         public event Action<string> WordSubmitEvent;
+        public event Action CancelEvent;
 
         private void CloseButton_Click(object sender, EventArgs e)
         {
@@ -460,6 +461,9 @@ namespace BoggleClient
 
         }
 
+
+        
+
         public void helpWindow()
         {
             player1WordList = "swag:" + " 3";
@@ -481,6 +485,14 @@ namespace BoggleClient
                 {
                     WordSubmitEvent(wordEntryBox.Text);
                 }
+            }
+        }
+
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            if(CancelButton != null)
+            {
+                CancelEvent();
             }
         }
     }

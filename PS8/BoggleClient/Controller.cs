@@ -4,6 +4,7 @@ using System.Dynamic;
 using System.Net.Http;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace BoggleClient
 {
@@ -18,17 +19,25 @@ namespace BoggleClient
 
         private string gameUrl;
 
+        private bool Cancel { get; set; }
+
         public Controller(IBoggleWindow window)
         {
             this.window = window;
-            
+
             //Calls method to create new client. 
             //client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc");
             window.CloseWindowEvent += HandleCloseWindowEvent;
             window.HelpEvent += HandleHelpEvent;
             window.ConnectEvent += HandleConnectEvent;
             window.WordSubmitEvent += HandleSubmitWordEvent;
-            
+            window.CancelEvent += HandleCancelEvent;
+
+        }
+
+        public void HandleCancelEvent()
+        {
+            Cancel = true;
         }
 
         //TODO: WE have two async methods inside of a async method is that necessary or do we only need the one async method. 
@@ -46,18 +55,33 @@ namespace BoggleClient
             {
                 window.timeLengthBox = "60";
             }
-            window.timerDisplayBox = window.timeLengthBox;
-            
+
+            //window.timerDisplayBox = window.timeLengthBox;
+
 
             //Create user and get token.  (Asynchronas)
             player1Token = await createUser(window.playerBox);
             //string player2Token = await createUser("asdfasdf");
+            window.player2ScoreBox = player1Token;
             //Attempgint to JoinGame
-            gameID = await joinGame(player1Token, int.Parse(window.timeLengthBox));
+            Pair gameInfo = await joinGame(player1Token, int.Parse(window.timeLengthBox));
 
-            //HandleSubmitWordEvent("yo");
+            gameID = (string)gameInfo.GameID;
 
-            //string response2 = await joinGame(player2Token, int.Parse(window.timeLengthBox));
+            if(gameInfo.Status == "Created")
+            {
+                //start GAME
+            }
+            else if(gameInfo.Status == "Accepted")
+            {
+                bool ActiveGame = await pendingLoop();
+                if(ActiveGame == true)
+                {
+                    //START THE GAMEEEE
+                }
+                
+            }
+            
 
             //if 202 call pending.
             // can cancel
@@ -68,6 +92,27 @@ namespace BoggleClient
             // Cancel button inactive
             // Connect button inactive
             // start timer
+        }
+
+       public async Task<bool> pendingLoop()
+        {
+            bool keepLooping = true;
+            do
+            {
+                if(Cancel == true)
+                {
+                    cancelJoin();
+                }
+
+                string isGameConnnected = await gameState(gameID);
+                if (isGameConnnected == "active")
+                {
+                    keepLooping = false;
+                }
+
+            } while (keepLooping);
+
+            return true;
         }
 
         public void HandleCloseWindowEvent()
@@ -84,7 +129,9 @@ namespace BoggleClient
             window.helpWindow();
 
         }
+
         
+
         /// <summary>
         /// This method will refresh the boggle board to represent the string it is given. 
         /// </summary>
@@ -129,7 +176,7 @@ namespace BoggleClient
                 dynamic data = new ExpandoObject();
                 data.Word = givenWord;
                 data.UserToken = player1Token;
-                
+
                 //Setting header and payload. 
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
@@ -138,7 +185,6 @@ namespace BoggleClient
 
                 //Awaiting post result.
                 HttpResponseMessage response = await getScore;
-
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -150,11 +196,11 @@ namespace BoggleClient
                     //Set player box to new score. 
                     window.player1ScoreBox = (score + previousScore).ToString();
                 }
-                else if(response.StatusCode.ToString() == "Forbidden")
+                else if (response.StatusCode.ToString() == "Forbidden")
                 {
                     window.errorMessage("FORBIDDEN");
                 }
-                else if(response.StatusCode.ToString() == "Conflict")
+                else if (response.StatusCode.ToString() == "Conflict")
                 {
                     window.errorMessage("Sorry time limit to submit words is over.");
                 }
@@ -162,7 +208,7 @@ namespace BoggleClient
                 {
                     window.errorMessage("UNKNOW ERROR!!");
                 }
-               
+
             }
         }
 
@@ -180,13 +226,15 @@ namespace BoggleClient
                 data.Nickname = nickname;
 
                 //Setting header and payload. 
-                StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8,"application/json");
-                
+                StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+
                 //Setting up post.
                 Task<HttpResponseMessage> getUserToken = client.PostAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/users", content);
 
-                //Awaiting post result.
+                ////Awaiting post result.
                 HttpResponseMessage response = await getUserToken;
+
+                //HttpResponseMessage response = client.PostAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/users", content).Result;
 
                 //If the response is good then get the user token and return it.
                 if (response.IsSuccessStatusCode)
@@ -216,7 +264,7 @@ namespace BoggleClient
         /// <param name="playerToken">userToken of player1.</param>
         /// <param name="timeGiven">Time limmit user gives.</param>
         /// <returns>The gameId</returns>
-        public async Task<string> joinGame(string playerToken, int timeGiven)
+        public async Task<Pair> joinGame(string playerToken, int timeGiven)
         {
             using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
             {
@@ -230,24 +278,50 @@ namespace BoggleClient
 
                 //Setting up post.
                 Task<HttpResponseMessage> getGameID = client.PostAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/games", content);
-                
+
                 //Awaiting post result.
                 HttpResponseMessage response = await getGameID;
 
-                if(response.StatusCode.ToString() == "Created")
+                if (response.StatusCode.ToString() == "Created")
                 {
                     string result = response.Content.ReadAsStringAsync().Result;
                     dynamic responseData = JsonConvert.DeserializeObject(result);
-                    return responseData.GameID;
+                    Pair info = new Pair(responseData.GameID, response.StatusCode.ToString());
+                    return info;
                 }
                 else if (response.StatusCode.ToString() == "Accepted")
                 {
                     string result = response.Content.ReadAsStringAsync().Result;
                     dynamic responseData = JsonConvert.DeserializeObject(result);
-                    return responseData.GameID;
+                    Pair info = new Pair(responseData.GameID, response.StatusCode.ToString());
+                    return info;
                 }
-                
-                return "";
+
+                return new Pair(null,null);
+            }
+        }
+
+
+        public async Task<string> gameState(string gameID)
+        {
+            using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
+            {
+                //Setting up post.
+                Task<HttpResponseMessage> getGameID = client.GetAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/games" + "/" + gameID);
+
+                //Awaiting post result.
+                HttpResponseMessage response = await getGameID;
+
+                if (response.StatusCode.ToString() == "OK")
+                {
+                    string result = response.Content.ReadAsStringAsync().Result;
+                    dynamic responseData = JsonConvert.DeserializeObject(result);
+                    return responseData.GameState;
+                }
+                else
+                {
+                    return "Forbidden";
+                }
             }
         }
 
@@ -282,7 +356,7 @@ namespace BoggleClient
                 {
                     //INVALID USERTOKEN oR NOT IN PENDING GAME
                 }
-                
+
             }
         }
 
@@ -295,21 +369,21 @@ namespace BoggleClient
         {
             using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
             {
-                
+
                 HttpResponseMessage response = client.GetAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/users").Result;
 
 
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return response.StatusCode.ToString(); 
+                    return response.StatusCode.ToString();
                 }
                 else
                 {
                     return response.StatusCode.ToString();
+                }
             }
-            }
-            }
+        }
 
 
 
@@ -325,10 +399,24 @@ namespace BoggleClient
             // Tell the server that the client will accept this particular type of response data
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Add("Accept", "application/json");
-            
+
 
             // There is more client configuration to do, depending on the request.
             return client;
         }
+
+        public class Pair
+        {
+            public Pair(string ID, string status)
+            {
+                GameID = ID;
+                Status = status;
+            }
+            public string GameID { get; set; }
+            public string Status { get; set; }
+        }
+
+
+
     }
 }

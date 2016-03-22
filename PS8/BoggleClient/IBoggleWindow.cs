@@ -15,6 +15,8 @@ namespace BoggleClient
 
         event Action ConnectEvent;
 
+        event Action CancelEvent;
+
         event Action<string> WordSubmitEvent;
 
 
