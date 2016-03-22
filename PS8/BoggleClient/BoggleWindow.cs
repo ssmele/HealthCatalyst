@@ -362,6 +362,16 @@ namespace BoggleClient
             }
         }
 
+        public string player1WordList
+        {
+            set
+            {
+                Player1WordList.Text = Player1WordList.Text + "\n" + value;
+            }
+        }
+
+       
+
         public BoggleWindow()
         {
             InitializeComponent();
@@ -452,7 +462,8 @@ namespace BoggleClient
 
         public void helpWindow()
         {
-            MessageBox.Show("How to start the game:\nEnter a URL to connect to another player, enter a username for yourself, and enter a time duration for each round.\nIf no time duration is set, the default is 60 seconds\n Once this information is entered, click Connect.\n Once another player connects, the game will start", "Help", MessageBoxButtons.OK);
+            player1WordList = "swag:" + " 3";
+            //MessageBox.Show("How to start the game:\nEnter a URL to connect to another player, enter a username for yourself, and enter a time duration for each round.\nIf no time duration is set, the default is 60 seconds\n Once this information is entered, click Connect.\n Once another player connects, the game will start", "Help", MessageBoxButtons.OK);
         }
 
         public void errorMessage(string message)

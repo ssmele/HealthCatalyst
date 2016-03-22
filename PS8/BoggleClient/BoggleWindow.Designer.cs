@@ -69,7 +69,7 @@
             this.Player2NameLabel = new System.Windows.Forms.Label();
             this.Player2ScoreLabel = new System.Windows.Forms.Label();
             this.Player1WordList = new System.Windows.Forms.RichTextBox();
-            this.Player2WordsBox = new System.Windows.Forms.RichTextBox();
+            this.Player2WordsList = new System.Windows.Forms.RichTextBox();
             this.Player1WordLabel = new System.Windows.Forms.Label();
             this.Player2WordLabel = new System.Windows.Forms.Label();
             this.timerLabel = new System.Windows.Forms.Label();
@@ -499,6 +499,7 @@
             // Player1WordList
             // 
             this.Player1WordList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.Player1WordList.Font = new System.Drawing.Font("copy 08_55", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Player1WordList.Location = new System.Drawing.Point(476, 112);
             this.Player1WordList.Name = "Player1WordList";
             this.Player1WordList.ReadOnly = true;
@@ -506,15 +507,15 @@
             this.Player1WordList.TabIndex = 21;
             this.Player1WordList.Text = "";
             // 
-            // Player2WordsBox
+            // Player2WordsList
             // 
-            this.Player2WordsBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.Player2WordsBox.Location = new System.Drawing.Point(734, 110);
-            this.Player2WordsBox.Name = "Player2WordsBox";
-            this.Player2WordsBox.ReadOnly = true;
-            this.Player2WordsBox.Size = new System.Drawing.Size(172, 464);
-            this.Player2WordsBox.TabIndex = 22;
-            this.Player2WordsBox.Text = "";
+            this.Player2WordsList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.Player2WordsList.Location = new System.Drawing.Point(734, 110);
+            this.Player2WordsList.Name = "Player2WordsList";
+            this.Player2WordsList.ReadOnly = true;
+            this.Player2WordsList.Size = new System.Drawing.Size(172, 464);
+            this.Player2WordsList.TabIndex = 22;
+            this.Player2WordsList.Text = "";
             // 
             // Player1WordLabel
             // 
@@ -595,7 +596,7 @@
             this.Controls.Add(this.timerLabel);
             this.Controls.Add(this.Player2WordLabel);
             this.Controls.Add(this.Player1WordLabel);
-            this.Controls.Add(this.Player2WordsBox);
+            this.Controls.Add(this.Player2WordsList);
             this.Controls.Add(this.Player1WordList);
             this.Controls.Add(this.Player2ScoreLabel);
             this.Controls.Add(this.Player2NameLabel);
@@ -670,7 +671,7 @@
         private System.Windows.Forms.Label Player2NameLabel;
         private System.Windows.Forms.Label Player2ScoreLabel;
         private System.Windows.Forms.RichTextBox Player1WordList;
-        private System.Windows.Forms.RichTextBox Player2WordsBox;
+        private System.Windows.Forms.RichTextBox Player2WordsList;
         private System.Windows.Forms.Label Player1WordLabel;
         private System.Windows.Forms.Label Player2WordLabel;
         private System.Windows.Forms.Label timerLabel;

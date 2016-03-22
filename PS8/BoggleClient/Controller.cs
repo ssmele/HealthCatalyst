@@ -251,6 +251,7 @@ namespace BoggleClient
             }
         }
 
+
         /// <summary>
         /// This method asynchronlsy cancels a join request for the player1Token. 
         /// </summary>
