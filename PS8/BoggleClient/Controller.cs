@@ -18,14 +18,20 @@ namespace BoggleClient
 
         private string gameID;
 
+        //SET these for cancle
         HttpClient mainClient;
 
+        //SET this for cheating.
         string boardString;
 
         private string Default_URL = @"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc";
 
         private bool Cancel { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="window"></param>
         public Controller(IBoggleWindow window)
         {
             this.window = window;
@@ -37,8 +43,6 @@ namespace BoggleClient
             window.CancelEvent += HandleCancelEvent;
             window.NewEvent += HandleNew;
             window.statusBox = "Idle";
-            
-
         }
 
         /// <summary>
@@ -49,10 +53,12 @@ namespace BoggleClient
             window.NewWindow();
         }
 
+        /// <summary>
+        /// This event sets Cancel to true. 
+        /// </summary>
         public void HandleCancelEvent()
         {
             Cancel = true;
-            
         }
 
         /// <summary>
@@ -93,7 +99,7 @@ namespace BoggleClient
 
             //Create user and get token.  (Asynchronas)
             player1Token = await createUser(window.playerBox);
-            if (Cancel == true)
+            if (Cancel == true || player1Token == null)
             {
                 RESET();
                 return;
@@ -102,7 +108,13 @@ namespace BoggleClient
             //TODO:Change Parse to try parse.
             // Attempting to join the game
             Pair gameInfo = await joinGame(player1Token, int.Parse(window.timeLengthBox));
-            
+            if (gameInfo == null || (Cancel == true && (string)gameInfo.Status == "Pending"))
+            {
+                RESET();
+                return;
+            }
+
+
             gameID = gameInfo.GameID.ToString();
 
 
@@ -326,7 +338,7 @@ namespace BoggleClient
                     string boardString = responseData.Board;
                     refreshBoard(boardString);
 
-                    string dlkasjdfg = responseData.Player1.Nickname;
+                    //string dlkasjdfg = responseData.Player1.Nickname;
 
                     string tempTimeLeft = responseData.TimeLeft;
                     window.timerDisplayBox = tempTimeLeft;
@@ -338,6 +350,7 @@ namespace BoggleClient
                     window.player2NameBox = tempPlayer2Name;
 
                     boardString = responseData.Board;
+                    string blah = await MESSAROUND(boardString);
 
                     window.startTimer();
                     window.statusBox = "Connected";
@@ -365,6 +378,13 @@ namespace BoggleClient
         /// <returns>The UserToken.</returns>
         public async Task<string> createUser(string nickname)
         {
+            if (nickname == null || nickname.Trim() == "")
+            {
+                window.errorMessage("Invalid username. Try again.");
+                return null;
+            }
+
+
             using (HttpClient client = CreateClient(Default_URL))
             {
                 //Setting up nickname to give to server.
@@ -390,12 +410,12 @@ namespace BoggleClient
                 else if (response.StatusCode.ToString() == "Forbidden")
                 {
                     window.errorMessage("Invalid username. Try again.");
-                    return "";
+                    return null;
                 }
                 else
                 {
                     window.errorMessage("Unknow error.");
-                    return "";
+                    return null;
                 }
             }
         }
@@ -410,6 +430,12 @@ namespace BoggleClient
         /// <returns>The gameId</returns>
         public async Task<Pair> joinGame(string playerToken, int timeGiven)
         {
+            if(timeGiven < 5 || timeGiven > 120)
+            {
+                window.errorMessage("Invalid time limit entered please try again");
+                return null;
+            }
+
             using (HttpClient client = CreateClient(Default_URL))
             {
                 //Setting up nickname to give to server.
@@ -441,7 +467,7 @@ namespace BoggleClient
                     return info;
                 }
 
-                return new Pair(null, null);
+                return null;
             }
         }
 
@@ -615,25 +641,9 @@ namespace BoggleClient
                     string tempGameState = responseData.GameState;
                     if (tempGameState == "active")
                     {
-                        string tempPlayer1Score = responseData.Player1.Score;
-                        window.player1ScoreBox = tempPlayer1Score;
-
-                        string tempPlayer2Score = responseData.Player2.Score;
-                        window.player2ScoreBox = tempPlayer2Score;
+                        return "";
                     }
-
-                    else if (tempGameState == "completed")
-                    {
-                        object player1WordList = responseData.Player1.WordsPlayed;
-                        string stringList1 = player1WordList.ToString();
-                        window.player1WordList = stringList1;
-
-                        object player2WordList = responseData.Player2.WordsPlayed;
-                        string stringList2 = player2WordList.ToString();
-                        window.player2WordList = stringList2;
-                    }
-
-                    return responseData.GameState;
+                    return "";
                 }
                 else
                 {
