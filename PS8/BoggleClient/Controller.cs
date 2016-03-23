@@ -61,6 +61,11 @@ namespace BoggleClient
 
         public async void HandleConnectEvent()
         {
+            refreshBoard("");
+            window.player1WordList = "";
+            window.player2WordList = "";
+            window.player1NameBox = "";
+            window.player2NameBox = "";
             gameUrl = window.urlTextBox;
             window.player1ScoreBox = "0";
             window.player2ScoreBox = "0";
@@ -126,6 +131,7 @@ namespace BoggleClient
             //RESET ALL THE VARIABLES. 
             window.statusBox = "GAME OVER";
             window.errorMessage("The game has ended. If you would like to start another game simply press connect again. Feel free to keep the same url, nickname, and game duration as last game, or if you want to change them up that is fine too!");
+            window.connectButton = true;
         }
 
         public async Task<bool> activeLoop()

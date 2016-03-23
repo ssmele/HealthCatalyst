@@ -243,6 +243,9 @@ namespace BoggleClient
             }
         }
 
+
+        //TODO:Need to go through all the http responses and decided what needs to be done for each error. 
+
         //TODO:FIGURE OUT WHERE SYNC GOES.
         /// <summary>
         /// I DONT KNOW WHERE THIS GOES!!!

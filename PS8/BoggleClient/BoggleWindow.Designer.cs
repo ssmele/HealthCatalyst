@@ -340,7 +340,7 @@
             this.ConnectButton.Location = new System.Drawing.Point(243, 129);
             this.ConnectButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.ConnectButton.Name = "ConnectButton";
-            this.ConnectButton.Size = new System.Drawing.Size(204, 25);
+            this.ConnectButton.Size = new System.Drawing.Size(140, 25);
             this.ConnectButton.TabIndex = 3;
             this.ConnectButton.Text = "Connect";
             this.ConnectButton.UseVisualStyleBackColor = true;
@@ -351,7 +351,7 @@
             this.CancelButton.Location = new System.Drawing.Point(243, 161);
             this.CancelButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.CancelButton.Name = "CancelButton";
-            this.CancelButton.Size = new System.Drawing.Size(204, 25);
+            this.CancelButton.Size = new System.Drawing.Size(140, 25);
             this.CancelButton.TabIndex = 4;
             this.CancelButton.Text = "Cancel";
             this.CancelButton.UseVisualStyleBackColor = true;
