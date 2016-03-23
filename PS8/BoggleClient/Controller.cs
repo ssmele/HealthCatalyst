@@ -19,6 +19,8 @@ namespace BoggleClient
 
         private string gameUrl;
 
+        private string Default_URL = @"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc";
+
         private bool Cancel { get; set; }
 
         public Controller(IBoggleWindow window)
@@ -62,22 +64,22 @@ namespace BoggleClient
             //Create user and get token.  (Asynchronas)
             player1Token = await createUser(window.playerBox);
             //string player2Token = await createUser("asdfasdf");
-            window.player2ScoreBox = player1Token;
+           
             //Attempgint to JoinGame
             Pair gameInfo = await joinGame(player1Token, int.Parse(window.timeLengthBox));
 
-            gameID = (string)gameInfo.GameID;
+            gameID = gameInfo.GameID.ToString();
 
-            if(gameInfo.Status == "Created")
+            if((string)gameInfo.Status == "Created")
             {
-                //start GAME
+                startGame();
             }
-            else if(gameInfo.Status == "Accepted")
+            else if((string)gameInfo.Status == "Accepted")
             {
                 bool ActiveGame = await pendingLoop();
                 if(ActiveGame == true)
                 {
-                    //START THE GAMEEEE
+                    startGame();
                 }
                 
             }
@@ -102,6 +104,7 @@ namespace BoggleClient
                 if(Cancel == true)
                 {
                     cancelJoin();
+                    break;
                 }
 
                 string isGameConnnected = await gameState(gameID);
@@ -170,7 +173,7 @@ namespace BoggleClient
         /// <param name="givenWord"></param>
         public async void HandleSubmitWordEvent(string givenWord)
         {
-            using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
+            using (HttpClient client = CreateClient(Default_URL))
             {
                 //Setting up nickname to give to server.
                 dynamic data = new ExpandoObject();
@@ -181,7 +184,7 @@ namespace BoggleClient
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
                 //Setting up the put.
-                Task<HttpResponseMessage> getScore = client.PutAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/games/" + gameID, content);
+                Task<HttpResponseMessage> getScore = client.PutAsync(Default_URL + "/games/" + gameID, content);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await getScore;
@@ -212,6 +215,52 @@ namespace BoggleClient
             }
         }
 
+        //TODO: FIX RUNTIME BINDER
+        public async void startGame()
+        {
+            using (HttpClient client = CreateClient(Default_URL))
+            {
+                //Setting up the put.
+                Task<HttpResponseMessage> getScore = client.GetAsync(Default_URL + "/games/" + gameID);
+
+                //Awaiting post result.
+                HttpResponseMessage response = await getScore;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string result = response.Content.ReadAsStringAsync().Result;
+                    dynamic responseData = JsonConvert.DeserializeObject(result);
+
+                    string boardString = responseData.Board;
+                    refreshBoard(boardString);
+                    
+                    string tempTimeLeft = responseData.TimeLeft;
+                    window.timerDisplayBox = tempTimeLeft;
+
+                    object tempPlayer1Name = responseData.Player1;
+                    window.player1NameBox = tempPlayer1Name.ToString();
+
+                    object tempPlayer2Name = responseData.Player2;
+                    window.player2NameBox = tempPlayer2Name.ToString();
+
+                    window.startTimer();
+                }
+                else if (response.StatusCode.ToString() == "Forbidden")
+                {
+                    window.errorMessage("FORBIDDEN");
+                }
+                else if (response.StatusCode.ToString() == "Conflict")
+                {
+                    window.errorMessage("Sorry time limit to submit words is over.");
+                }
+                else
+                {
+                    window.errorMessage("UNKNOW ERROR!!");
+                }
+
+            }
+        }
+
         /// <summary>
         /// This method will create a user with the nickName that is submitted from the client. 
         /// </summary>
@@ -219,7 +268,7 @@ namespace BoggleClient
         /// <returns>The UserToken.</returns>
         public async Task<string> createUser(string nickname)
         {
-            using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
+            using (HttpClient client = CreateClient(Default_URL))
             {
                 //Setting up nickname to give to server.
                 dynamic data = new ExpandoObject();
@@ -229,12 +278,10 @@ namespace BoggleClient
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
                 //Setting up post.
-                Task<HttpResponseMessage> getUserToken = client.PostAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/users", content);
+                Task<HttpResponseMessage> getUserToken = client.PostAsync(Default_URL + "/users", content);
 
                 ////Awaiting post result.
                 HttpResponseMessage response = await getUserToken;
-
-                //HttpResponseMessage response = client.PostAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/users", content).Result;
 
                 //If the response is good then get the user token and return it.
                 if (response.IsSuccessStatusCode)
@@ -266,7 +313,7 @@ namespace BoggleClient
         /// <returns>The gameId</returns>
         public async Task<Pair> joinGame(string playerToken, int timeGiven)
         {
-            using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
+            using (HttpClient client = CreateClient(Default_URL))
             {
                 //Setting up nickname to give to server.
                 dynamic data = new ExpandoObject();
@@ -277,7 +324,7 @@ namespace BoggleClient
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
                 //Setting up post.
-                Task<HttpResponseMessage> getGameID = client.PostAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/games", content);
+                Task<HttpResponseMessage> getGameID = client.PostAsync( Default_URL + "/games", content);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await getGameID;
@@ -304,10 +351,10 @@ namespace BoggleClient
 
         public async Task<string> gameState(string gameID)
         {
-            using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
+            using (HttpClient client = CreateClient(Default_URL))
             {
                 //Setting up post.
-                Task<HttpResponseMessage> getGameID = client.GetAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/games" + "/" + gameID);
+                Task<HttpResponseMessage> getGameID = client.GetAsync(Default_URL + "/games/" + gameID);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await getGameID;
@@ -331,7 +378,7 @@ namespace BoggleClient
         /// </summary>
         public async void cancelJoin()
         {
-            using (HttpClient client = CreateClient(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc"))
+            using (HttpClient client = CreateClient(Default_URL))
             {
                 //Setting up nickname to give to server.
                 dynamic data = new ExpandoObject();
@@ -342,7 +389,7 @@ namespace BoggleClient
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
                 //Setting up post.
-                Task<HttpResponseMessage> cancelGame = client.PutAsync(@"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc/games", content);
+                Task<HttpResponseMessage> cancelGame = client.PutAsync(Default_URL + "/games", content);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await cancelGame;
@@ -407,13 +454,13 @@ namespace BoggleClient
 
         public class Pair
         {
-            public Pair(string ID, string status)
+            public Pair(object  ID, object status)
             {
                 GameID = ID;
                 Status = status;
             }
-            public string GameID { get; set; }
-            public string Status { get; set; }
+            public object GameID { get; set; }
+            public object Status { get; set; }
         }
 
 
