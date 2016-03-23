@@ -10,16 +10,11 @@ namespace BoggleClient
     {
 
         event Action CloseWindowEvent;
-
         event Action HelpEvent1;
         event Action HelpEvent2;
-
         event Action ConnectEvent;
-
         event Action CancelEvent;
-
         event Action<string> WordSubmitEvent;
-
         event Action NewEvent;
 
         void NewWindow();

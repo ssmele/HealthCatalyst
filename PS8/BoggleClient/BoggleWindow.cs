@@ -483,7 +483,6 @@ namespace BoggleClient
             {
                 ConnectEvent();
             }
-            //startTimer();
 
         }
 

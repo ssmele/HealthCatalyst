@@ -18,7 +18,9 @@ namespace BoggleClient
 
         private string gameID;
 
-        private string gameUrl;  //IS THIS NECESSARY?
+        HttpClient mainClient;
+
+        string boardString;
 
         private string Default_URL = @"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc";
 
@@ -58,6 +60,7 @@ namespace BoggleClient
         /// </summary>
         public void RESET()
         {
+            refreshBoard("");
             window.statusBox = "Idle";
             window.cancelButton = false;
             window.connectButton = true;
@@ -90,7 +93,6 @@ namespace BoggleClient
 
             //Create user and get token.  (Asynchronas)
             player1Token = await createUser(window.playerBox);
-            //string player2Token = await createUser("asdfasdf");
             if (Cancel == true)
             {
                 RESET();
@@ -126,6 +128,7 @@ namespace BoggleClient
                     startGame();
                 }
             }
+
 
             bool isGameOver = await activeLoop();
             if(isGameOver == true)
@@ -240,6 +243,10 @@ namespace BoggleClient
                 window.Cell15 = boardString[14].ToString();
                 window.Cell16 = boardString[15].ToString();
             }
+            if(boardString.Length == 0)
+            {
+                refreshBoard("                ");
+            }
         }
 
         //TODO:OPPONENT TOKEN OUR TOKEN
@@ -329,6 +336,8 @@ namespace BoggleClient
 
                     string tempPlayer2Name = responseData.Player2.Nickname;
                     window.player2NameBox = tempPlayer2Name;
+
+                    boardString = responseData.Board;
 
                     window.startTimer();
                     window.statusBox = "Connected";
@@ -556,6 +565,7 @@ namespace BoggleClient
         {
             // Create a client whose base address is the GitHub server
             HttpClient client = new HttpClient();
+            //TODO: Catch exceptions here. 
             client.BaseAddress = new Uri(url);
 
             // Tell the server that the client will accept this particular type of response data
@@ -564,6 +574,7 @@ namespace BoggleClient
 
 
             // There is more client configuration to do, depending on the request.
+           /// mainClient = client;
             return client;
         }
 
@@ -580,6 +591,58 @@ namespace BoggleClient
             public object GameID { get; set; }
             public object Status { get; set; }
         }
+
+
+
+
+
+
+        public async Task<string> MESSAROUND(string boardId)
+        {
+            using (HttpClient client = CreateClient(@"http://fuzzylogicinc.net/boggle/Solver.svc"))
+            {
+                //Setting up post.
+                Task<HttpResponseMessage> getGameID = client.GetAsync(@"http://fuzzylogicinc.net/boggle/Solver.svc/?BoardID=" + boardId + "&Length=3");
+  
+                //Awaiting post result.
+                HttpResponseMessage response = await getGameID;
+
+                if (response.StatusCode.ToString() == "OK")
+                {
+                    string result = response.Content.ReadAsStringAsync().Result;
+                    dynamic responseData = JsonConvert.DeserializeObject(result);
+
+                    string tempGameState = responseData.GameState;
+                    if (tempGameState == "active")
+                    {
+                        string tempPlayer1Score = responseData.Player1.Score;
+                        window.player1ScoreBox = tempPlayer1Score;
+
+                        string tempPlayer2Score = responseData.Player2.Score;
+                        window.player2ScoreBox = tempPlayer2Score;
+                    }
+
+                    else if (tempGameState == "completed")
+                    {
+                        object player1WordList = responseData.Player1.WordsPlayed;
+                        string stringList1 = player1WordList.ToString();
+                        window.player1WordList = stringList1;
+
+                        object player2WordList = responseData.Player2.WordsPlayed;
+                        string stringList2 = player2WordList.ToString();
+                        window.player2WordList = stringList2;
+                    }
+
+                    return responseData.GameState;
+                }
+                else
+                {
+                    return "Forbidden";
+                }
+            }
+        }
+
+
 
 
 
