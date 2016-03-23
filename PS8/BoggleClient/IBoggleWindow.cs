@@ -19,8 +19,9 @@ namespace BoggleClient
 
         event Action<string> WordSubmitEvent;
 
+        event Action NewEvent;
 
-
+        void NewWindow();
         void startTimer();
         string wordEntryBox { get; }
         string urlTextBox { get; }
@@ -31,6 +32,7 @@ namespace BoggleClient
         bool connectButton { set; get; }
         bool cancelButton { set; get; }
         string player1WordList { set; }
+        string player2WordList { set; }
         string timeLengthBox { set; get; }
         string timerDisplayBox { set; get; }
         string player1ScoreBox { set; get; }

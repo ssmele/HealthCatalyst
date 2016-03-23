@@ -5,6 +5,7 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace BoggleClient
 {
@@ -31,13 +32,21 @@ namespace BoggleClient
             window.ConnectEvent += HandleConnectEvent;
             window.WordSubmitEvent += HandleSubmitWordEvent;
             window.CancelEvent += HandleCancelEvent;
+            window.NewEvent += HandleNew;
             window.statusBox = "Idle";
+            
 
+        }
+
+        public void HandleNew()
+        {
+            window.NewWindow();
         }
 
         public void HandleCancelEvent()
         {
             Cancel = true;
+            
         }
 
         public void RESET()
@@ -72,10 +81,15 @@ namespace BoggleClient
                 return;
             }
 
+            //TODO:Change Parse to ry parse.
             //Attempgint to JoinGame
             Pair gameInfo = await joinGame(player1Token, int.Parse(window.timeLengthBox));
             
             gameID = gameInfo.GameID.ToString();
+
+
+            //string x = await gameStateBrief();
+
             if (Cancel == true && (string)gameInfo.Status == "Pending") 
             {
                 RESET();
@@ -95,10 +109,41 @@ namespace BoggleClient
                 {
                     startGame();
                 }
-
             }
 
+            bool isGameOver = await activeLoop();
+            if(isGameOver == true)
+            {
+                endGame();
+            }
+
+
         }
+
+
+        public void endGame()
+        {
+            //RESET ALL THE VARIABLES. 
+            window.statusBox = "GAME OVER";
+            window.errorMessage("The game has ended. If you would like to start another game simply press connect again. Feel free to keep the same url, nickname, and game duration as last game, or if you want to change them up that is fine too!");
+        }
+
+        public async Task<bool> activeLoop()
+        {
+            bool keepLooping = true;
+            do
+            {
+                string isGameConnnected = await scoreUpdater();
+                if (isGameConnnected == "completed")
+                {
+                    keepLooping = false;
+                }
+
+            } while (keepLooping);
+
+            return true;
+        }
+
 
         public async Task<bool> pendingLoop()
         {
@@ -108,10 +153,11 @@ namespace BoggleClient
                 if (Cancel == true)
                 {
                     cancelJoin();
+                    RESET();
                     return false;
                 }
 
-                string isGameConnnected = await gameState(gameID);
+                string isGameConnnected = await gameState();
                 if (isGameConnnected == "active")
                 {
                     keepLooping = false;
@@ -129,12 +175,7 @@ namespace BoggleClient
 
         public void HandleHelpEvent()
         {
-            //string x = getTest();
-            //string x = createUser("");
-            //window.playerBox = x;
-            //refreshBoard("abcdefgejdlhdofi");
             window.helpWindow();
-
         }
 
 
@@ -199,10 +240,7 @@ namespace BoggleClient
                     string result = response.Content.ReadAsStringAsync().Result;
                     dynamic responseData = JsonConvert.DeserializeObject(result);
                     //Get the new score, and previous in integer form. 
-                    int score = int.Parse(responseData.Score);
-                    int previousScore = int.Parse(window.player1ScoreBox);
-                    //Set player box to new score. 
-                    window.player1ScoreBox = (score + previousScore).ToString();
+                    string scoreTemp = (string)responseData.Score;
                 }
                 else if (response.StatusCode.ToString() == "Forbidden")
                 {
@@ -363,12 +401,59 @@ namespace BoggleClient
         }
 
 
-        public async Task<string> gameState(string gameID)
+
+        public async Task<string> scoreUpdater()
         {
             using (HttpClient client = CreateClient(Default_URL))
             {
                 //Setting up post.
                 Task<HttpResponseMessage> getGameID = client.GetAsync(Default_URL + "/games/" + gameID);
+
+                //Awaiting post result.
+                HttpResponseMessage response = await getGameID;
+
+                if (response.StatusCode.ToString() == "OK")
+                {
+                    string result = response.Content.ReadAsStringAsync().Result;
+                    dynamic responseData = JsonConvert.DeserializeObject(result);
+
+                    string tempGameState = responseData.GameState;
+                    if (tempGameState == "active")
+                    {
+                        string tempPlayer1Score = responseData.Player1.Score;
+                        window.player1ScoreBox = tempPlayer1Score;
+
+                        string tempPlayer2Score = responseData.Player2.Score;
+                        window.player2ScoreBox = tempPlayer2Score;
+                    }
+
+                    else if (tempGameState == "completed") 
+                    {
+                        object player1WordList = responseData.Player1.WordsPlayed;
+                        string stringList1 = player1WordList.ToString();
+                        window.player1WordList = stringList1;
+
+                        object player2WordList = responseData.Player2.WordsPlayed;
+                        string stringList2 = player2WordList.ToString();
+                        window.player2WordList = stringList2;
+                    }
+
+                    return responseData.GameState;
+                }
+                else
+                {
+                    return "Forbidden";
+                }
+            }
+        }
+
+
+        public async Task<string> gameState()
+        {
+            using (HttpClient client = CreateClient(Default_URL))
+            {
+                //Setting up post.
+                Task<HttpResponseMessage> getGameID = client.GetAsync(Default_URL + "/games/" + gameID + "?Brief=yes");
 
                 //Awaiting post result.
                 HttpResponseMessage response = await getGameID;

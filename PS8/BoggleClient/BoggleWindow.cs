@@ -366,11 +366,17 @@ namespace BoggleClient
         {
             set
             {
-                Player1WordList.Text = Player1WordList.Text + "\n" + value;
+                Player1WordList.Text =  value;
             }
         }
 
-       
+        public string player2WordList
+        {
+            set
+            {
+                Player2WordsList.Text = value;
+            }
+        }
 
         public BoggleWindow()
         {
@@ -427,6 +433,7 @@ namespace BoggleClient
         public event Action ConnectEvent;
         public event Action<string> WordSubmitEvent;
         public event Action CancelEvent;
+        public event Action NewEvent;
 
         private void CloseButton_Click(object sender, EventArgs e)
         {
@@ -478,22 +485,36 @@ namespace BoggleClient
         private void wordEntryBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             //Checks to see if the key pressed is the enter key if it is then continue on with the event. 
-            if (statusBox.Text == "Active" && e.KeyChar == '\r')
+            if (statusBox.Text == "Connected" && e.KeyChar == '\r')
             {
                 e.Handled = true;
                 if (WordSubmitEvent != null)
                 {
                     WordSubmitEvent(wordEntryBox.Text);
+                    wordEntryBox.Text = "";
                 }
             }
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
-            if(CancelButton != null)
+            if(CancelEvent != null)
             {
                 CancelEvent();
             }
+        }
+
+        private void newWindowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(NewEvent != null)
+            {
+                NewEvent();
+            }
+        }
+
+        public void NewWindow()
+        {
+            BoggleContext.GetContext().RunNew();
         }
     }
 }
