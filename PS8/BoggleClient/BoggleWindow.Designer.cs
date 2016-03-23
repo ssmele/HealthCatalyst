@@ -417,9 +417,9 @@
             this.timeBoxLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.timeBoxLabel.Location = new System.Drawing.Point(23, 108);
             this.timeBoxLabel.Name = "timeBoxLabel";
-            this.timeBoxLabel.Size = new System.Drawing.Size(119, 20);
+            this.timeBoxLabel.Size = new System.Drawing.Size(130, 20);
             this.timeBoxLabel.TabIndex = 12;
-            this.timeBoxLabel.Text = "Game duration:";
+            this.timeBoxLabel.Text = "Desired duration:";
             // 
             // Player1NameBox
             // 
@@ -569,7 +569,7 @@
             this.statusLabel.BackColor = System.Drawing.SystemColors.ControlLight;
             this.statusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.statusLabel.ForeColor = System.Drawing.Color.Black;
-            this.statusLabel.Location = new System.Drawing.Point(759, 3);
+            this.statusLabel.Location = new System.Drawing.Point(706, 3);
             this.statusLabel.Name = "statusLabel";
             this.statusLabel.Size = new System.Drawing.Size(61, 18);
             this.statusLabel.TabIndex = 27;
@@ -579,10 +579,10 @@
             // 
             this.statusBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.statusBox.ForeColor = System.Drawing.Color.Red;
-            this.statusBox.Location = new System.Drawing.Point(819, 2);
+            this.statusBox.Location = new System.Drawing.Point(773, 2);
             this.statusBox.Name = "statusBox";
             this.statusBox.ReadOnly = true;
-            this.statusBox.Size = new System.Drawing.Size(83, 22);
+            this.statusBox.Size = new System.Drawing.Size(133, 22);
             this.statusBox.TabIndex = 28;
             // 
             // BoggleWindow
