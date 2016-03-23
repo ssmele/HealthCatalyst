@@ -363,6 +363,10 @@ namespace BoggleClient
             {
                 return urlTextBox.Text;
             }
+            set
+            {
+                urlTextBox.Text = value;
+            }
         }
 
         public string player1WordList
@@ -432,7 +436,8 @@ namespace BoggleClient
 
 
         public event Action CloseWindowEvent;
-        public event Action HelpEvent;
+        public event Action HelpEvent1;
+        public event Action HelpEvent2;
         public event Action ConnectEvent;
         public event Action<string> WordSubmitEvent;
         public event Action CancelEvent;
@@ -446,13 +451,24 @@ namespace BoggleClient
             }
         }
 
+        private void howToStart_Click(object sender, EventArgs e)
+        {
+            if (HelpEvent1 != null)
+            {
+                HelpEvent1();
+            }
+        }
 
+        private void gameRules_Click(object sender, EventArgs e)
+        {
+            if (HelpEvent2 != null)
+            {
+                HelpEvent2();
+            }
+        }
         private void HelpButton_Click(object sender, EventArgs e)
         {
-            if (HelpEvent != null)
-            {
-                HelpEvent();
-            }
+           
         }
 
 
@@ -472,14 +488,15 @@ namespace BoggleClient
         }
 
 
-        
-
-        public void helpWindow()
+        public void helpHowToStartGame()
         {
-            player1WordList = "swag:" + " 3";
-            //MessageBox.Show("How to start the game:\nEnter a URL to connect to another player, enter a username for yourself, and enter a time duration for each round.\nIf no time duration is set, the default is 60 seconds\n Once this information is entered, click Connect.\n Once another player connects, the game will start", "Help", MessageBoxButtons.OK);
+            MessageBox.Show("How to start the game:\nEnter a URL to connect to another player, enter a username for yourself, and enter a time duration for each round.\nIf no time duration is set, the default is 60 seconds\n Once this information is entered, click Connect.\n Once another player connects, the game will start", "Help", MessageBoxButtons.OK);
         }
 
+        public void helpGameRules()
+        {
+            MessageBox.Show("If a string has fewer than three characters, it scores zero points\n\nOtherwise, if a string has a duplicate that occurs earlier in the list, it scores zero points\n\nOtherwise, if a string is legal (it appears in the dictionary and occurs on the board), it receives a score that depends on its length.  Three- and four-letter words are worth one point, five-letter words are worth two points, six-letter words are worth three points, seven-letter words are worth five points, and longer words are worth 11 points\n\nOtherwise, the string scores negative one point");
+        }
         public void errorMessage(string message)
         {
             MessageBox.Show(message);
@@ -519,5 +536,7 @@ namespace BoggleClient
         {
             BoggleContext.GetContext().RunNew();
         }
+
+
     }
 }

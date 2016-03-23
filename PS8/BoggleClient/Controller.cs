@@ -28,7 +28,8 @@ namespace BoggleClient
         {
             this.window = window;
             window.CloseWindowEvent += HandleCloseWindowEvent;
-            window.HelpEvent += HandleHelpEvent;
+            window.HelpEvent1 += HandleHelp1Event;
+            window.HelpEvent2 += HandleHelp2Event;
             window.ConnectEvent += HandleConnectEvent;
             window.WordSubmitEvent += HandleSubmitWordEvent;
             window.CancelEvent += HandleCancelEvent;
@@ -66,7 +67,8 @@ namespace BoggleClient
             window.player2WordList = "";
             window.player1NameBox = "";
             window.player2NameBox = "";
-            gameUrl = window.urlTextBox;
+            //gameUrl = window.urlTextBox;
+            window.urlTextBox = Default_URL;
             window.player1ScoreBox = "0";
             window.player2ScoreBox = "0";
             window.statusBox = "Trying to connect!";
@@ -86,7 +88,7 @@ namespace BoggleClient
                 return;
             }
 
-            //TODO:Change Parse to ry parse.
+            //TODO:Change Parse to try parse.
             //Attempgint to JoinGame
             Pair gameInfo = await joinGame(player1Token, int.Parse(window.timeLengthBox));
             
@@ -179,12 +181,15 @@ namespace BoggleClient
             window.closeWindow();
         }
 
-        public void HandleHelpEvent()
+        public void HandleHelp1Event()
         {
-            window.helpWindow();
+            window.helpHowToStartGame();
         }
 
-
+        public void HandleHelp2Event()
+        {
+            window.helpGameRules();
+        }
 
         /// <summary>
         /// This method will refresh the boggle board to represent the string it is given. 

@@ -11,7 +11,8 @@ namespace BoggleClient
 
         event Action CloseWindowEvent;
 
-        event Action HelpEvent;
+        event Action HelpEvent1;
+        event Action HelpEvent2;
 
         event Action ConnectEvent;
 
@@ -24,9 +25,10 @@ namespace BoggleClient
         void NewWindow();
         void startTimer();
         string wordEntryBox { get; }
-        string urlTextBox { get; }
+        string urlTextBox { get; set; }
         void closeWindow();
-        void helpWindow();
+        void helpHowToStartGame();
+        void helpGameRules();
         void errorMessage(string message);
         string statusBox { set; get; }
         bool connectButton { set; get; }
