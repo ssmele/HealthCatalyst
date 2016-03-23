@@ -18,7 +18,7 @@ namespace BoggleClient
 
         private string gameID;
 
-        private string gameUrl;
+        private string gameUrl;  //IS THIS NECESSARY?
 
         private string Default_URL = @"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc";
 
@@ -39,6 +39,9 @@ namespace BoggleClient
 
         }
 
+        /// <summary>
+        /// Opens a new window
+        /// </summary>
         public void HandleNew()
         {
             window.NewWindow();
@@ -50,6 +53,9 @@ namespace BoggleClient
             
         }
 
+        /// <summary>
+        /// Resets the GUI back to idle status
+        /// </summary>
         public void RESET()
         {
             window.statusBox = "Idle";
@@ -59,7 +65,10 @@ namespace BoggleClient
         }
 
         //TODO: WE have two async methods inside of a async method is that necessary or do we only need the one async method. 
-
+        
+        /// <summary>
+        /// Things that happen when the connect button is clicked.  Game will either be pending or active
+        /// </summary>
         public async void HandleConnectEvent()
         {
             refreshBoard("");
@@ -89,7 +98,7 @@ namespace BoggleClient
             }
 
             //TODO:Change Parse to try parse.
-            //Attempgint to JoinGame
+            // Attempting to join the game
             Pair gameInfo = await joinGame(player1Token, int.Parse(window.timeLengthBox));
             
             gameID = gameInfo.GameID.ToString();
@@ -123,11 +132,11 @@ namespace BoggleClient
             {
                 endGame();
             }
-
-
         }
 
-
+        /// <summary>
+        /// Ends the game & resets the gui
+        /// </summary>
         public void endGame()
         {
             //RESET ALL THE VARIABLES. 
@@ -136,6 +145,10 @@ namespace BoggleClient
             window.connectButton = true;
         }
 
+        /// <summary>
+        /// Checks to see if the game is active or completed
+        /// </summary>
+        /// <returns></returns>
         public async Task<bool> activeLoop()
         {
             bool keepLooping = true;
@@ -152,7 +165,10 @@ namespace BoggleClient
             return true;
         }
 
-
+        /// <summary>
+        /// Checks to see if the game is pending or active or canceled
+        /// </summary>
+        /// <returns></returns>
         public async Task<bool> pendingLoop()
         {
             bool keepLooping = true;
@@ -181,11 +197,17 @@ namespace BoggleClient
             window.closeWindow();
         }
 
+        /// <summary>
+        /// To view game setup instructions
+        /// </summary>
         public void HandleHelp1Event()
         {
             window.helpHowToStartGame();
         }
 
+        /// <summary>
+        /// To view game rules
+        /// </summary>
         public void HandleHelp2Event()
         {
             window.helpGameRules();
@@ -273,6 +295,9 @@ namespace BoggleClient
 
 
         //TODO: FIX RUNTIME BINDER
+        /// <summary>
+        /// This starts the game once the game status changes to connected
+        /// </summary>
         public async void startGame()
         {
             using (HttpClient client = CreateClient(Default_URL))
@@ -411,8 +436,10 @@ namespace BoggleClient
             }
         }
 
-
-
+        /// <summary>
+        /// Updates the score
+        /// </summary>
+        /// <returns></returns>
         public async Task<string> scoreUpdater()
         {
             using (HttpClient client = CreateClient(Default_URL))
@@ -458,7 +485,10 @@ namespace BoggleClient
             }
         }
 
-
+        /// <summary>
+        /// Gets the status of the game from the server.  Pending, Connected, or Completed
+        /// </summary>
+        /// <returns></returns>
         public async Task<string> gameState()
         {
             using (HttpClient client = CreateClient(Default_URL))
@@ -537,6 +567,9 @@ namespace BoggleClient
             return client;
         }
 
+        /// <summary>
+        /// Used to keep track of the game ID and game status
+        /// </summary>
         public class Pair
         {
             public Pair(object ID, object status)
