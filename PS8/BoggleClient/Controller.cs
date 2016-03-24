@@ -92,6 +92,7 @@ namespace BoggleClient
             window.player2ScoreBox = "0";
             window.timerDisplayBox = "0";
             window.ConnectButtonText = "Connect";
+            window.CancelButtonText = "Cancel";
         }
 
         //TODO: WE have two async methods inside of a async method is that necessary or do we only need the one async method. 
@@ -168,6 +169,11 @@ namespace BoggleClient
                     {
                         await startGame();
                     }
+                    else if(ActiveGame == false)
+                    {
+                        resetClient();
+                        return;
+                    }
                 }
 
                 //Starts the activeLoop.
@@ -235,7 +241,7 @@ namespace BoggleClient
         }
 
         /// <summary>
-        /// Loops until the game that has been created is joined by another person.
+        /// Loops until the game that has been created is joined by another person..
         /// </summary>
         /// <returns>Boolean that determins if game was joined or not.</returns>
         public async Task<bool> pendingLoop()
@@ -250,7 +256,7 @@ namespace BoggleClient
                 {
                     //TODO: ANalysis this to see if it can remain unawaited. 
                     cancelJoin();
-                    resetClient();
+                    //resetClient();
                     return false;
                 }
 
@@ -801,19 +807,64 @@ namespace BoggleClient
             //Get the answers in a presentable form. 
             string finalList = "";
             int count = 0;
-            foreach (dynamic wordObj in answer)
+
+            string longestWord = "";
+            int largestScore = 0;
+
+            List<Pair> wordSORT = new List<Pair>();
+
+            foreach (dynamic wordObj in answer.Solutions)
             {
+                wordSORT.Add(new Pair(wordObj.Word, wordObj.Score));
+                int tempScore = wordObj.Score;
+                if(tempScore > largestScore)
+                {
+                    largestScore = tempScore;
+                    longestWord = wordObj.Word;
+                }
+
                 if (count == 0) { }
                 else { finalList = finalList + "\n"; }
                 finalList = finalList + wordObj.Word + " : " + wordObj.Score;
                 count++;
             }
 
+            wordSORT.Sort(pairCompare);
+            string sortedFinalList = "";
+            foreach(Pair sorted in wordSORT)
+            {
+                if(count == 0) { }
+                else { sortedFinalList = sortedFinalList + "\n"; }
+                sortedFinalList = sortedFinalList + sorted.GameID + " : " + sorted.Status;
+                count++;
+            }
             //Display them in a new window. 
-            CheatForm newWindow = new CheatForm();
-            newWindow.displayWords(finalList);
+            CheatForm cheatWindow = new CheatForm();
+            cheatWindow.Show();
+            cheatWindow.displayWords(finalList,sortedFinalList.TrimStart('\n'));
+            cheatWindow.displayLargest(longestWord, largestScore);
             
 
         }
+
+        private int pairCompare(Pair x, Pair y)
+        {
+            int a = int.Parse(x.Status.ToString());
+            int b = int.Parse(y.Status.ToString());
+            if (a < b)
+            {
+                return 1;
+            }
+            else if (b < a)
+            {
+                return -1;
+            }
+            else
+            {
+                return 0;
+            }
+
+        }
+
     }
 }
