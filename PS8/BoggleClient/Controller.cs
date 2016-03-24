@@ -18,10 +18,10 @@ namespace BoggleClient
 
         private string gameID;
 
-        //SET these for cancle
-        HttpClient mainClient;
+        private CancellationTokenSource source;
 
-        //SET this for cheating.
+        CancellationToken token;
+ 
         string boardString;
 
         private string Default_URL = @"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc";
@@ -42,6 +42,8 @@ namespace BoggleClient
             window.WordSubmitEvent += HandleSubmitWordEvent;
             window.CancelEvent += HandleCancelEvent;
             window.NewEvent += HandleNew;
+            source = new CancellationTokenSource();
+            token = source.Token;
             window.statusBox = "Idle";
         }
 
@@ -59,6 +61,8 @@ namespace BoggleClient
         public void HandleCancelEvent()
         {
             Cancel = true;
+            //CancellationTokenSource cancelSource = new CancellationTokenSource();
+            source.Cancel();
         }
 
         /// <summary>
@@ -71,6 +75,9 @@ namespace BoggleClient
             window.cancelButton = false;
             window.connectButton = true;
             Cancel = false;
+            source.Dispose();
+            source = new CancellationTokenSource();
+            token = source.Token;
         }
 
         //TODO: WE have two async methods inside of a async method is that necessary or do we only need the one async method. 
@@ -97,55 +104,62 @@ namespace BoggleClient
                 window.timeLengthBox = "60";
             }
 
-            //Create user and get token.  (Asynchronas)
-            player1Token = await createUser(window.playerBox);
-            if (Cancel == true || player1Token == null)
-            {
-                RESET();
-                return;
-            }
 
-            //TODO:Change Parse to try parse.
-            // Attempting to join the game
-            Pair gameInfo = await joinGame(player1Token, int.Parse(window.timeLengthBox));
-            if (gameInfo == null || (Cancel == true && (string)gameInfo.Status == "Pending"))
-            {
-                RESET();
-                return;
-            }
+            try {
+                //Create user and get token.  (Asynchronas)
+                player1Token = await createUser(window.playerBox);
+                if (Cancel == true || player1Token == null)
+                {
+                    RESET();
+                    return;
+                }
 
-
-            gameID = gameInfo.GameID.ToString();
-
-
-            //string x = await gameStateBrief();
-
-            if (Cancel == true && (string)gameInfo.Status == "Pending") 
-            {
-                RESET();
-                return;
-            }
+                //TODO:Change Parse to try parse.
+                // Attempting to join the game
+                Pair gameInfo = await joinGame(player1Token, int.Parse(window.timeLengthBox));
+                if (gameInfo == null || (Cancel == true && (string)gameInfo.Status == "Pending"))
+                {
+                    RESET();
+                    return;
+                }
 
 
-            if ((string)gameInfo.Status == "Created")
-            {
-                startGame();
-            }
+                gameID = gameInfo.GameID.ToString();
 
-            else if ((string)gameInfo.Status == "Accepted")
-            {
-                bool ActiveGame = await pendingLoop();
-                if (ActiveGame == true)
+
+                //string x = await gameStateBrief();
+
+                if (Cancel == true && (string)gameInfo.Status == "Pending")
+                {
+                    RESET();
+                    return;
+                }
+
+
+                if ((string)gameInfo.Status == "Created")
                 {
                     startGame();
                 }
+
+                else if ((string)gameInfo.Status == "Accepted")
+                {
+                    bool ActiveGame = await pendingLoop();
+                    if (ActiveGame == true)
+                    {
+                        startGame();
+                    }
+                }
+
+
+                bool isGameOver = await activeLoop();
+                if (isGameOver == true)
+                {
+                    endGame();
+                }
             }
-
-
-            bool isGameOver = await activeLoop();
-            if(isGameOver == true)
+            catch(TaskCanceledException e)
             {
-                endGame();
+                RESET();
             }
         }
 
@@ -155,9 +169,23 @@ namespace BoggleClient
         public void endGame()
         {
             //RESET ALL THE VARIABLES. 
+            window.cancelButton = false;
             window.statusBox = "GAME OVER";
-            window.errorMessage("The game has ended. If you would like to start another game simply press connect again. Feel free to keep the same url, nickname, and game duration as last game, or if you want to change them up that is fine too!");
-            window.connectButton = true;
+
+            if (int.Parse(window.player1ScoreBox) > int.Parse(window.player2ScoreBox))
+
+            {
+                window.errorMessage("Congratulations! " + window.player1NameBox + " is the winner!\nThe game has ended. If you would like to start another game simply press connect again. Feel free to keep the same url, nickname, and game duration as last game, or if you want to change them up that is fine too!");
+            }
+            else if (int.Parse(window.player2ScoreBox) > int.Parse(window.player1ScoreBox))
+            {
+                window.errorMessage("Congratulations! " + window.player2NameBox + " is the winner!\nThe game has ended. If you would like to start another game simply press connect again. Feel free to keep the same url, nickname, and game duration as last game, or if you want to change them up that is fine too!");
+            }
+            else
+            {
+                window.errorMessage("It's a tie!\nThe game has ended. If you would like to start another game simply press connect again. Feel free to keep the same url, nickname, and game duration as last game, or if you want to change them up that is fine too!");
+            }
+                window.connectButton = true;
         }
 
         /// <summary>
@@ -282,7 +310,7 @@ namespace BoggleClient
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
                 //Setting up the put.
-                Task<HttpResponseMessage> putWord = client.PutAsync(Default_URL + "/games/" + gameID, content);
+                Task<HttpResponseMessage> putWord = client.PutAsync(Default_URL + "/games/" + gameID, content,token);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await putWord;
@@ -322,14 +350,14 @@ namespace BoggleClient
             using (HttpClient client = CreateClient(Default_URL))
             {
                 //Setting up the put.
-                Task<HttpResponseMessage> getScore = client.GetAsync(Default_URL + "/games/" + gameID);
+                Task<HttpResponseMessage> getScore = client.GetAsync(Default_URL + "/games/" + gameID,token);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await getScore;
 
                 if (response.IsSuccessStatusCode)
                 {
-                    window.cancelButton = false;
+                    //window.CancelButton = false;
                     window.statusBox = "Connected";
 
                     string result = response.Content.ReadAsStringAsync().Result;
@@ -365,7 +393,7 @@ namespace BoggleClient
                 }
                 else
                 {
-                    window.errorMessage("UNKNOW ERROR!!");
+                    window.errorMessage("UNKNOWN ERROR!!");
                 }
 
             }
@@ -395,7 +423,7 @@ namespace BoggleClient
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
                 //Setting up post.
-                Task<HttpResponseMessage> getUserToken = client.PostAsync(Default_URL + "/users", content);
+                Task<HttpResponseMessage> getUserToken = client.PostAsync(Default_URL + "/users", content, token);
 
                 ////Awaiting post result.
                 HttpResponseMessage response = await getUserToken;
@@ -414,7 +442,7 @@ namespace BoggleClient
                 }
                 else
                 {
-                    window.errorMessage("Unknow error.");
+                    window.errorMessage("Unknown error.");
                     return null;
                 }
             }
@@ -447,7 +475,7 @@ namespace BoggleClient
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
                 //Setting up post.
-                Task<HttpResponseMessage> getGameID = client.PostAsync(Default_URL + "/games", content);
+                Task<HttpResponseMessage> getGameID = client.PostAsync(Default_URL + "/games", content, token);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await getGameID;
@@ -480,7 +508,7 @@ namespace BoggleClient
             using (HttpClient client = CreateClient(Default_URL))
             {
                 //Setting up post.
-                Task<HttpResponseMessage> getGameID = client.GetAsync(Default_URL + "/games/" + gameID);
+                Task<HttpResponseMessage> getGameID = client.GetAsync(Default_URL + "/games/" + gameID,token);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await getGameID;
@@ -529,7 +557,7 @@ namespace BoggleClient
             using (HttpClient client = CreateClient(Default_URL))
             {
                 //Setting up post.
-                Task<HttpResponseMessage> getGameID = client.GetAsync(Default_URL + "/games/" + gameID + "?Brief=yes");
+                Task<HttpResponseMessage> getGameID = client.GetAsync(Default_URL + "/games/" + gameID + "?Brief=yes",token);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await getGameID;
@@ -564,7 +592,7 @@ namespace BoggleClient
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
                 //Setting up post.
-                Task<HttpResponseMessage> cancelGame = client.PutAsync(Default_URL + "/games", content);
+                Task<HttpResponseMessage> cancelGame = client.PutAsync(Default_URL + "/games", content,token);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await cancelGame;
@@ -628,7 +656,7 @@ namespace BoggleClient
             using (HttpClient client = CreateClient(@"http://fuzzylogicinc.net/boggle/Solver.svc"))
             {
                 //Setting up post.
-                Task<HttpResponseMessage> getGameID = client.GetAsync(@"http://fuzzylogicinc.net/boggle/Solver.svc/?BoardID=" + boardId + "&Length=3");
+                Task<HttpResponseMessage> getGameID = client.GetAsync(@"http://fuzzylogicinc.net/boggle/Solver.svc/?BoardID=" + boardId + "&Length=3",token);
   
                 //Awaiting post result.
                 HttpResponseMessage response = await getGameID;

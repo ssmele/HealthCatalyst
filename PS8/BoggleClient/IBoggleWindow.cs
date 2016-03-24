@@ -33,9 +33,9 @@ namespace BoggleClient
         string timeLengthBox { set; get; }
         string timerDisplayBox { set; get; }
         string player1ScoreBox { set; get; }
-        string player2ScoreBox { set; }
-        string player1NameBox { set; }
-        string player2NameBox { set; }
+        string player2ScoreBox { get;  set; }
+        string player1NameBox { get;  set; }
+        string player2NameBox { get;  set; }
         string playerBox { set; get; }
         string Cell1 { set; get; }
         string Cell2 { set; get; }

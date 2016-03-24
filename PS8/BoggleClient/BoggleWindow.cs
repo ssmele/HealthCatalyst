@@ -241,6 +241,10 @@ namespace BoggleClient
             {
                 Player1NameBox.Text = value;
             }
+            get
+            {
+                return Player1NameBox.Text;
+            }
         }
 
 
@@ -273,6 +277,10 @@ namespace BoggleClient
             set
             {
                 Player2ScoreBox.Text = value;
+            }
+            get
+            {
+                return Player2ScoreBox.Text;
             }
         }
 
@@ -346,6 +354,10 @@ namespace BoggleClient
             set
             {
                 Player2NameBox.Text = value;
+            }
+            get
+            {
+                return Player2NameBox.Text;
             }
         }
 
