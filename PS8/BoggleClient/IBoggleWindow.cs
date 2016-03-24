@@ -8,7 +8,8 @@ namespace BoggleClient
 {
     public interface IBoggleWindow
     {
-
+        event Action UpdateScoreEvent;
+        event Action GameStateEvent;
         event Action CloseWindowEvent;
         event Action HelpEvent1;
         event Action HelpEvent2;
@@ -22,11 +23,12 @@ namespace BoggleClient
 
         //void refreshBoard(string boardSTRING);
 
+        void endScoreUpdater();
+        void endPending();
         string CancelButtonText { get; set; }
         string ConnectButtonText { get; set; }
         void NewWindow();
         void startTimer();
-
         void startTimerPending();
         void startTimerScoreUpdate();
         string wordEntryBox { get; }

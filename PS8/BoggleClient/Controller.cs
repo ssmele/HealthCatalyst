@@ -42,6 +42,8 @@ namespace BoggleClient
             window.WordSubmitEvent += HandleSubmitWordEvent;
             window.CancelEvent += HandleCancelEvent;
             window.NewEvent += HandleNew;
+            window.UpdateScoreEvent += scoreUpdater;
+            window.GameStateEvent += gameState;
             window.CheatEventFast += HandleCheatFast;
             window.CheatEventSlow += HandleCheatSlow;
             window.CheatEventWindow += HandleCheatWindow;
@@ -155,33 +157,34 @@ namespace BoggleClient
                 //Sets gameID equal to what we recieved from the join game HTTP request. 
                 gameID = gameInfo.GameID.ToString();
 
+                await stateDecision();
 
                 //If we recieved a Created Status code from the join game then Start the game.
-                if ((string)gameInfo.Status == "Created")
-                {
-                    await startGame();
-                }
-                //If the game only has one person in it start the pending loop. 
-                else if ((string)gameInfo.Status == "Accepted")
-                {
-                    bool ActiveGame = await pendingLoop();
-                    if (ActiveGame == true)
-                    {
-                        await startGame();
-                    }
-                    else if(ActiveGame == false)
-                    {
-                        resetClient();
-                        return;
-                    }
-                }
+                //if ((string)gameInfo.Status == "Created")
+                //{
+                //    await startGame();
+                //}
+                ////If the game only has one person in it start the pending loop. 
+                //else if ((string)gameInfo.Status == "Accepted")
+                //{
+                //    bool ActiveGame = await pendingLoop();
+                //    if (ActiveGame == true)
+                //    {
+                //        await startGame();
+                //    }
+                //    else if(ActiveGame == false)
+                //    {
+                //        resetClient();
+                //        return;
+                //    }
+                //}
 
-                //Starts the activeLoop.
-                bool isGameOver = await activeLoop();
-                if (isGameOver == true)
-                {
-                    endGame();
-                }
+                ////Starts the activeLoop.
+                //bool isGameOver = await activeLoop();
+                //if (isGameOver == true)
+                //{
+                //    endGame();
+                //}
             }
             catch(TaskCanceledException)
             {
@@ -221,56 +224,56 @@ namespace BoggleClient
         /// Checks to see if the game is active or completed
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> activeLoop()
-        {
-            //Will keep looping aslong as the game is active. scoreUpdater updates the scores.
-            bool keepLooping = true;
-            do
-            {
-                await Task.Delay(1000);
-                //ONce the game is complete end the looping.
-                string isGameConnnected = await scoreUpdater();
-                if (isGameConnnected == "completed")
-                {
-                    keepLooping = false;
-                }
+        //public async Task<bool> activeLoop()
+        //{
+        //    //Will keep looping aslong as the game is active. scoreUpdater updates the scores.
+        //    bool keepLooping = true;
+        //    do
+        //    {
+        //        await Task.Delay(1000);
+        //        //ONce the game is complete end the looping.
+        //        //string isGameConnnected = await scoreUpdater();
+        //        if (isGameConnnected == "completed")
+        //        {
+        //            keepLooping = false;
+        //        }
 
-            } while (keepLooping);
+        //    } while (keepLooping);
 
-            return true;
-        }
+        //    return true;
+        //}
 
         /// <summary>
         /// Loops until the game that has been created is joined by another person..
         /// </summary>
         /// <returns>Boolean that determins if game was joined or not.</returns>
-        public async Task<bool> pendingLoop()
-        {
-            //Will keepLooping until the gameStat changes to active. 
-            bool keepLooping = true;
-            do
-            {
-                await Task.Delay(1000);
-                //If cancel is pressed then the join request cancelled, and the client will be reset. 
-                if (Cancel == true)
-                {
-                    //TODO: ANalysis this to see if it can remain unawaited. 
-                    cancelJoin();
-                    //resetClient();
-                    return false;
-                }
+        //public async Task<bool> pendingLoop()
+        //{
+        //    //Will keepLooping until the gameStat changes to active. 
+        //    bool keepLooping = true;
+        //    do
+        //    {
+        //        await Task.Delay(1000);
+        //        //If cancel is pressed then the join request cancelled, and the client will be reset. 
+        //        if (Cancel == true)
+        //        {
+        //            //TODO: ANalysis this to see if it can remain unawaited. 
+        //            cancelJoin();
+        //            //resetClient();
+        //            return false;
+        //        }
 
-                //If the game is active then set boolean to stop looping. 
-                string isGameConnnected = await gameState();
-                if (isGameConnnected == "active")
-                {
-                    keepLooping = false;
-                }
+        //        //If the game is active then set boolean to stop looping. 
+        //        //string isGameConnnected = await gameState();
+        //        //if (isGameConnnected == "active")
+        //        {
+        //            keepLooping = false;
+        //        }
 
-            } while (keepLooping);
+        //    } while (keepLooping);
 
-            return true;
-        }
+        //    return true;
+        //}
 
         public void HandleCloseWindowEvent()
         {
@@ -379,6 +382,49 @@ namespace BoggleClient
 
 
 
+        /// <summary>
+        /// This method sends a get state request to the http server. It is not brief as it needs to retrieve board information. 
+        /// </summary>
+        public async Task stateDecision()
+        {
+            using (HttpClient client = CreateClient(Default_URL))
+            {
+                //Setting up the put.
+                Task<HttpResponseMessage> getStartInfo = client.GetAsync(Default_URL + "/games/" + gameID, token);
+
+                //Awaiting post result.
+                HttpResponseMessage response = await getStartInfo;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string result = response.Content.ReadAsStringAsync().Result;
+                    dynamic responseData = JsonConvert.DeserializeObject(result);
+
+                    if (responseData.GameState == "active")
+                    {
+                        await startGame();
+                    }
+                    else if (responseData.GameState == "pending")
+                    {
+                        window.startTimerPending();
+                    }
+                }
+                else if (response.StatusCode.ToString() == "Forbidden")
+                {
+                    //TODO: IF THE GAME ID GETS CORRUPTED NEEDS TO RESET FIGURE THAT OUT.
+                    window.errorMessage("Your gameID seems to be corrupted please try again.");
+                    return;
+                }
+                else
+                {
+                    window.errorMessage("Your game session got corrupted please try again.");
+                    return;
+                }
+
+            }
+        }
+
+
 
         /// <summary>
         /// This method sends a get state request to the http server. It is not brief as it needs to retrieve board information. 
@@ -411,7 +457,6 @@ namespace BoggleClient
                     //Refreshes the board to represent the current game. 
                     refreshBoard(boardString);
 
-
                     //string tempTimeLeft = responseData.TimeLeft;
                     //Sets time to current game clock.
                     window.timerDisplayBox = (string)responseData.TimeLeft;
@@ -426,6 +471,7 @@ namespace BoggleClient
 
                     //starts the clockTimer.
                     window.startTimer();
+                    window.startTimerScoreUpdate();
                 }
                 else if (response.StatusCode.ToString() == "Forbidden")
                 {
@@ -550,7 +596,7 @@ namespace BoggleClient
         /// </summary>
         /// <param name="wordList"></param>
         /// <returns></returns>
-        public string wordListFormatter(dynamic wordList)
+        private string wordListFormatter(dynamic wordList)
         {
             string finalList = "";
             int count = 0;
@@ -569,7 +615,7 @@ namespace BoggleClient
         /// put all the words form the words list into the text box.
         /// </summary>
         /// <returns>Returns the game status.</returns>
-        public async Task<string> scoreUpdater()
+        public async void scoreUpdater()
         {
             using (HttpClient client = CreateClient(Default_URL))
             {
@@ -601,15 +647,16 @@ namespace BoggleClient
                         //Updates the wordlist.
                         window.player1WordList = wordListFormatter(responseData.Player1.WordsPlayed);
                         window.player2WordList = wordListFormatter(responseData.Player2.WordsPlayed);
+                        window.endScoreUpdater();
+                        endGame();
                     }
 
-                    return responseData.GameState;
                 }
                 //If the game was corrupted prompt error. 
                 else
                 {
                     window.errorMessage("Game was corrupted while active.");
-                    return "Forbidden";
+                    return;
                 }
             }
         }
@@ -618,7 +665,7 @@ namespace BoggleClient
         /// Gets the status of the game from the server. This is different that the other get method as it is brief. 
         /// </summary>
         /// <returns></returns>
-        public async Task<string> gameState()
+        public async void gameState()
         {
             using (HttpClient client = CreateClient(Default_URL))
             {
@@ -632,11 +679,17 @@ namespace BoggleClient
                 {
                     string result = response.Content.ReadAsStringAsync().Result;
                     dynamic responseData = JsonConvert.DeserializeObject(result);
-                    return responseData.GameState;
+                    if(responseData.GameState == "active")
+                    {
+                        window.endPending();
+                        await startGame();
+                        
+                    }
                 }
                 else
                 {
-                    return "Forbidden";
+                    //DO SOMETHING
+                    //return "Forbidden";
                 }
             }
         }
@@ -787,14 +840,14 @@ namespace BoggleClient
             if (window.statusBox == "Connected" && window.timerDisplayBox != "0")
             {
                 double sleepTime = int.Parse(window.timerDisplayBox);
-                sleepTime = (sleepTime / 5) * 1000;
+                //sleepTime = (sleepTime / 5) * 1000;
+                sleepTime = 1000;
                 dynamic answer = await boggleSolver(boardString);
                 foreach (dynamic word in answer.Solutions)
                 {
                     string x = word.Word.ToString();
                     HandleSubmitWordEvent(x);
                     await Task.Delay((int)sleepTime);
-                    sleepTime = sleepTime / 1.5;
                 }
 
             }

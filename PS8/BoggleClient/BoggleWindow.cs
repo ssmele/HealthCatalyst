@@ -469,7 +469,10 @@ namespace BoggleClient
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-
+            if(GameStateEvent != null)
+            {
+                GameStateEvent();
+            }
         }
 
         public void startTimerScoreUpdate()
@@ -480,10 +483,14 @@ namespace BoggleClient
 
         private void timer3_Tick(object sender, EventArgs e)
         {
-
+            if(UpdateScoreEvent != null)
+            {
+                UpdateScoreEvent();
+            }
         }
 
-
+        public event Action GameStateEvent;
+        public event Action UpdateScoreEvent;
         public event Action CloseWindowEvent;
         public event Action HelpEvent1;
         public event Action HelpEvent2;
@@ -636,6 +643,16 @@ namespace BoggleClient
             {
                 CheatEventWindow();
             }
+        }
+
+        public void endPending()
+        {
+            timer2.Stop();
+        }
+
+        public void endScoreUpdater()
+        {
+            timer3.Stop();
         }
     }
 }
