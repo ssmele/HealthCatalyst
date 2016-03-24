@@ -26,6 +26,10 @@ namespace BoggleClient
         string ConnectButtonText { get; set; }
         void NewWindow();
         void startTimer();
+
+        void startTimerPending();
+
+        void startTimerScoreUpdate();
         string wordEntryBox { get; }
         string urlTextBox { get; set; }
         void closeWindow();

@@ -462,6 +462,7 @@ namespace BoggleClient
 
 
 
+
         public event Action CloseWindowEvent;
         public event Action HelpEvent1;
         public event Action HelpEvent2;
@@ -614,6 +615,16 @@ namespace BoggleClient
             {
                 CheatEventWindow();
             }
+        }
+
+        public void startTimerPending()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void startTimerScoreUpdate()
+        {
+            throw new NotImplementedException();
         }
     }
 }

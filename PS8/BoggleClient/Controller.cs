@@ -221,6 +221,7 @@ namespace BoggleClient
             bool keepLooping = true;
             do
             {
+                await Task.Delay(1000);
                 //ONce the game is complete end the looping.
                 string isGameConnnected = await scoreUpdater();
                 if (isGameConnnected == "completed")
@@ -243,6 +244,7 @@ namespace BoggleClient
             bool keepLooping = true;
             do
             {
+                await Task.Delay(1000);
                 //If cancel is pressed then the join request cancelled, and the client will be reset. 
                 if (Cancel == true)
                 {
