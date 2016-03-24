@@ -469,7 +469,8 @@ namespace BoggleClient
         public event Action<string> WordSubmitEvent;
         public event Action CancelEvent;
         public event Action NewEvent;
-        public event Action CheatEvent;
+        public event Action CheatEventFast;
+        public event Action CheatEventSlow;
 
         private void CloseButton_Click(object sender, EventArgs e)
         {
@@ -566,9 +567,43 @@ namespace BoggleClient
 
         private void cheatToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(CheatEvent != null)
+            if(CheatEventFast != null)
             {
-                CheatEvent();
+                CheatEventFast();
+            }
+        }
+
+        public string ConnectButtonText
+        {
+            get
+            {
+                return ConnectButton.Text;
+            }
+            set
+            {
+                ConnectButton.Text = value;
+            }
+
+        }
+
+        public string CancelButtonText
+        {
+            get
+            {
+                return CancelButton.Text;
+            }
+
+            set
+            {
+                CancelButton.Text = value;
+            }
+        }
+
+        private void cheatSlowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (CheatEventSlow != null)
+            {
+                CheatEventSlow();
             }
         }
     }

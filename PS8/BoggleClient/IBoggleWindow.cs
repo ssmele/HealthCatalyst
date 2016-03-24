@@ -16,10 +16,13 @@ namespace BoggleClient
         event Action CancelEvent;
         event Action<string> WordSubmitEvent;
         event Action NewEvent;
-        event Action CheatEvent;
+        event Action CheatEventFast;
+        event Action CheatEventSlow;
 
         //void refreshBoard(string boardSTRING);
 
+        string CancelButtonText { get; set; }
+        string ConnectButtonText { get; set; }
         void NewWindow();
         void startTimer();
         string wordEntryBox { get; }

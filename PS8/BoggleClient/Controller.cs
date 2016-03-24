@@ -42,33 +42,11 @@ namespace BoggleClient
             window.WordSubmitEvent += HandleSubmitWordEvent;
             window.CancelEvent += HandleCancelEvent;
             window.NewEvent += HandleNew;
-            window.CheatEvent += HandleCheat;
+            window.CheatEventFast += HandleCheatFast;
+            window.CheatEventSlow += HandleCheatSlow;
             source = new CancellationTokenSource();
             token = source.Token;
             window.statusBox = "Idle";
-        }
-
-        public async void HandleCheat1()
-        {
-           // await HandleCheat();
-        }
-
-        public async void HandleCheat()
-        {
-            if(window.statusBox == "Connected")
-            {
-                double sleepTime =int.Parse(window.timerDisplayBox);
-                sleepTime = (sleepTime / 5)*1000;
-                dynamic answer = await MESSAROUND(boardString);
-                foreach(dynamic word in answer.Solutions)
-                {
-                    string x = word.Word.ToString();
-                    HandleSubmitWordEvent(x);
-                    await Task.Delay((int)sleepTime);
-                    sleepTime = sleepTime / 1.5;
-                }
-                
-            }
         }
 
 
@@ -103,6 +81,16 @@ namespace BoggleClient
             source.Dispose();
             source = new CancellationTokenSource();
             token = source.Token;
+
+            //Test Stuff
+            window.player1WordList = "";
+            window.player2WordList = "";
+            window.player1NameBox = "";
+            window.player2NameBox = "";
+            window.player1ScoreBox = "0";
+            window.player2ScoreBox = "0";
+            window.timerDisplayBox = "0";
+            window.ConnectButtonText = "Connect";
         }
 
         //TODO: WE have two async methods inside of a async method is that necessary or do we only need the one async method. 
@@ -120,6 +108,8 @@ namespace BoggleClient
             window.urlTextBox = Default_URL;
             window.player1ScoreBox = "0";
             window.player2ScoreBox = "0";
+            window.timerDisplayBox = "0";
+            window.ConnectButtonText = "Connect";
             window.statusBox = "Trying to connect!";
             window.connectButton = false;
             window.cancelButton = true;
@@ -130,7 +120,8 @@ namespace BoggleClient
 
 
             try {
-                //Create user and get token.  (Asynchronas)
+
+                //Create user and get token.
                 player1Token = await createUser(window.playerBox);
                 if (Cancel == true || player1Token == null)
                 {
@@ -180,7 +171,7 @@ namespace BoggleClient
                     endGame();
                 }
             }
-            catch(TaskCanceledException e)
+            catch(TaskCanceledException)
             {
                 RESET();
             }
@@ -192,6 +183,8 @@ namespace BoggleClient
         public void endGame()
         {
             //RESET ALL THE VARIABLES. 
+            window.CancelButtonText = "Cancel";
+            window.ConnectButtonText = "New Game";
             window.cancelButton = false;
             window.statusBox = "GAME OVER";
 
@@ -242,6 +235,7 @@ namespace BoggleClient
             {
                 if (Cancel == true)
                 {
+
                     cancelJoin();
                     RESET();
                     return false;
@@ -384,6 +378,7 @@ namespace BoggleClient
                 {
                     //window.CancelButton = false;
                     window.statusBox = "Connected";
+                    window.CancelButtonText = "Exit Game";
 
                     string result = response.Content.ReadAsStringAsync().Result;
                     dynamic responseData = JsonConvert.DeserializeObject(result);
@@ -613,9 +608,9 @@ namespace BoggleClient
                 //Setting header and payload. 
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
-                //TODO: GOT AN EXCEPTION.
+                //TODO: FOUND EXCEPTION DOES THIS HTTP REQUEST NEED A CANCEL SHOULD IT EVER BE CANCELED!?!?!?
                 //Setting up post.
-                Task<HttpResponseMessage> cancelGame = client.PutAsync(Default_URL + "/games", content,token);
+                Task<HttpResponseMessage> cancelGame = client.PutAsync(Default_URL + "/games", content);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await cancelGame;
@@ -671,10 +666,14 @@ namespace BoggleClient
 
 
 
+        ///*********************Not important code***************************************************************************
 
-
-
-        public async Task<dynamic> MESSAROUND(string boardId)
+        /// <summary>
+        /// This method access's a seperate API that will give you back all the solutions to the current BoggleBoard.
+        /// </summary>
+        /// <param name="boardId"></param>
+        /// <returns></returns>
+        public async Task<dynamic> boggleSolver(string boardId)
         {
             using (HttpClient client = CreateClient(@"http://fuzzylogicinc.net/boggle/Solver.svc"))
             {
@@ -690,9 +689,7 @@ namespace BoggleClient
                     dynamic responseData = JsonConvert.DeserializeObject(result);
 
                    
-                    return responseData;
-                    
-                    
+                    return responseData;  
                 }
                 else
                 {
@@ -703,7 +700,43 @@ namespace BoggleClient
 
 
 
+        /// <summary>
+        /// This method will automatically insert all the words of a boggle board. 
+        /// </summary>
+        public async void HandleCheatFast()
+        {
+            if (window.statusBox == "Connected" && window.timerDisplayBox != "0")
+            {
+                double sleepTime = int.Parse(window.timerDisplayBox);
+                dynamic answer = await boggleSolver(boardString);
+                foreach (dynamic word in answer.Solutions)
+                {
+                    string x = word.Word.ToString();
+                    HandleSubmitWordEvent(x);
+                }
 
+            }
+        }
 
+        /// <summary>
+        /// This method will make it look less suspicious of cheating. 
+        /// </summary>
+        public async void HandleCheatSlow()
+        {
+            if (window.statusBox == "Connected" && window.timerDisplayBox != "0")
+            {
+                double sleepTime = int.Parse(window.timerDisplayBox);
+                sleepTime = (sleepTime / 5) * 1000;
+                dynamic answer = await boggleSolver(boardString);
+                foreach (dynamic word in answer.Solutions)
+                {
+                    string x = word.Word.ToString();
+                    HandleSubmitWordEvent(x);
+                    await Task.Delay((int)sleepTime);
+                    sleepTime = sleepTime / 1.5;
+                }
+
+            }
+        }
     }
 }
