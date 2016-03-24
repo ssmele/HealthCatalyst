@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace BoggleClient
 {
@@ -67,7 +66,5 @@ namespace BoggleClient
         string Cell14 { set; get; }
         string Cell15 { set; get; }
         string Cell16 { set; get; }
-
-        RichTextBox Cell1Access { get; }
     }
 }

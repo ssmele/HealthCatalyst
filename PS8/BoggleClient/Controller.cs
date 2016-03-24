@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Collections.Generic;
-using System.Windows.Forms;
 
 namespace BoggleClient
 {
@@ -27,8 +26,8 @@ namespace BoggleClient
 
         private string URL = "";
 
-        private List<RichTextBox> cells;
         private bool Cancel { get; set; }
+
         /// <summary>
         /// 
         /// </summary>
@@ -54,8 +53,6 @@ namespace BoggleClient
             window.urlTextBox = @"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc";
             window.statusBox = "Idle";
             window.timerDisplayBox = "0";
-            cells = new List<RichTextBox>();
-            cells.Add(window.Cell1Access);
         }
 
 
@@ -242,45 +239,32 @@ namespace BoggleClient
         /// on the first row of the boggle board and so forth.</param>
         public void refreshBoard(string boardString)
         {
-            //Setting all the values in the cells.
+
             if (boardString.Length == 16)
             {
-                for (int i = 0; i < boardString.Length; i++)
-                {
-                    if (boardString[i] == 'Q')
-                    {
-                        cells[i].Text = "Qu";
-                    }
-                    else
-                    {
-                        cells[i].Text = boardString[i].ToString();
-                    }
-
-                }
-                //    window.Cell1 = boardString[0].ToString();
-                //    window.Cell2 = boardString[1].ToString();
-                //    window.Cell3 = boardString[2].ToString();
-                //    window.Cell4 = boardString[3].ToString();
-                //    window.Cell5 = boardString[4].ToString();
-                //    window.Cell6 = boardString[5].ToString();
-                //    window.Cell7 = boardString[6].ToString();
-                //    window.Cell8 = boardString[7].ToString();
-                //    window.Cell9 = boardString[8].ToString();
-                //    window.Cell10 = boardString[9].ToString();
-                //    window.Cell11 = boardString[10].ToString();
-                //    window.Cell12 = boardString[11].ToString();
-                //    window.Cell13 = boardString[12].ToString();
-                //    window.Cell14 = boardString[13].ToString();
-                //    window.Cell15 = boardString[14].ToString();
-                //    window.Cell16 = boardString[15].ToString();
-                //}
-                if (boardString.Length == 0)
-                {
-                    refreshBoard("                ");
-                }
+                //Setting all the values in the cells. 
+                window.Cell1 = boardString[0].ToString();
+                window.Cell2 = boardString[1].ToString();
+                window.Cell3 = boardString[2].ToString();
+                window.Cell4 = boardString[3].ToString();
+                window.Cell5 = boardString[4].ToString();
+                window.Cell6 = boardString[5].ToString();
+                window.Cell7 = boardString[6].ToString();
+                window.Cell8 = boardString[7].ToString();
+                window.Cell9 = boardString[8].ToString();
+                window.Cell10 = boardString[9].ToString();
+                window.Cell11 = boardString[10].ToString();
+                window.Cell12 = boardString[11].ToString();
+                window.Cell13 = boardString[12].ToString();
+                window.Cell14 = boardString[13].ToString();
+                window.Cell15 = boardString[14].ToString();
+                window.Cell16 = boardString[15].ToString();
+            }
+            if (boardString.Length == 0)
+            {
+                refreshBoard("                ");
             }
         }
-
 
         //TODO:OPPONENT TOKEN OUR TOKEN
         //TODO:MAKE URL GIVABLE.
