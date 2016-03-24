@@ -11,21 +11,44 @@ namespace BoggleClient
 {
     public class Controller
     {
-
+        /// <summary>
+        /// Creates the window
+        /// </summary>
         private IBoggleWindow window;
 
-        private string player1Token;
+        /// <summary>
+        /// Current user info
+        /// </summary>
+        private string currentUserToken;
 
+        /// <summary>
+        /// ID of the game
+        /// </summary>
         private string gameID;
 
+        /// <summary>
+        /// Used in canceling requests
+        /// </summary>
         private CancellationTokenSource source;
 
+        /// <summary>
+        /// Used in canceling requests
+        /// </summary>
         private CancellationToken token;
 
+        /// <summary>
+        /// String that determines the letters on the board
+        /// </summary>
         string boardString;
 
+        /// <summary>
+        /// URL of the server 
+        /// </summary>
         private string URL = "";
 
+        /// <summary>
+        /// Determines whether the request was cancelled
+        /// </summary>
         private bool Cancel { get; set; }
 
         /// <summary>
@@ -76,8 +99,13 @@ namespace BoggleClient
         /// <summary>
         /// Resets the GUI back to idle status
         /// </summary>
-        public void resetClient()
+        public async void resetClient()
         {
+            //If we are still pending then cancel the latest join request. 
+            if (window.statusBox == "Trying to connect!")
+            {
+                await cancelJoin();
+            }
             refreshBoard("");
             window.statusBox = "Idle";
             window.cancelButton = false;
@@ -86,8 +114,7 @@ namespace BoggleClient
             source.Dispose();
             source = new CancellationTokenSource();
             token = source.Token;
-
-            //Test Stuff
+            // Initializations
             window.player1WordList = "";
             window.player2WordList = "";
             window.player1NameBox = "";
@@ -101,15 +128,13 @@ namespace BoggleClient
             window.endPending();
         }
 
-        //TODO: WE have two async methods inside of a async method is that necessary or do we only need the one async method. 
-
         /// <summary>
         /// Things that happen when the connect button is clicked.  Game will either be pending or active
         /// </summary>
         public async void HandleConnectEvent()
         {
             //Setting up the board to be connected. 
-            refreshBoard("QQQQQQQQQQQQQQQQ");
+            refreshBoard("");
             window.player1WordList = "";
             window.player2WordList = "";
             window.player1NameBox = "";
@@ -134,9 +159,9 @@ namespace BoggleClient
             try
             {
                 //Create user and get token.
-                player1Token = await createUser(window.playerBox);
+                currentUserToken = await createUser(window.playerBox);
                 //If we get a null then we know that the name was invalid or some other type of error. Or if the cancel is true.
-                if (Cancel == true || player1Token == null)
+                if (Cancel == true || currentUserToken == null)
                 {
                     resetClient();
                     return;
@@ -152,8 +177,8 @@ namespace BoggleClient
                 }
 
                 // Attempt to join the game
-                Pair gameInfo = await joinGame(player1Token, tempTime);
-                if (gameInfo == null) // || (Cancel == true && (string)gameInfo.Status == "Pending")) COMMENTED THIS OUT IDK IF WE NEED IT ANYMORE
+                Pair gameInfo = await joinGame(currentUserToken, tempTime);
+                if (gameInfo == null) 
                 {
                     resetClient();
                     return;
@@ -189,14 +214,13 @@ namespace BoggleClient
         /// </summary>
         public void endGame()
         {
-            //RESET ALL THE VARIABLES. 
+            // Set end game variables 
             window.CancelButtonText = "Cancel";
             window.ConnectButtonText = "New Game";
             window.cancelButton = false;
             window.connectButton = true;
             window.statusBox = "GAME OVER";
 
-            //TODO:WE SHOULD CHANGe THIS FROM CONGRATULATIONS!!!!
             if (int.Parse(window.player1ScoreBox) > int.Parse(window.player2ScoreBox))
             {
                 window.errorMessage("Congratulations! " + window.player1NameBox + " is the winner!\nThe game has ended. If you would like to start another game simply press connect again. Feel free to keep the same url, nickname, and game duration as last game, or if you want to change them up that is fine too!");
@@ -211,6 +235,9 @@ namespace BoggleClient
             }
         }
 
+        /// <summary>
+        /// Closes the game window
+        /// </summary>
         public void HandleCloseWindowEvent()
         {
             window.closeWindow();
@@ -239,7 +266,7 @@ namespace BoggleClient
         /// on the first row of the boggle board and so forth.</param>
         public void refreshBoard(string boardString)
         {
-            
+            // Sets the values of the board
             if (boardString.Length == 0)
             {
                 window.refreshBoard("                ");
@@ -247,28 +274,9 @@ namespace BoggleClient
             if (boardString.Length == 16)
             {
                 window.refreshBoard(boardString);
-                //Setting all the values in the cells. 
-                //window.Cell1 = boardString[0].ToString();
-                //window.Cell2 = boardString[1].ToString();
-                //window.Cell3 = boardString[2].ToString();
-                //window.Cell4 = boardString[3].ToString();
-                //window.Cell5 = boardString[4].ToString();
-                //window.Cell6 = boardString[5].ToString();
-                //window.Cell7 = boardString[6].ToString();
-                //window.Cell8 = boardString[7].ToString();
-                //window.Cell9 = boardString[8].ToString();
-                //window.Cell10 = boardString[9].ToString();
-                //window.Cell11 = boardString[10].ToString();
-                //window.Cell12 = boardString[11].ToString();
-                //window.Cell13 = boardString[12].ToString();
-                //window.Cell14 = boardString[13].ToString();
-                //window.Cell15 = boardString[14].ToString();
-                //window.Cell16 = boardString[15].ToString();
             }
         }
 
-        //TODO:OPPONENT TOKEN OUR TOKEN
-        //TODO:MAKE URL GIVABLE.
         /// <summary>
         /// This method takes in the word that the user wants to submit and makes a put request to the given boggle server id. If the word
         /// is valid it will go ahead and change the score of the GUI. If its to late then no score will be added and user will recieve a popup box error.
@@ -282,7 +290,7 @@ namespace BoggleClient
                 //Setting up nickname to give to server.
                 dynamic data = new ExpandoObject();
                 data.Word = givenWord;
-                data.UserToken = player1Token;
+                data.UserToken = currentUserToken;
 
                 //Setting header and payload. 
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
@@ -290,6 +298,8 @@ namespace BoggleClient
                 //Setting up the put.
                 Task<HttpResponseMessage> putWord = client.PutAsync(URL + "/games/" + gameID, content, token);
 
+                try
+                {
                 //Awaiting post result.
                 HttpResponseMessage response = await putWord;
 
@@ -311,6 +321,12 @@ namespace BoggleClient
                 else
                 {
                     window.errorMessage("UNKNOWN ERROR!!");
+                }
+                }
+                catch (TaskCanceledException)
+                {
+                    resetClient();
+                    return;
                 }
 
             }
@@ -668,13 +684,13 @@ namespace BoggleClient
         /// <summary>
         /// This method asynchronlsy cancels a join request for the current user token. 
         /// </summary>
-        public async void cancelJoin()
+        public async Task cancelJoin()
         {
             using (HttpClient client = CreateClient(URL))
             {
                 //Setting up nickname to give to server.
                 dynamic data = new ExpandoObject();
-                data.UserToken = player1Token;
+                data.UserToken = currentUserToken;
 
 
                 //Setting header and payload. 
@@ -687,19 +703,6 @@ namespace BoggleClient
 
                 //Awaiting post result.
                 HttpResponseMessage response = await cancelGame;
-
-
-                if (response.IsSuccessStatusCode)
-                {
-                    //GAME CANCELED
-                }
-                else
-                {
-                    //INVALID USERTOKEN oR NOT IN PENDING GAME
-                }
-
-
-
             }
         }
 

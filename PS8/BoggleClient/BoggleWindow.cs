@@ -402,23 +402,6 @@ namespace BoggleClient
             InitializeComponent();
             Text = "Boggle";
             CancelButton.Enabled = false;
-            //Sets all cells to align in the center. 
-            Cell1.SelectionAlignment = HorizontalAlignment.Center;
-            Cell2.SelectionAlignment = HorizontalAlignment.Center;
-            Cell3.SelectionAlignment = HorizontalAlignment.Center;
-            Cell4.SelectionAlignment = HorizontalAlignment.Center;
-            Cell5.SelectionAlignment = HorizontalAlignment.Center;
-            Cell6.SelectionAlignment = HorizontalAlignment.Center;
-            Cell7.SelectionAlignment = HorizontalAlignment.Center;
-            Cell8.SelectionAlignment = HorizontalAlignment.Center;
-            Cell9.SelectionAlignment = HorizontalAlignment.Center;
-            Cell10.SelectionAlignment = HorizontalAlignment.Center;
-            Cell11.SelectionAlignment = HorizontalAlignment.Center;
-            Cell12.SelectionAlignment = HorizontalAlignment.Center;
-            Cell13.SelectionAlignment = HorizontalAlignment.Center;
-            Cell14.SelectionAlignment = HorizontalAlignment.Center;
-            Cell15.SelectionAlignment = HorizontalAlignment.Center;
-            Cell16.SelectionAlignment = HorizontalAlignment.Center;
             timer1.Tick += Timer1_Tick;
         }
 
@@ -651,7 +634,7 @@ namespace BoggleClient
 
         public void refreshBoard(string boardSTRING)
         {
-            List<RichTextBox> cellList = new List<RichTextBox>();
+            List<Label> cellList = new List<Label>();
             cellList.Add(Cell1);
             cellList.Add(Cell2);
             cellList.Add(Cell3);
@@ -669,7 +652,7 @@ namespace BoggleClient
             cellList.Add(Cell15);
             cellList.Add(Cell16);
             int count = 0;
-            foreach (RichTextBox cell in cellList)
+            foreach (Label cell in cellList)
             {
                 if(boardSTRING[count] == 'Q')
                 {
