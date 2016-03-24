@@ -18,6 +18,7 @@ namespace BoggleClient
         event Action NewEvent;
         event Action CheatEventFast;
         event Action CheatEventSlow;
+        event Action CheatEventWindow;
 
         //void refreshBoard(string boardSTRING);
 

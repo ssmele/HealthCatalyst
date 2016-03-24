@@ -82,6 +82,7 @@
             this.statusLabel = new System.Windows.Forms.Label();
             this.statusBox = new System.Windows.Forms.TextBox();
             this.cheatSlowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cheatWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -106,7 +107,8 @@
             this.CloseButton,
             this.newWindowToolStripMenuItem,
             this.cheatToolStripMenuItem,
-            this.cheatSlowToolStripMenuItem});
+            this.cheatSlowToolStripMenuItem,
+            this.cheatWindowToolStripMenuItem});
             this.FileButton.Name = "FileButton";
             this.FileButton.Size = new System.Drawing.Size(44, 24);
             this.FileButton.Text = "File";
@@ -659,6 +661,13 @@
             this.cheatSlowToolStripMenuItem.Text = "Cheat Slow";
             this.cheatSlowToolStripMenuItem.Click += new System.EventHandler(this.cheatSlowToolStripMenuItem_Click);
             // 
+            // cheatWindowToolStripMenuItem
+            // 
+            this.cheatWindowToolStripMenuItem.Name = "cheatWindowToolStripMenuItem";
+            this.cheatWindowToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.cheatWindowToolStripMenuItem.Text = "Cheat Window";
+            this.cheatWindowToolStripMenuItem.Click += new System.EventHandler(this.cheatWindowToolStripMenuItem_Click);
+            // 
             // BoggleWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -759,6 +768,7 @@
         private System.Windows.Forms.ToolStripMenuItem gameRules;
         private System.Windows.Forms.ToolStripMenuItem cheatToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cheatSlowToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cheatWindowToolStripMenuItem;
     }
 }
 

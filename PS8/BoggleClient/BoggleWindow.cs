@@ -471,6 +471,7 @@ namespace BoggleClient
         public event Action NewEvent;
         public event Action CheatEventFast;
         public event Action CheatEventSlow;
+        public event Action CheatEventWindow;
 
         private void CloseButton_Click(object sender, EventArgs e)
         {
@@ -604,6 +605,14 @@ namespace BoggleClient
             if (CheatEventSlow != null)
             {
                 CheatEventSlow();
+            }
+        }
+
+        private void cheatWindowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(CheatEventWindow != null)
+            {
+                CheatEventWindow();
             }
         }
     }

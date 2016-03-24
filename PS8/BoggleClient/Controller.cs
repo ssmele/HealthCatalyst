@@ -44,6 +44,7 @@ namespace BoggleClient
             window.NewEvent += HandleNew;
             window.CheatEventFast += HandleCheatFast;
             window.CheatEventSlow += HandleCheatSlow;
+            window.CheatEventWindow += HandleCheatWindow;
             source = new CancellationTokenSource();
             token = source.Token;
             window.statusBox = "Idle";
@@ -536,6 +537,26 @@ namespace BoggleClient
         }
 
         /// <summary>
+        /// This method will take in a wordList dyanmic object and return it into a formatted string that is presentable for the 
+        /// wordList textboxes. 
+        /// </summary>
+        /// <param name="wordList"></param>
+        /// <returns></returns>
+        public string wordListFormatter(dynamic wordList)
+        {
+            string finalList = "";
+            int count = 0;
+            foreach(dynamic wordObj in wordList)
+            {
+                if (count == 0) { }
+                else { finalList = finalList + "\n"; }
+                finalList = finalList + wordObj.Word + ":" + wordObj.Score;
+                count++;
+            }
+            return finalList;
+        }
+
+        /// <summary>
         /// Will go and get the gameStatus. It will then update the scores if the game is still active. If it becomes complete then it will
         /// put all the words form the words list into the text box.
         /// </summary>
@@ -569,13 +590,9 @@ namespace BoggleClient
                     //If its complete then update the wordLists.
                     else if (tempGameState == "completed") 
                     {
-                        object player1WordList = responseData.Player1.WordsPlayed;
-                        string stringList1 = player1WordList.ToString();
-                        window.player1WordList = stringList1;
-
-                        object player2WordList = responseData.Player2.WordsPlayed;
-                        string stringList2 = player2WordList.ToString();
-                        window.player2WordList = stringList2;
+                        //Updates the wordlist.
+                        window.player1WordList = wordListFormatter(responseData.Player1.WordsPlayed);
+                        window.player2WordList = wordListFormatter(responseData.Player2.WordsPlayed);
                     }
 
                     return responseData.GameState;
@@ -773,6 +790,28 @@ namespace BoggleClient
                 }
 
             }
+        }
+
+        public async void HandleCheatWindow()
+        {
+            dynamic answer = await boggleSolver(boardString);
+
+            //Get the answers in a presentable form. 
+            string finalList = "";
+            int count = 0;
+            foreach (dynamic wordObj in answer)
+            {
+                if (count == 0) { }
+                else { finalList = finalList + "\n"; }
+                finalList = finalList + wordObj.Word + " : " + wordObj.Score;
+                count++;
+            }
+
+            //Display them in a new window. 
+            CheatForm newWindow = new CheatForm();
+            newWindow.displayWords(finalList);
+            
+
         }
     }
 }
