@@ -461,6 +461,27 @@ namespace BoggleClient
         }
 
 
+        public void startTimerPending()
+        {
+            timer2.Interval = 1000;
+            timer2.Start();
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+
+        }
+
+        public void startTimerScoreUpdate()
+        {
+            timer3.Interval = 1000;
+            timer3.Start();
+        }
+
+        private void timer3_Tick(object sender, EventArgs e)
+        {
+
+        }
 
 
         public event Action CloseWindowEvent;
@@ -615,16 +636,6 @@ namespace BoggleClient
             {
                 CheatEventWindow();
             }
-        }
-
-        public void startTimerPending()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void startTimerScoreUpdate()
-        {
-            throw new NotImplementedException();
         }
     }
 }
