@@ -22,8 +22,7 @@ namespace BoggleClient
         event Action CheatEventWindow;
         event Action CheatEventEthically;
 
-        //void refreshBoard(string boardSTRING);
-
+        void refreshBoard(string boardSTRING);
         void endScoreUpdater();
         void endPending();
         string CancelButtonText { get; set; }

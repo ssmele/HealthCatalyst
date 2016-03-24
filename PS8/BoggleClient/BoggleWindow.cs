@@ -419,25 +419,10 @@ namespace BoggleClient
             Cell14.SelectionAlignment = HorizontalAlignment.Center;
             Cell15.SelectionAlignment = HorizontalAlignment.Center;
             Cell16.SelectionAlignment = HorizontalAlignment.Center;
-            List<RichTextBox> cellList = new List<RichTextBox>();
-            cellList.Add(Cell1);
-            cellList.Add(Cell2);
-            cellList.Add(Cell3);
-            cellList.Add(Cell4);
-            cellList.Add(Cell5);
-            cellList.Add(Cell6);
-            cellList.Add(Cell7);
-            cellList.Add(Cell8);
-            cellList.Add(Cell9);
-            cellList.Add(Cell10);
-            cellList.Add(Cell11);
-            cellList.Add(Cell12);
-            cellList.Add(Cell13);
-            cellList.Add(Cell14);
-            cellList.Add(Cell15);
-            cellList.Add(Cell16);
             timer1.Tick += Timer1_Tick;
         }
+
+
 
         private void Timer1_Tick(object sender, EventArgs e)
         {
@@ -661,6 +646,40 @@ namespace BoggleClient
             if(CheatEventEthically != null)
             {
                 CheatEventEthically();
+            }
+        }
+
+        public void refreshBoard(string boardSTRING)
+        {
+            List<RichTextBox> cellList = new List<RichTextBox>();
+            cellList.Add(Cell1);
+            cellList.Add(Cell2);
+            cellList.Add(Cell3);
+            cellList.Add(Cell4);
+            cellList.Add(Cell5);
+            cellList.Add(Cell6);
+            cellList.Add(Cell7);
+            cellList.Add(Cell8);
+            cellList.Add(Cell9);
+            cellList.Add(Cell10);
+            cellList.Add(Cell11);
+            cellList.Add(Cell12);
+            cellList.Add(Cell13);
+            cellList.Add(Cell14);
+            cellList.Add(Cell15);
+            cellList.Add(Cell16);
+            int count = 0;
+            foreach (RichTextBox cell in cellList)
+            {
+                if(boardSTRING[count] == 'Q')
+                {
+                    cell.Text = "Qu";
+                }
+                else
+                {
+                    cell.Text = boardSTRING[count].ToString();
+                }
+                count++;
             }
         }
     }
