@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Written by: Boggle Masters
+//Date: 3/24/16
+
+using System;
 using System.Windows.Forms;
 
 namespace BoggleClient
 {
+    //View for cheater.
     public partial class CheatForm : Form
     {
         public CheatForm()

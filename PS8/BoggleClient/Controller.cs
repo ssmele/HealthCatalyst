@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Written by: Hanna Larsen & Salvatore Stone Mele
+//              u0741837       u0897718
+//Date: 3/24/16
+
+using System;
 using System.Text;
 using System.Dynamic;
 using System.Net.Http;
@@ -9,6 +13,9 @@ using System.Collections.Generic;
 
 namespace BoggleClient
 {
+    /// <summary>
+    /// Controller class for our boggle client. 
+    /// </summary>
     public class Controller
     {
         /// <summary>
@@ -61,6 +68,7 @@ namespace BoggleClient
             window.CloseWindowEvent += HandleCloseWindowEvent;
             window.HelpEvent1 += HandleHelp1Event;
             window.HelpEvent2 += HandleHelp2Event;
+            window.HelpCheat += HandleHelpCheatEvent;
             window.ConnectEvent += HandleConnectEvent;
             window.WordSubmitEvent += HandleSubmitWordEvent;
             window.CancelEvent += HandleCancelEvent;
@@ -152,7 +160,7 @@ namespace BoggleClient
                 window.timeLengthBox = "60";
             }
 
-            //TODO: WE COULD DO ALL THE CHECKS FOR VALID NAME, AND TIME UP HERE WHAT DO YOU THINK? Would not change functionaltiy but would make the error messages come a little bit faster. 
+           
 
 
             //TRY CATCH OVER ALL THE AWAIT METHODS AS THEY CAN ALL THROW CANCELLATION EXCEPTIONS. 
@@ -186,6 +194,7 @@ namespace BoggleClient
                 //Sets gameID equal to what we recieved from the join game HTTP request. 
                 gameID = gameInfo.GameID.ToString();
 
+                //Decides stat to put client in. 
                 await stateDecision();
 
             }
@@ -312,17 +321,18 @@ namespace BoggleClient
                 }
                 else if (response.StatusCode.ToString() == "Forbidden")
                 {
-                    window.errorMessage("FORBIDDEN");
+                    window.errorMessage("Please enter a valid word, and try again.");
                 }
                 else if (response.StatusCode.ToString() == "Conflict")
                 {
-                    window.errorMessage("Sorry time limit to submit words is over.");
+                    window.errorMessage("Sorry time limit to submit words is over. Start a new game to submit words.");
                 }
                 else
                 {
                     window.errorMessage("UNKNOWN ERROR!!");
                 }
                 }
+                // Resets the client if cancel button is clicked
                 catch (TaskCanceledException)
                 {
                     resetClient();
@@ -437,13 +447,9 @@ namespace BoggleClient
                     }
                     else if (response.StatusCode.ToString() == "Forbidden")
                     {
-                        //TODO: IF THE GAME ID GETS CORRUPTED NEEDS TO RESET FIGURE THAT OUT.
-                        window.errorMessage("Your gameID seems to be corrupted please try again.");
-                        return;
-                    }
-                    else
-                    {
-                        window.errorMessage("Your game session got corrupted please try again.");
+                        
+                        window.errorMessage("Your gameID seems to be corrupted please try to start a new game.");
+                        resetClient();
                         return;
                     }
                 }
@@ -500,16 +506,15 @@ namespace BoggleClient
                     window.errorMessage("Invalid username. Try again.");
                     return null;
                 }
-                //Incase something really bad happens just return unknow error. 
+                //Incase something really bad happens just return unknown error. 
                 else
                 {
-                    window.errorMessage("Unknow error, please try creating a new game!");
+                    window.errorMessage("Unknown error, please try creating a new game!");
                     return null;
                 }
             }
         }
-
-        //TODO:INvestigate the problem with async changing the GUI he talked about it in discussion. 
+ 
 
         /// <summary>
         /// This method will attempt to join the game a game under the UserToken that is given when the user given nickName was created.
@@ -529,10 +534,10 @@ namespace BoggleClient
                 //Setting header and payload. 
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
-                //Setting up post.
+                //Setting up get
                 Task<HttpResponseMessage> getGameINFO = client.PostAsync(URL + "/games", content, token);
 
-                //Awaiting post result.
+                //Awaiting get result.
                 HttpResponseMessage response = await getGameINFO;
 
                 //If we succesfully join or create a game then get the game ID, and the statusCode and return it.
@@ -544,15 +549,20 @@ namespace BoggleClient
                     return info;
                 }
                 //If the userTOken is already in this game respond with error and return null. 
-                if (response.StatusCode.ToString() == "Conflict")
+                else if (response.StatusCode.ToString() == "Conflict")
                 {
                     window.errorMessage("It seems as if your already in another game please finish that one first and then try again.");
+                    return null;
+                }
+                else if(response.StatusCode.ToString() == "Forbidden")
+                {
+                    window.errorMessage("Please enter a valid integer for the desired game duration, and try again. ");
                     return null;
                 }
                 //If anything else happens return unknown error message. 
                 else
                 {
-                    window.errorMessage("Unknow error, please try creating a new game!");
+                    window.errorMessage("Unknown error, please try creating a new game!");
                     return null;
                 }
             }
@@ -587,12 +597,12 @@ namespace BoggleClient
         {
             using (HttpClient client = CreateClient(URL))
             {
-                //Setting up post.
+                //Setting up get
                 Task<HttpResponseMessage> getGameID = client.GetAsync(URL + "/games/" + gameID, token);
 
                 try
                 {
-                    //Awaiting post result.
+                    //Awaiting get result.
                     HttpResponseMessage response = await getGameID;
 
                     //If the game status is ok then decide what to do with info. 
@@ -618,6 +628,7 @@ namespace BoggleClient
                             //Updates the wordlist.
                             window.player1WordList = wordListFormatter(responseData.Player1.WordsPlayed);
                             window.player2WordList = wordListFormatter(responseData.Player2.WordsPlayed);
+                            // Stops updating the score
                             window.endScoreUpdater();
                             endGame();
                         }
@@ -628,6 +639,7 @@ namespace BoggleClient
                     else
                     {
                         window.errorMessage("Game was corrupted while active.");
+                        resetClient();
                         return;
                     }
                 }
@@ -639,22 +651,22 @@ namespace BoggleClient
             }
         }
 
-        /// <summary>
-        /// Gets the status of the game from the server. This is different that the other get method as it is brief. 
-        /// </summary>
-        /// <returns></returns>
+        // <summary>
+        // Gets the status of the game from the server.This is different that the other get method as it is brief.
+        // </summary>
+        // <returns></returns>
         public async void gameState()
         {
             using (HttpClient client = CreateClient(URL))
             {
-                //Setting up post.
+                //Setting up get.
                 Task<HttpResponseMessage> getGameID = client.GetAsync(URL + "/games/" + gameID + "?Brief=yes", token);
 
-                //Awaiting post result.
+                //Awaiting get result.
                 try
                 {
                     HttpResponseMessage response = await getGameID;
-
+                    //Getting the response code
                     if (response.StatusCode.ToString() == "OK")
                     {
                         string result = response.Content.ReadAsStringAsync().Result;
@@ -663,13 +675,14 @@ namespace BoggleClient
                         {
                             window.endPending();
                             await startGame();
-
                         }
                     }
                     else
                     {
-                        //DO SOMETHING
-                        //return "Forbidden";
+                        // If there is any error, displays message & resets
+                        window.errorMessage("Game was corrupted while active.");
+                        resetClient();
+                        return;
                     }
                 }
                 catch (TaskCanceledException)
@@ -682,7 +695,7 @@ namespace BoggleClient
 
 
         /// <summary>
-        /// This method asynchronlsy cancels a join request for the current user token. 
+        /// This method cancels a join request for the current user token. 
         /// </summary>
         public async Task cancelJoin()
         {
@@ -695,14 +708,18 @@ namespace BoggleClient
 
                 //Setting header and payload. 
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-
-                //TODO: FOUND EXCEPTION DOES THIS HTTP REQUEST NEED A CANCEL SHOULD IT EVER BE CANCELED!?!?!?
-                //Setting up post.
+                //Setting up put.
 
                 Task<HttpResponseMessage> cancelGame = client.PutAsync(URL + "/games", content);
-
-                //Awaiting post result.
-                HttpResponseMessage response = await cancelGame;
+                try {
+                    //Awaiting put result.
+                    HttpResponseMessage response = await cancelGame;
+                }
+                catch(TaskCanceledException)
+                {
+                    window.errorMessage("Unknown Error. Error code 500");
+                    resetClient();
+                }
             }
         }
 
@@ -715,7 +732,6 @@ namespace BoggleClient
         {
             // Create a client whose base address is the GitHub server
             HttpClient client = new HttpClient();
-            //TODO: Catch exceptions here. 
 
             client.BaseAddress = new Uri(url);
 
@@ -785,7 +801,7 @@ namespace BoggleClient
         /// </summary>
         public async void HandleCheatFast()
         {
-            if (int.Parse(window.timerDisplayBox) < 5)
+            if (int.Parse(window.timerDisplayBox) < 1)
             {
                 window.errorMessage("Sorry not enough time for the fast cheat, looks like your on your own!");
                 return;
@@ -922,6 +938,11 @@ namespace BoggleClient
                 return 0;
             }
 
+        }
+
+        private void HandleHelpCheatEvent()
+        {
+            window.helpCheat();
         }
 
     }

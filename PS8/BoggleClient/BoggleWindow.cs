@@ -1,228 +1,39 @@
-﻿using System;
+﻿// Written by: Hanna Larsen & Salvatore Stone Mele
+//              u0741837       u0897718
+//Date: 3/24/16
+
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using BoggleClient;
 
 namespace BoggleClient
 {
+
+    /// <summary>
+    /// Viewer for Boggle Client. 
+    /// </summary>
     public partial class BoggleWindow : Form, IBoggleWindow
     {
 
-        //Getters and setters for the cells.
-        string IBoggleWindow.Cell1
-        {
-            get
-            {
-                return Cell1.Text;
-            }
 
-            set
-            {
-                Cell1.Text = value;
-            }
-        }
+        // Events
+        public event Action GameStateEvent;
+        public event Action UpdateScoreEvent;
+        public event Action CloseWindowEvent;
+        public event Action HelpEvent1;
+        public event Action HelpEvent2;
+        public event Action ConnectEvent;
+        public event Action<string> WordSubmitEvent;
+        public event Action CancelEvent;
+        public event Action NewEvent;
+        public event Action CheatEventFast;
+        public event Action CheatEventSlow;
+        public event Action CheatEventWindow;
+        public event Action CheatEventEthically;
+        public event Action HelpCheat;
 
-        string IBoggleWindow.Cell2
-        {
-            get
-            {
-                return Cell2.Text;
-            }
 
-            set
-            {
-                Cell2.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell3
-        {
-            get
-            {
-                return Cell3.Text;
-            }
-
-            set
-            {
-                Cell3.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell4
-        {
-            get
-            {
-                return Cell4.Text;
-            }
-
-            set
-            {
-                Cell4.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell5
-        {
-            get
-            {
-                return Cell5.Text;
-            }
-
-            set
-            {
-                Cell5.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell6
-        {
-            get
-            {
-                return Cell6.Text;
-            }
-
-            set
-            {
-                Cell6.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell7
-        {
-            get
-            {
-                return Cell7.Text;
-            }
-
-            set
-            {
-                Cell7.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell8
-        {
-            get
-            {
-                return Cell8.Text;
-            }
-
-            set
-            {
-                Cell8.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell9
-        {
-            get
-            {
-                return Cell9.Text;
-            }
-
-            set
-            {
-                Cell9.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell10
-        {
-            get
-            {
-                return Cell10.Text;
-            }
-
-            set
-            {
-                Cell10.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell11
-        {
-            get
-            {
-                return Cell11.Text;
-            }
-
-            set
-            {
-                Cell11.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell12
-        {
-            get
-            {
-                return Cell12.Text;
-            }
-
-            set
-            {
-                Cell12.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell13
-        {
-            get
-            {
-                return Cell13.Text;
-            }
-
-            set
-            {
-                Cell13.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell14
-        {
-            get
-            {
-                return Cell14.Text;
-            }
-
-            set
-            {
-                Cell14.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell15
-        {
-            get
-            {
-                return Cell15.Text;
-            }
-
-            set
-            {
-                Cell15.Text = value;
-            }
-        }
-
-        string IBoggleWindow.Cell16
-        {
-            get
-            {
-                return Cell16.Text;
-            }
-
-            set
-            {
-                Cell16.Text = value;
-            }
-        }
-
+        // Getters & setters for GUI components
         string IBoggleWindow.playerBox
         {
             get
@@ -247,12 +58,8 @@ namespace BoggleClient
             }
         }
 
-
-        //TODO:Need to go through all the http responses and decided what needs to be done for each error. 
-
-        //TODO:FIGURE OUT WHERE SYNC GOES.
         /// <summary>
-        /// I DONT KNOW WHERE THIS GOES!!!
+        /// Associated with the lock on the player 1 scorebox
         /// </summary>
         private readonly object sync = new object();
 
@@ -260,7 +67,6 @@ namespace BoggleClient
         {
             set
             {
-                //I THINK I DID THIS RIGHT IS IT NECESSARY IDK!!!!
                 lock (sync)
                 {
                     Player1ScoreBox.Text = value;
@@ -385,7 +191,7 @@ namespace BoggleClient
         {
             set
             {
-                Player1WordList.Text =  value;
+                Player1WordList.Text = value;
             }
         }
 
@@ -394,181 +200,6 @@ namespace BoggleClient
             set
             {
                 Player2WordsList.Text = value;
-            }
-        }
-
-        public BoggleWindow()
-        {
-            InitializeComponent();
-            Text = "Boggle";
-            CancelButton.Enabled = false;
-            timer1.Tick += Timer1_Tick;
-        }
-
-
-
-        private void Timer1_Tick(object sender, EventArgs e)
-        {
-            //TODO:when nothing is in timebox. or 5 or 120
-            //Gets current time.
-            int currentTime = int.Parse(timerDisplayBox.Text);
-            if (currentTime <= 0)
-            {
-                timer1.Stop();
-                return;
-            }
-            //Sets new time. 
-            int newTime = --currentTime;
-            timerDisplayBox.Text = newTime.ToString();
-        }
-
-        public void startTimer()
-        {
-            timer1.Interval = 1000;
-            timer1.Start();
-        }
-
-
-        public void startTimerPending()
-        {
-            timer2.Interval = 1000;
-            timer2.Start();
-        }
-
-        private void timer2_Tick(object sender, EventArgs e)
-        {
-            if(GameStateEvent != null)
-            {
-                GameStateEvent();
-            }
-        }
-
-        public void startTimerScoreUpdate()
-        {
-            timer3.Interval = 1000;
-            timer3.Start();
-        }
-
-        private void timer3_Tick(object sender, EventArgs e)
-        {
-            if(UpdateScoreEvent != null)
-            {
-                UpdateScoreEvent();
-            }
-        }
-
-        public event Action GameStateEvent;
-        public event Action UpdateScoreEvent;
-        public event Action CloseWindowEvent;
-        public event Action HelpEvent1;
-        public event Action HelpEvent2;
-        public event Action ConnectEvent;
-        public event Action<string> WordSubmitEvent;
-        public event Action CancelEvent;
-        public event Action NewEvent;
-        public event Action CheatEventFast;
-        public event Action CheatEventSlow;
-        public event Action CheatEventWindow;
-        public event Action CheatEventEthically;
-
-        private void CloseButton_Click(object sender, EventArgs e)
-        {
-            if (CloseWindowEvent != null)
-            {
-                CloseWindowEvent();
-            }
-        }
-
-        private void howToStart_Click(object sender, EventArgs e)
-        {
-            if (HelpEvent1 != null)
-            {
-                HelpEvent1();
-            }
-        }
-
-        private void gameRules_Click(object sender, EventArgs e)
-        {
-            if (HelpEvent2 != null)
-            {
-                HelpEvent2();
-            }
-        }
-        private void HelpButton_Click(object sender, EventArgs e)
-        {
-           
-        }
-
-
-        public void closeWindow()
-        {
-            Close();
-        }
-
-        private void ConnectButton_Click(object sender, EventArgs e)
-        {
-            if (ConnectEvent != null)
-            {
-                ConnectEvent();
-            }
-
-        }
-
-
-        public void helpHowToStartGame()
-        {
-            MessageBox.Show("How to start the game:\nEnter a URL to connect to another player, enter a username for yourself, and enter a time duration for each round.\nIf no time duration is set, the default is 60 seconds\n Once this information is entered, click Connect.\n Once another player connects, the game will start", "Help", MessageBoxButtons.OK);
-        }
-
-        public void helpGameRules()
-        {
-            MessageBox.Show("If a string has fewer than three characters, it scores zero points\n\nOtherwise, if a string has a duplicate that occurs earlier in the list, it scores zero points\n\nOtherwise, if a string is legal (it appears in the dictionary and occurs on the board), it receives a score that depends on its length.  Three- and four-letter words are worth one point, five-letter words are worth two points, six-letter words are worth three points, seven-letter words are worth five points, and longer words are worth 11 points\n\nOtherwise, the string scores negative one point");
-        }
-        public void errorMessage(string message)
-        {
-            MessageBox.Show(message);
-        }
-
-        private void wordEntryBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            //Checks to see if the key pressed is the enter key if it is then continue on with the event. 
-            if (statusBox.Text == "Connected" && e.KeyChar == '\r')
-            {
-                e.Handled = true;
-                if (WordSubmitEvent != null)
-                {
-                    WordSubmitEvent(wordEntryBox.Text);
-                    wordEntryBox.Text = "";
-                }
-            }
-        }
-
-        private void CancelButton_Click(object sender, EventArgs e)
-        {
-            if(CancelEvent != null)
-            {
-                CancelEvent();
-            }
-        }
-
-        private void newWindowToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if(NewEvent != null)
-            {
-                NewEvent();
-            }
-        }
-
-        public void NewWindow()
-        {
-            BoggleContext.GetContext().RunNew();
-        }
-
-        private void cheatToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if(CheatEventFast != null)
-            {
-                CheatEventFast();
             }
         }
 
@@ -598,40 +229,249 @@ namespace BoggleClient
             }
         }
 
-        private void cheatSlowToolStripMenuItem_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Creates the GUI window
+        /// </summary>
+        public BoggleWindow()
         {
-            if (CheatEventSlow != null)
+            InitializeComponent();
+            Text = "Boggle";
+            CancelButton.Enabled = false;
+            timer1.Tick += Timer1_Tick;
+        }
+
+
+        /// <summary>
+        /// Timer that controls the time left in the game
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Timer1_Tick(object sender, EventArgs e)
+        {
+            //Gets current time.
+            int currentTime = int.Parse(timerDisplayBox.Text);
+            if (currentTime <= 0)
             {
-                CheatEventSlow();
+                timer1.Stop();
+                return;
+            }
+            //Sets new time. 
+            int newTime = --currentTime;
+            timerDisplayBox.Text = newTime.ToString();
+        }
+
+        /// <summary>
+        /// Starts Timer1
+        /// </summary>
+        public void startTimer()
+        {
+            timer1.Interval = 1000;
+            timer1.Start();
+        }
+
+        /// <summary>
+        /// Starts the timer for the status updater
+        /// </summary>
+        public void startTimerPending()
+        {
+            timer2.Interval = 1000;
+            timer2.Start();
+        }
+
+        /// <summary>
+        /// Timer for the status updates
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            if (GameStateEvent != null)
+            {
+                GameStateEvent();
             }
         }
 
-        private void cheatWindowToolStripMenuItem_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Starts the timer to update the scores
+        /// </summary>
+        public void startTimerScoreUpdate()
         {
-            if(CheatEventWindow != null)
+            timer3.Interval = 1000;
+            timer3.Start();
+        }
+
+        /// <summary>
+        /// Timer that updates the scores
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void timer3_Tick(object sender, EventArgs e)
+        {
+            if (UpdateScoreEvent != null)
             {
-                CheatEventWindow();
+                UpdateScoreEvent();
             }
         }
 
+        /// <summary>
+        /// When Close button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CloseButton_Click(object sender, EventArgs e)
+        {
+            if (CloseWindowEvent != null)
+            {
+                CloseWindowEvent();
+            }
+        }
+
+        /// <summary>
+        /// When How to Start is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void howToStart_Click(object sender, EventArgs e)
+        {
+            if (HelpEvent1 != null)
+            {
+                HelpEvent1();
+            }
+        }
+
+        /// <summary>
+        /// When Game Rules menu is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void gameRules_Click(object sender, EventArgs e)
+        {
+            if (HelpEvent2 != null)
+            {
+                HelpEvent2();
+            }
+        }
+
+        /// <summary>
+        /// Closes the window
+        /// </summary>
+        public void closeWindow()
+        {
+            Close();
+        }
+
+        /// <summary>
+        /// When connect button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ConnectButton_Click(object sender, EventArgs e)
+        {
+            if (ConnectEvent != null)
+            {
+                ConnectEvent();
+            }
+        }
+
+        /// <summary>
+        /// Displays text explaining how to start the game
+        /// </summary>
+        public void helpHowToStartGame()
+        {
+            MessageBox.Show("How to start the game:\nEnter a URL to connect to another player, enter a username for yourself, and enter a time duration for each round.\nIf no time duration is set, the default is 60 seconds\n Once this information is entered, click Connect.\n Once another player connects, the game will start", "Help", MessageBoxButtons.OK);
+        }
+
+        /// <summary>
+        /// Displays the game rules
+        /// </summary>
+        public void helpGameRules()
+        {
+            MessageBox.Show("If a string has fewer than three characters, it scores zero points\n\nOtherwise, if a string has a duplicate that occurs earlier in the list, it scores zero points\n\nOtherwise, if a string is legal (it appears in the dictionary and occurs on the board), it receives a score that depends on its length.  Three- and four-letter words are worth one point, five-letter words are worth two points, six-letter words are worth three points, seven-letter words are worth five points, and longer words are worth 11 points\n\nOtherwise, the string scores negative one point");
+        }
+
+        /// <summary>
+        /// General error message method
+        /// </summary>
+        /// <param name="message"></param>
+        public void errorMessage(string message)
+        {
+            MessageBox.Show(message);
+        }
+
+        /// <summary>
+        /// When a word is submitted
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void wordEntryBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            //Checks to see if the key pressed is the enter key if it is then continue on with the event. 
+            if (statusBox.Text == "Connected" && e.KeyChar == '\r')
+            {
+                e.Handled = true;
+                if (WordSubmitEvent != null)
+                {
+                    WordSubmitEvent(wordEntryBox.Text);
+                    wordEntryBox.Text = "";
+                }
+            }
+        }
+
+        /// <summary>
+        /// When the cancel button is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            if (CancelEvent != null)
+            {
+                CancelEvent();
+            }
+        }
+
+        /// <summary>
+        /// When new game is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void newWindowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (NewEvent != null)
+            {
+                NewEvent();
+            }
+        }
+
+        /// <summary>
+        /// Opens a new window w/ a new game
+        /// </summary>
+        public void NewWindow()
+        {
+            BoggleContext.GetContext().RunNew();
+        }
+
+
+        /// <summary>
+        /// Ends the pending timer
+        /// </summary>
         public void endPending()
         {
             timer2.Stop();
         }
 
+        /// <summary>
+        /// Ends updating the score
+        /// </summary>
         public void endScoreUpdater()
         {
             timer3.Stop();
         }
 
-        private void cheatEthicallyToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if(CheatEventEthically != null)
-            {
-                CheatEventEthically();
-            }
-        }
-
+        /// <summary>
+        /// Refreshes the letters on the board
+        /// </summary>
+        /// <param name="boardSTRING"></param>
         public void refreshBoard(string boardSTRING)
         {
             List<Label> cellList = new List<Label>();
@@ -654,7 +494,7 @@ namespace BoggleClient
             int count = 0;
             foreach (Label cell in cellList)
             {
-                if(boardSTRING[count] == 'Q')
+                if (boardSTRING[count] == 'Q')
                 {
                     cell.Text = "Qu";
                 }
@@ -664,6 +504,56 @@ namespace BoggleClient
                 }
                 count++;
             }
+        }
+        // NOT IMPORTANT CODE ------------------------------------------------------------*********************************************************************************
+        private void cheatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (CheatEventFast != null)
+            {
+                CheatEventFast();
+            }
+        }
+
+
+        private void cheatWindowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (CheatEventWindow != null)
+            {
+                CheatEventWindow();
+            }
+        }
+
+        private void cheatSlowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (CheatEventSlow != null)
+            {
+                CheatEventSlow();
+            }
+        }
+
+        private void cheatEthicallyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (CheatEventEthically != null)
+            {
+                CheatEventEthically();
+            }
+        }
+
+        private void howToCheatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (HelpCheat != null)
+            {
+                helpCheat();
+            }
+        }
+
+
+        /// <summary>
+        /// Displays the game rules
+        /// </summary>
+        public void helpCheat()
+        {
+            MessageBox.Show("Cheating: \n Fast Cheat: This will insert all possible words on current boggle board. \n SlowCheat: Does same thing as fast cheat but slowly so its more sneaky(Also less stressful on the server) \n Cheat Window: Will display a window will all possible words of current boggle board. Sort button located at the bottom of the window to sort based on score. \n Cheat ethically: This will enter one of the largest words on the board every few seconds. Very low stress on the server, and very sneaky.");
         }
     }
 }

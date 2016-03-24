@@ -86,6 +86,7 @@
             this.Cell14 = new System.Windows.Forms.Label();
             this.Cell15 = new System.Windows.Forms.Label();
             this.Cell16 = new System.Windows.Forms.Label();
+            this.howToCheatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
@@ -163,23 +164,23 @@
             // 
             this.HelpButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.howToStart,
-            this.gameRules});
+            this.gameRules,
+            this.howToCheatToolStripMenuItem});
             this.HelpButton.Name = "HelpButton";
             this.HelpButton.Size = new System.Drawing.Size(44, 20);
             this.HelpButton.Text = "Help";
-            this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
             // 
             // howToStart
             // 
             this.howToStart.Name = "howToStart";
-            this.howToStart.Size = new System.Drawing.Size(143, 22);
+            this.howToStart.Size = new System.Drawing.Size(176, 22);
             this.howToStart.Text = "How To Start";
             this.howToStart.Click += new System.EventHandler(this.howToStart_Click);
             // 
             // gameRules
             // 
             this.gameRules.Name = "gameRules";
-            this.gameRules.Size = new System.Drawing.Size(143, 22);
+            this.gameRules.Size = new System.Drawing.Size(176, 22);
             this.gameRules.Text = "Game Rules";
             this.gameRules.Click += new System.EventHandler(this.gameRules_Click);
             // 
@@ -671,6 +672,15 @@
             this.Cell16.TabIndex = 15;
             this.Cell16.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // howToCheatToolStripMenuItem
+            // 
+            this.howToCheatToolStripMenuItem.Font = new System.Drawing.Font("uni 05_53", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.howToCheatToolStripMenuItem.ImageTransparentColor = System.Drawing.SystemColors.Control;
+            this.howToCheatToolStripMenuItem.Name = "howToCheatToolStripMenuItem";
+            this.howToCheatToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
+            this.howToCheatToolStripMenuItem.Text = "How to Cheat.";
+            this.howToCheatToolStripMenuItem.Click += new System.EventHandler(this.howToCheatToolStripMenuItem_Click);
+            // 
             // BoggleWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -706,7 +716,7 @@
             this.Controls.Add(this.ConnectButton);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "BoggleWindow";
             this.Text = "Boggle";
             this.menuStrip1.ResumeLayout(false);
@@ -776,6 +786,7 @@
         private System.Windows.Forms.Label Cell14;
         private System.Windows.Forms.Label Cell15;
         private System.Windows.Forms.Label Cell16;
+        private System.Windows.Forms.ToolStripMenuItem howToCheatToolStripMenuItem;
     }
 }
 

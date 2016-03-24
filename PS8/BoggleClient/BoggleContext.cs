@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Written by: Hanna Larsen & Salvatore Stone Mele
+//              u0741837       u0897718
+//Date: 3/24/16
+
 using System.Windows.Forms;
 
 namespace BoggleClient
 {
+
+    /// <summary>
+    /// Contenxt for our Boggle Client. 
+    /// </summary>
     class BoggleContext : ApplicationContext
     {
 
