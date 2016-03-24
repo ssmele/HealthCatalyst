@@ -34,6 +34,8 @@
             this.CloseButton = new System.Windows.Forms.ToolStripMenuItem();
             this.newWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.HelpButton = new System.Windows.Forms.ToolStripMenuItem();
+            this.howToStart = new System.Windows.Forms.ToolStripMenuItem();
+            this.gameRules = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.Cell1 = new System.Windows.Forms.RichTextBox();
             this.Cell2 = new System.Windows.Forms.RichTextBox();
@@ -78,8 +80,7 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.statusLabel = new System.Windows.Forms.Label();
             this.statusBox = new System.Windows.Forms.TextBox();
-            this.howToStart = new System.Windows.Forms.ToolStripMenuItem();
-            this.gameRules = new System.Windows.Forms.ToolStripMenuItem();
+            this.cheatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -102,7 +103,8 @@
             // 
             this.FileButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.CloseButton,
-            this.newWindowToolStripMenuItem});
+            this.newWindowToolStripMenuItem,
+            this.cheatToolStripMenuItem});
             this.FileButton.Name = "FileButton";
             this.FileButton.Size = new System.Drawing.Size(37, 20);
             this.FileButton.Text = "File";
@@ -110,14 +112,14 @@
             // CloseButton
             // 
             this.CloseButton.Name = "CloseButton";
-            this.CloseButton.Size = new System.Drawing.Size(145, 22);
+            this.CloseButton.Size = new System.Drawing.Size(152, 22);
             this.CloseButton.Text = "Close";
             this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);
             // 
             // newWindowToolStripMenuItem
             // 
             this.newWindowToolStripMenuItem.Name = "newWindowToolStripMenuItem";
-            this.newWindowToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.newWindowToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.newWindowToolStripMenuItem.Text = "New Window";
             this.newWindowToolStripMenuItem.Click += new System.EventHandler(this.newWindowToolStripMenuItem_Click);
             // 
@@ -130,6 +132,20 @@
             this.HelpButton.Size = new System.Drawing.Size(44, 20);
             this.HelpButton.Text = "Help";
             this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
+            // 
+            // howToStart
+            // 
+            this.howToStart.Name = "howToStart";
+            this.howToStart.Size = new System.Drawing.Size(143, 22);
+            this.howToStart.Text = "How To Start";
+            this.howToStart.Click += new System.EventHandler(this.howToStart_Click);
+            // 
+            // gameRules
+            // 
+            this.gameRules.Name = "gameRules";
+            this.gameRules.Size = new System.Drawing.Size(143, 22);
+            this.gameRules.Text = "Game Rules";
+            this.gameRules.Click += new System.EventHandler(this.gameRules_Click);
             // 
             // panel1
             // 
@@ -158,7 +174,7 @@
             // 
             this.Cell1.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell1.Location = new System.Drawing.Point(5, 13);
-            this.Cell1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell1.Margin = new System.Windows.Forms.Padding(2);
             this.Cell1.Name = "Cell1";
             this.Cell1.ReadOnly = true;
             this.Cell1.Size = new System.Drawing.Size(76, 82);
@@ -170,7 +186,7 @@
             // 
             this.Cell2.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell2.Location = new System.Drawing.Point(85, 13);
-            this.Cell2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell2.Margin = new System.Windows.Forms.Padding(2);
             this.Cell2.Name = "Cell2";
             this.Cell2.ReadOnly = true;
             this.Cell2.Size = new System.Drawing.Size(76, 82);
@@ -182,7 +198,7 @@
             // 
             this.Cell3.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell3.Location = new System.Drawing.Point(165, 13);
-            this.Cell3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell3.Margin = new System.Windows.Forms.Padding(2);
             this.Cell3.Name = "Cell3";
             this.Cell3.ReadOnly = true;
             this.Cell3.Size = new System.Drawing.Size(76, 82);
@@ -194,7 +210,7 @@
             // 
             this.Cell4.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell4.Location = new System.Drawing.Point(245, 13);
-            this.Cell4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell4.Margin = new System.Windows.Forms.Padding(2);
             this.Cell4.Name = "Cell4";
             this.Cell4.ReadOnly = true;
             this.Cell4.Size = new System.Drawing.Size(76, 82);
@@ -206,7 +222,7 @@
             // 
             this.Cell5.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell5.Location = new System.Drawing.Point(5, 99);
-            this.Cell5.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell5.Margin = new System.Windows.Forms.Padding(2);
             this.Cell5.Name = "Cell5";
             this.Cell5.ReadOnly = true;
             this.Cell5.Size = new System.Drawing.Size(76, 82);
@@ -218,7 +234,7 @@
             // 
             this.Cell6.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell6.Location = new System.Drawing.Point(85, 99);
-            this.Cell6.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell6.Margin = new System.Windows.Forms.Padding(2);
             this.Cell6.Name = "Cell6";
             this.Cell6.ReadOnly = true;
             this.Cell6.Size = new System.Drawing.Size(76, 82);
@@ -230,7 +246,7 @@
             // 
             this.Cell7.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell7.Location = new System.Drawing.Point(165, 99);
-            this.Cell7.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell7.Margin = new System.Windows.Forms.Padding(2);
             this.Cell7.Name = "Cell7";
             this.Cell7.ReadOnly = true;
             this.Cell7.Size = new System.Drawing.Size(76, 82);
@@ -242,7 +258,7 @@
             // 
             this.Cell8.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell8.Location = new System.Drawing.Point(245, 99);
-            this.Cell8.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell8.Margin = new System.Windows.Forms.Padding(2);
             this.Cell8.Name = "Cell8";
             this.Cell8.ReadOnly = true;
             this.Cell8.Size = new System.Drawing.Size(76, 82);
@@ -254,7 +270,7 @@
             // 
             this.Cell9.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell9.Location = new System.Drawing.Point(5, 185);
-            this.Cell9.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell9.Margin = new System.Windows.Forms.Padding(2);
             this.Cell9.Name = "Cell9";
             this.Cell9.ReadOnly = true;
             this.Cell9.Size = new System.Drawing.Size(76, 82);
@@ -266,7 +282,7 @@
             // 
             this.Cell10.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell10.Location = new System.Drawing.Point(85, 185);
-            this.Cell10.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell10.Margin = new System.Windows.Forms.Padding(2);
             this.Cell10.Name = "Cell10";
             this.Cell10.ReadOnly = true;
             this.Cell10.Size = new System.Drawing.Size(76, 82);
@@ -278,7 +294,7 @@
             // 
             this.Cell11.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell11.Location = new System.Drawing.Point(165, 185);
-            this.Cell11.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell11.Margin = new System.Windows.Forms.Padding(2);
             this.Cell11.Name = "Cell11";
             this.Cell11.ReadOnly = true;
             this.Cell11.Size = new System.Drawing.Size(76, 82);
@@ -290,7 +306,7 @@
             // 
             this.Cell12.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell12.Location = new System.Drawing.Point(245, 185);
-            this.Cell12.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell12.Margin = new System.Windows.Forms.Padding(2);
             this.Cell12.Name = "Cell12";
             this.Cell12.ReadOnly = true;
             this.Cell12.Size = new System.Drawing.Size(76, 82);
@@ -302,7 +318,7 @@
             // 
             this.Cell13.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell13.Location = new System.Drawing.Point(5, 271);
-            this.Cell13.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell13.Margin = new System.Windows.Forms.Padding(2);
             this.Cell13.Name = "Cell13";
             this.Cell13.ReadOnly = true;
             this.Cell13.Size = new System.Drawing.Size(76, 82);
@@ -314,7 +330,7 @@
             // 
             this.Cell14.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell14.Location = new System.Drawing.Point(85, 271);
-            this.Cell14.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell14.Margin = new System.Windows.Forms.Padding(2);
             this.Cell14.Name = "Cell14";
             this.Cell14.ReadOnly = true;
             this.Cell14.Size = new System.Drawing.Size(76, 82);
@@ -326,7 +342,7 @@
             // 
             this.Cell15.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell15.Location = new System.Drawing.Point(165, 271);
-            this.Cell15.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell15.Margin = new System.Windows.Forms.Padding(2);
             this.Cell15.Name = "Cell15";
             this.Cell15.ReadOnly = true;
             this.Cell15.Size = new System.Drawing.Size(76, 82);
@@ -338,7 +354,7 @@
             // 
             this.Cell16.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Cell16.Location = new System.Drawing.Point(245, 271);
-            this.Cell16.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cell16.Margin = new System.Windows.Forms.Padding(2);
             this.Cell16.Name = "Cell16";
             this.Cell16.ReadOnly = true;
             this.Cell16.Size = new System.Drawing.Size(76, 82);
@@ -600,19 +616,12 @@
             this.statusBox.Size = new System.Drawing.Size(133, 22);
             this.statusBox.TabIndex = 28;
             // 
-            // howToStart
+            // cheatToolStripMenuItem
             // 
-            this.howToStart.Name = "howToStart";
-            this.howToStart.Size = new System.Drawing.Size(152, 22);
-            this.howToStart.Text = "How To Start";
-            this.howToStart.Click += new System.EventHandler(this.howToStart_Click);
-            // 
-            // gameRules
-            // 
-            this.gameRules.Name = "gameRules";
-            this.gameRules.Size = new System.Drawing.Size(152, 22);
-            this.gameRules.Text = "Game Rules";
-            this.gameRules.Click += new System.EventHandler(this.gameRules_Click);
+            this.cheatToolStripMenuItem.Name = "cheatToolStripMenuItem";
+            this.cheatToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.cheatToolStripMenuItem.Text = "Cheat";
+            this.cheatToolStripMenuItem.Click += new System.EventHandler(this.cheatToolStripMenuItem_Click);
             // 
             // BoggleWindow
             // 
@@ -649,7 +658,7 @@
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "BoggleWindow";
             this.Text = "Boggle";
             this.menuStrip1.ResumeLayout(false);
@@ -712,6 +721,7 @@
         private System.Windows.Forms.ToolStripMenuItem newWindowToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem howToStart;
         private System.Windows.Forms.ToolStripMenuItem gameRules;
+        private System.Windows.Forms.ToolStripMenuItem cheatToolStripMenuItem;
     }
 }
 

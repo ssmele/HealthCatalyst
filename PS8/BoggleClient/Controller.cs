@@ -20,7 +20,7 @@ namespace BoggleClient
 
         private CancellationTokenSource source;
 
-        CancellationToken token;
+        private CancellationToken token;
  
         string boardString;
 
@@ -42,10 +42,35 @@ namespace BoggleClient
             window.WordSubmitEvent += HandleSubmitWordEvent;
             window.CancelEvent += HandleCancelEvent;
             window.NewEvent += HandleNew;
+            window.CheatEvent += HandleCheat;
             source = new CancellationTokenSource();
             token = source.Token;
             window.statusBox = "Idle";
         }
+
+        public async void HandleCheat1()
+        {
+           // await HandleCheat();
+        }
+
+        public async void HandleCheat()
+        {
+            if(window.statusBox == "Connected")
+            {
+                double sleepTime =int.Parse(window.timerDisplayBox);
+                sleepTime = (sleepTime / 5)*1000;
+                dynamic answer = await MESSAROUND(boardString);
+                foreach(dynamic word in answer.Solutions)
+                {
+                    string x = word.Word.ToString();
+                    HandleSubmitWordEvent(x);
+                    await Task.Delay((int)sleepTime);
+                    sleepTime = sleepTime / 1.5;
+                }
+                
+            }
+        }
+
 
         /// <summary>
         /// Opens a new window
@@ -92,7 +117,6 @@ namespace BoggleClient
             window.player2WordList = "";
             window.player1NameBox = "";
             window.player2NameBox = "";
-            //gameUrl = window.urlTextBox;
             window.urlTextBox = Default_URL;
             window.player1ScoreBox = "0";
             window.player2ScoreBox = "0";
@@ -149,7 +173,6 @@ namespace BoggleClient
                         startGame();
                     }
                 }
-
 
                 bool isGameOver = await activeLoop();
                 if (isGameOver == true)
@@ -263,6 +286,8 @@ namespace BoggleClient
         /// on the first row of the boggle board and so forth.</param>
         public void refreshBoard(string boardString)
         {
+
+            
             if (boardString.Length == 16)
             {
                 //Setting all the values in the cells. 
@@ -363,7 +388,7 @@ namespace BoggleClient
                     string result = response.Content.ReadAsStringAsync().Result;
                     dynamic responseData = JsonConvert.DeserializeObject(result);
 
-                    string boardString = responseData.Board;
+                    boardString = responseData.Board;
                     refreshBoard(boardString);
 
                     //string dlkasjdfg = responseData.Player1.Nickname;
@@ -376,9 +401,6 @@ namespace BoggleClient
 
                     string tempPlayer2Name = responseData.Player2.Nickname;
                     window.player2NameBox = tempPlayer2Name;
-
-                    boardString = responseData.Board;
-                    string blah = await MESSAROUND(boardString);
 
                     window.startTimer();
                     window.statusBox = "Connected";
@@ -591,6 +613,7 @@ namespace BoggleClient
                 //Setting header and payload. 
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
+                //TODO: GOT AN EXCEPTION.
                 //Setting up post.
                 Task<HttpResponseMessage> cancelGame = client.PutAsync(Default_URL + "/games", content,token);
 
@@ -651,7 +674,7 @@ namespace BoggleClient
 
 
 
-        public async Task<string> MESSAROUND(string boardId)
+        public async Task<dynamic> MESSAROUND(string boardId)
         {
             using (HttpClient client = CreateClient(@"http://fuzzylogicinc.net/boggle/Solver.svc"))
             {
@@ -666,12 +689,10 @@ namespace BoggleClient
                     string result = response.Content.ReadAsStringAsync().Result;
                     dynamic responseData = JsonConvert.DeserializeObject(result);
 
-                    string tempGameState = responseData.GameState;
-                    if (tempGameState == "active")
-                    {
-                        return "";
-                    }
-                    return "";
+                   
+                    return responseData;
+                    
+                    
                 }
                 else
                 {

@@ -419,6 +419,23 @@ namespace BoggleClient
             Cell14.SelectionAlignment = HorizontalAlignment.Center;
             Cell15.SelectionAlignment = HorizontalAlignment.Center;
             Cell16.SelectionAlignment = HorizontalAlignment.Center;
+            List<RichTextBox> cellList = new List<RichTextBox>();
+            cellList.Add(Cell1);
+            cellList.Add(Cell2);
+            cellList.Add(Cell3);
+            cellList.Add(Cell4);
+            cellList.Add(Cell5);
+            cellList.Add(Cell6);
+            cellList.Add(Cell7);
+            cellList.Add(Cell8);
+            cellList.Add(Cell9);
+            cellList.Add(Cell10);
+            cellList.Add(Cell11);
+            cellList.Add(Cell12);
+            cellList.Add(Cell13);
+            cellList.Add(Cell14);
+            cellList.Add(Cell15);
+            cellList.Add(Cell16);
             timer1.Tick += Timer1_Tick;
         }
 
@@ -445,8 +462,6 @@ namespace BoggleClient
 
 
 
-
-
         public event Action CloseWindowEvent;
         public event Action HelpEvent1;
         public event Action HelpEvent2;
@@ -454,6 +469,7 @@ namespace BoggleClient
         public event Action<string> WordSubmitEvent;
         public event Action CancelEvent;
         public event Action NewEvent;
+        public event Action CheatEvent;
 
         private void CloseButton_Click(object sender, EventArgs e)
         {
@@ -548,6 +564,12 @@ namespace BoggleClient
             BoggleContext.GetContext().RunNew();
         }
 
-
+        private void cheatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(CheatEvent != null)
+            {
+                CheatEvent();
+            }
+        }
     }
 }

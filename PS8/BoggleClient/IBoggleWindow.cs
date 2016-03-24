@@ -16,6 +16,9 @@ namespace BoggleClient
         event Action CancelEvent;
         event Action<string> WordSubmitEvent;
         event Action NewEvent;
+        event Action CheatEvent;
+
+        //void refreshBoard(string boardSTRING);
 
         void NewWindow();
         void startTimer();
