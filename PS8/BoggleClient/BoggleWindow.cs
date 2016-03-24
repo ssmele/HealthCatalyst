@@ -630,6 +630,14 @@ namespace BoggleClient
             }
         }
 
+        public RichTextBox Cell1Access
+        {
+            get
+            {
+                return Cell1;
+            }
+        }
+
         private void cheatSlowToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (CheatEventSlow != null)
