@@ -21,10 +21,10 @@ namespace BoggleClient
         private CancellationTokenSource source;
 
         private CancellationToken token;
- 
+
         string boardString;
 
-        private string Default_URL = @"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc";
+        private string URL = "";
 
         private bool Cancel { get; set; }
 
@@ -49,6 +49,7 @@ namespace BoggleClient
             window.CheatEventWindow += HandleCheatWindow;
             source = new CancellationTokenSource();
             token = source.Token;
+            window.urlTextBox = @"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc";
             window.statusBox = "Idle";
             window.timerDisplayBox = "0";
         }
@@ -95,10 +96,12 @@ namespace BoggleClient
             window.timerDisplayBox = "0";
             window.ConnectButtonText = "Connect";
             window.CancelButtonText = "Cancel";
+            window.endScoreUpdater();
+            window.endPending();
         }
 
         //TODO: WE have two async methods inside of a async method is that necessary or do we only need the one async method. 
-        
+
         /// <summary>
         /// Things that happen when the connect button is clicked.  Game will either be pending or active
         /// </summary>
@@ -110,7 +113,7 @@ namespace BoggleClient
             window.player2WordList = "";
             window.player1NameBox = "";
             window.player2NameBox = "";
-            window.urlTextBox = Default_URL;
+            URL = window.urlTextBox;
             window.player1ScoreBox = "0";
             window.player2ScoreBox = "0";
             window.timerDisplayBox = "0";
@@ -127,8 +130,8 @@ namespace BoggleClient
 
 
             //TRY CATCH OVER ALL THE AWAIT METHODS AS THEY CAN ALL THROW CANCELLATION EXCEPTIONS. 
-            try {
-
+            try
+            {
                 //Create user and get token.
                 player1Token = await createUser(window.playerBox);
                 //If we get a null then we know that the name was invalid or some other type of error. Or if the cancel is true.
@@ -159,37 +162,12 @@ namespace BoggleClient
 
                 await stateDecision();
 
-                //If we recieved a Created Status code from the join game then Start the game.
-                //if ((string)gameInfo.Status == "Created")
-                //{
-                //    await startGame();
-                //}
-                ////If the game only has one person in it start the pending loop. 
-                //else if ((string)gameInfo.Status == "Accepted")
-                //{
-                //    bool ActiveGame = await pendingLoop();
-                //    if (ActiveGame == true)
-                //    {
-                //        await startGame();
-                //    }
-                //    else if(ActiveGame == false)
-                //    {
-                //        resetClient();
-                //        return;
-                //    }
-                //}
-
-                ////Starts the activeLoop.
-                //bool isGameOver = await activeLoop();
-                //if (isGameOver == true)
-                //{
-                //    endGame();
-                //}
             }
-            catch(TaskCanceledException)
+            catch (TaskCanceledException)
             {
                 //If any of the methods get canceled simply just reset the client. 
                 resetClient();
+                return;
             }
         }
 
@@ -220,61 +198,6 @@ namespace BoggleClient
             }
         }
 
-        /// <summary>
-        /// Checks to see if the game is active or completed
-        /// </summary>
-        /// <returns></returns>
-        //public async Task<bool> activeLoop()
-        //{
-        //    //Will keep looping aslong as the game is active. scoreUpdater updates the scores.
-        //    bool keepLooping = true;
-        //    do
-        //    {
-        //        await Task.Delay(1000);
-        //        //ONce the game is complete end the looping.
-        //        //string isGameConnnected = await scoreUpdater();
-        //        if (isGameConnnected == "completed")
-        //        {
-        //            keepLooping = false;
-        //        }
-
-        //    } while (keepLooping);
-
-        //    return true;
-        //}
-
-        /// <summary>
-        /// Loops until the game that has been created is joined by another person..
-        /// </summary>
-        /// <returns>Boolean that determins if game was joined or not.</returns>
-        //public async Task<bool> pendingLoop()
-        //{
-        //    //Will keepLooping until the gameStat changes to active. 
-        //    bool keepLooping = true;
-        //    do
-        //    {
-        //        await Task.Delay(1000);
-        //        //If cancel is pressed then the join request cancelled, and the client will be reset. 
-        //        if (Cancel == true)
-        //        {
-        //            //TODO: ANalysis this to see if it can remain unawaited. 
-        //            cancelJoin();
-        //            //resetClient();
-        //            return false;
-        //        }
-
-        //        //If the game is active then set boolean to stop looping. 
-        //        //string isGameConnnected = await gameState();
-        //        //if (isGameConnnected == "active")
-        //        {
-        //            keepLooping = false;
-        //        }
-
-        //    } while (keepLooping);
-
-        //    return true;
-        //}
-
         public void HandleCloseWindowEvent()
         {
             window.closeWindow();
@@ -304,7 +227,6 @@ namespace BoggleClient
         public void refreshBoard(string boardString)
         {
 
-            
             if (boardString.Length == 16)
             {
                 //Setting all the values in the cells. 
@@ -325,7 +247,7 @@ namespace BoggleClient
                 window.Cell15 = boardString[14].ToString();
                 window.Cell16 = boardString[15].ToString();
             }
-            if(boardString.Length == 0)
+            if (boardString.Length == 0)
             {
                 refreshBoard("                ");
             }
@@ -341,7 +263,7 @@ namespace BoggleClient
         /// <param name="givenWord"></param>
         public async void HandleSubmitWordEvent(string givenWord)
         {
-            using (HttpClient client = CreateClient(Default_URL))
+            using (HttpClient client = CreateClient(URL))
             {
                 //Setting up nickname to give to server.
                 dynamic data = new ExpandoObject();
@@ -352,7 +274,7 @@ namespace BoggleClient
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
                 //Setting up the put.
-                Task<HttpResponseMessage> putWord = client.PutAsync(Default_URL + "/games/" + gameID, content,token);
+                Task<HttpResponseMessage> putWord = client.PutAsync(URL + "/games/" + gameID, content, token);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await putWord;
@@ -387,37 +309,45 @@ namespace BoggleClient
         /// </summary>
         public async Task stateDecision()
         {
-            using (HttpClient client = CreateClient(Default_URL))
+            using (HttpClient client = CreateClient(URL))
             {
                 //Setting up the put.
-                Task<HttpResponseMessage> getStartInfo = client.GetAsync(Default_URL + "/games/" + gameID, token);
+                Task<HttpResponseMessage> getStartInfo = client.GetAsync(URL + "/games/" + gameID, token);
 
-                //Awaiting post result.
-                HttpResponseMessage response = await getStartInfo;
-
-                if (response.IsSuccessStatusCode)
+                try
                 {
-                    string result = response.Content.ReadAsStringAsync().Result;
-                    dynamic responseData = JsonConvert.DeserializeObject(result);
+                    //Awaiting post result.
+                    HttpResponseMessage response = await getStartInfo;
 
-                    if (responseData.GameState == "active")
+                    if (response.IsSuccessStatusCode)
                     {
-                        await startGame();
+                        string result = response.Content.ReadAsStringAsync().Result;
+                        dynamic responseData = JsonConvert.DeserializeObject(result);
+
+                        if (responseData.GameState == "active")
+                        {
+                            await startGame();
+                        }
+                        else if (responseData.GameState == "pending")
+                        {
+                            window.startTimerPending();
+                        }
                     }
-                    else if (responseData.GameState == "pending")
+                    else if (response.StatusCode.ToString() == "Forbidden")
                     {
-                        window.startTimerPending();
+                        //TODO: IF THE GAME ID GETS CORRUPTED NEEDS TO RESET FIGURE THAT OUT.
+                        window.errorMessage("Your gameID seems to be corrupted please try again.");
+                        return;
+                    }
+                    else
+                    {
+                        window.errorMessage("Your game session got corrupted please try again.");
+                        return;
                     }
                 }
-                else if (response.StatusCode.ToString() == "Forbidden")
+                catch (TaskCanceledException)
                 {
-                    //TODO: IF THE GAME ID GETS CORRUPTED NEEDS TO RESET FIGURE THAT OUT.
-                    window.errorMessage("Your gameID seems to be corrupted please try again.");
-                    return;
-                }
-                else
-                {
-                    window.errorMessage("Your game session got corrupted please try again.");
+                    resetClient();
                     return;
                 }
 
@@ -431,57 +361,65 @@ namespace BoggleClient
         /// </summary>
         public async Task startGame()
         {
-            using (HttpClient client = CreateClient(Default_URL))
+            using (HttpClient client = CreateClient(URL))
             {
                 //Setting up the put.
-                Task<HttpResponseMessage> getStartInfo = client.GetAsync(Default_URL + "/games/" + gameID,token);
+                Task<HttpResponseMessage> getStartInfo = client.GetAsync(URL + "/games/" + gameID, token);
 
                 //Awaiting post result.
-                HttpResponseMessage response = await getStartInfo;
-
-                if (response.IsSuccessStatusCode)
+                try
                 {
-                    //Lets the users no the game has connected.
-                    window.statusBox = "Connected";
+                    HttpResponseMessage response = await getStartInfo;
 
-                    //Changes the Cancel Button to say EXIT GAME so user knows that they can exit the game at anytime. 
-                    window.CancelButtonText = "Exit Game";
+                    if (response.IsSuccessStatusCode)
+                    {
+                        //Lets the users no the game has connected.
+                        window.statusBox = "Connected";
 
-                    //Get the data out of the response. 
-                    string result = response.Content.ReadAsStringAsync().Result;
-                    dynamic responseData = JsonConvert.DeserializeObject(result);
+                        //Changes the Cancel Button to say EXIT GAME so user knows that they can exit the game at anytime. 
+                        window.CancelButtonText = "Exit Game";
 
-                    //Sets the boardString private instance variable.
-                    boardString = responseData.Board;
+                        //Get the data out of the response. 
+                        string result = response.Content.ReadAsStringAsync().Result;
+                        dynamic responseData = JsonConvert.DeserializeObject(result);
 
-                    //Refreshes the board to represent the current game. 
-                    refreshBoard(boardString);
+                        //Sets the boardString private instance variable.
+                        boardString = responseData.Board;
 
-                    //string tempTimeLeft = responseData.TimeLeft;
-                    //Sets time to current game clock.
-                    window.timerDisplayBox = (string)responseData.TimeLeft;
+                        //Refreshes the board to represent the current game. 
+                        refreshBoard(boardString);
 
-                    //Sets player1 to player1s nickname.
-                    string tempPlayer1Name = responseData.Player1.Nickname;
-                    window.player1NameBox = (string)responseData.Player1.Nickname;
+                        //string tempTimeLeft = responseData.TimeLeft;
+                        //Sets time to current game clock.
+                        window.timerDisplayBox = (string)responseData.TimeLeft;
 
-                    //Sets player2 to player2s nickname.
-                    string tempPlayer2Name = responseData.Player2.Nickname;
-                    window.player2NameBox = (string)responseData.Player2.Nickname;
+                        //Sets player1 to player1s nickname.
+                        string tempPlayer1Name = responseData.Player1.Nickname;
+                        window.player1NameBox = (string)responseData.Player1.Nickname;
 
-                    //starts the clockTimer.
-                    window.startTimer();
-                    window.startTimerScoreUpdate();
+                        //Sets player2 to player2s nickname.
+                        string tempPlayer2Name = responseData.Player2.Nickname;
+                        window.player2NameBox = (string)responseData.Player2.Nickname;
+
+                        //starts the clockTimer.
+                        window.startTimer();
+                        window.startTimerScoreUpdate();
+                    }
+                    else if (response.StatusCode.ToString() == "Forbidden")
+                    {
+                        //TODO: IF THE GAME ID GETS CORRUPTED NEEDS TO RESET FIGURE THAT OUT.
+                        window.errorMessage("Your gameID seems to be corrupted please try again.");
+                        return;
+                    }
+                    else
+                    {
+                        window.errorMessage("Your game session got corrupted please try again.");
+                        return;
+                    }
                 }
-                else if (response.StatusCode.ToString() == "Forbidden")
+                catch (TaskCanceledException)
                 {
-                    //TODO: IF THE GAME ID GETS CORRUPTED NEEDS TO RESET FIGURE THAT OUT.
-                    window.errorMessage("Your gameID seems to be corrupted please try again.");
-                    return;
-                }
-                else
-                {
-                    window.errorMessage("Your game session got corrupted please try again.");
+                    resetClient();
                     return;
                 }
 
@@ -504,7 +442,7 @@ namespace BoggleClient
             }
 
 
-            using (HttpClient client = CreateClient(Default_URL))
+            using (HttpClient client = CreateClient(URL))
             {
                 //Setting up nickname to give to server.
                 dynamic data = new ExpandoObject();
@@ -514,7 +452,7 @@ namespace BoggleClient
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
                 //Setting up post.
-                Task<HttpResponseMessage> getUserToken = client.PostAsync(Default_URL + "/users", content, token);
+                Task<HttpResponseMessage> getUserToken = client.PostAsync(URL + "/users", content, token);
 
                 ////Awaiting post result.
                 HttpResponseMessage response = await getUserToken;
@@ -551,7 +489,7 @@ namespace BoggleClient
         /// <returns>The gameId</returns>
         public async Task<Pair> joinGame(string playerToken, int timeGiven)
         {
-            using (HttpClient client = CreateClient(Default_URL))
+            using (HttpClient client = CreateClient(URL))
             {
                 //Setting up nickname to give to server.
                 dynamic data = new ExpandoObject();
@@ -562,7 +500,7 @@ namespace BoggleClient
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
                 //Setting up post.
-                Task<HttpResponseMessage> getGameINFO = client.PostAsync(Default_URL + "/games", content, token);
+                Task<HttpResponseMessage> getGameINFO = client.PostAsync(URL + "/games", content, token);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await getGameINFO;
@@ -576,7 +514,7 @@ namespace BoggleClient
                     return info;
                 }
                 //If the userTOken is already in this game respond with error and return null. 
-                if(response.StatusCode.ToString() == "Conflict")
+                if (response.StatusCode.ToString() == "Conflict")
                 {
                     window.errorMessage("It seems as if your already in another game please finish that one first and then try again.");
                     return null;
@@ -600,7 +538,7 @@ namespace BoggleClient
         {
             string finalList = "";
             int count = 0;
-            foreach(dynamic wordObj in wordList)
+            foreach (dynamic wordObj in wordList)
             {
                 if (count == 0) { }
                 else { finalList = finalList + "\n"; }
@@ -617,45 +555,55 @@ namespace BoggleClient
         /// <returns>Returns the game status.</returns>
         public async void scoreUpdater()
         {
-            using (HttpClient client = CreateClient(Default_URL))
+            using (HttpClient client = CreateClient(URL))
             {
                 //Setting up post.
-                Task<HttpResponseMessage> getGameID = client.GetAsync(Default_URL + "/games/" + gameID,token);
+                Task<HttpResponseMessage> getGameID = client.GetAsync(URL + "/games/" + gameID, token);
 
-                //Awaiting post result.
-                HttpResponseMessage response = await getGameID;
-
-                //If the game status is ok then decide what to do with info. 
-                if (response.StatusCode.ToString() == "OK")
+                try
                 {
-                    //Get data from response.
-                    string result = response.Content.ReadAsStringAsync().Result;
-                    dynamic responseData = JsonConvert.DeserializeObject(result);
+                    //Awaiting post result.
+                    HttpResponseMessage response = await getGameID;
 
-                    //Get the gameState
-                    string tempGameState = responseData.GameState;
-                    //If the game was active then update the scores. 
-                    if (tempGameState == "active")
+                    //If the game status is ok then decide what to do with info. 
+                    if (response.StatusCode.ToString() == "OK")
                     {
-                        //Update the two players scores. 
-                        window.player1ScoreBox = (string)responseData.Player1.Score;
-                        window.player2ScoreBox = (string)responseData.Player2.Score; 
-                    }
-                    //If its complete then update the wordLists.
-                    else if (tempGameState == "completed") 
-                    {
-                        //Updates the wordlist.
-                        window.player1WordList = wordListFormatter(responseData.Player1.WordsPlayed);
-                        window.player2WordList = wordListFormatter(responseData.Player2.WordsPlayed);
-                        window.endScoreUpdater();
-                        endGame();
+                        //Get data from response.
+                        string result = response.Content.ReadAsStringAsync().Result;
+                        dynamic responseData = JsonConvert.DeserializeObject(result);
+
+                        //Get the gameState
+                        string tempGameState = responseData.GameState;
+
+                        //If the game was active then update the scores. 
+                        if (tempGameState == "active")
+                        {
+                            //Update the two players scores. 
+                            window.player1ScoreBox = (string)responseData.Player1.Score;
+                            window.player2ScoreBox = (string)responseData.Player2.Score;
+                        }
+                        //If its complete then update the wordLists.
+                        else if (tempGameState == "completed")
+                        {
+                            //Updates the wordlist.
+                            window.player1WordList = wordListFormatter(responseData.Player1.WordsPlayed);
+                            window.player2WordList = wordListFormatter(responseData.Player2.WordsPlayed);
+                            window.endScoreUpdater();
+                            endGame();
+                        }
+
                     }
 
+                    //If the game was corrupted prompt error. 
+                    else
+                    {
+                        window.errorMessage("Game was corrupted while active.");
+                        return;
+                    }
                 }
-                //If the game was corrupted prompt error. 
-                else
+                catch (TaskCanceledException)
                 {
-                    window.errorMessage("Game was corrupted while active.");
+                    resetClient();
                     return;
                 }
             }
@@ -667,29 +615,37 @@ namespace BoggleClient
         /// <returns></returns>
         public async void gameState()
         {
-            using (HttpClient client = CreateClient(Default_URL))
+            using (HttpClient client = CreateClient(URL))
             {
                 //Setting up post.
-                Task<HttpResponseMessage> getGameID = client.GetAsync(Default_URL + "/games/" + gameID + "?Brief=yes",token);
+                Task<HttpResponseMessage> getGameID = client.GetAsync(URL + "/games/" + gameID + "?Brief=yes", token);
 
                 //Awaiting post result.
-                HttpResponseMessage response = await getGameID;
-
-                if (response.StatusCode.ToString() == "OK")
+                try
                 {
-                    string result = response.Content.ReadAsStringAsync().Result;
-                    dynamic responseData = JsonConvert.DeserializeObject(result);
-                    if(responseData.GameState == "active")
+                    HttpResponseMessage response = await getGameID;
+
+                    if (response.StatusCode.ToString() == "OK")
                     {
-                        window.endPending();
-                        await startGame();
-                        
+                        string result = response.Content.ReadAsStringAsync().Result;
+                        dynamic responseData = JsonConvert.DeserializeObject(result);
+                        if (responseData.GameState == "active")
+                        {
+                            window.endPending();
+                            await startGame();
+
+                        }
+                    }
+                    else
+                    {
+                        //DO SOMETHING
+                        //return "Forbidden";
                     }
                 }
-                else
+                catch (TaskCanceledException)
                 {
-                    //DO SOMETHING
-                    //return "Forbidden";
+                    resetClient();
+                    return;
                 }
             }
         }
@@ -700,7 +656,7 @@ namespace BoggleClient
         /// </summary>
         public async void cancelJoin()
         {
-            using (HttpClient client = CreateClient(Default_URL))
+            using (HttpClient client = CreateClient(URL))
             {
                 //Setting up nickname to give to server.
                 dynamic data = new ExpandoObject();
@@ -712,7 +668,8 @@ namespace BoggleClient
 
                 //TODO: FOUND EXCEPTION DOES THIS HTTP REQUEST NEED A CANCEL SHOULD IT EVER BE CANCELED!?!?!?
                 //Setting up post.
-                Task<HttpResponseMessage> cancelGame = client.PutAsync(Default_URL + "/games", content);
+
+                Task<HttpResponseMessage> cancelGame = client.PutAsync(URL + "/games", content);
 
                 //Awaiting post result.
                 HttpResponseMessage response = await cancelGame;
@@ -727,6 +684,8 @@ namespace BoggleClient
                     //INVALID USERTOKEN oR NOT IN PENDING GAME
                 }
 
+
+
             }
         }
 
@@ -740,15 +699,17 @@ namespace BoggleClient
             // Create a client whose base address is the GitHub server
             HttpClient client = new HttpClient();
             //TODO: Catch exceptions here. 
+          
             client.BaseAddress = new Uri(url);
-
+            
+            
             // Tell the server that the client will accept this particular type of response data
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 
 
             // There is more client configuration to do, depending on the request.
-           /// mainClient = client;
+            /// mainClient = client;
             return client;
         }
 
@@ -780,8 +741,8 @@ namespace BoggleClient
             using (HttpClient client = CreateClient(@"http://fuzzylogicinc.net/boggle/Solver.svc"))
             {
                 //Setting up post.
-                Task<HttpResponseMessage> getGameID = client.GetAsync(@"http://fuzzylogicinc.net/boggle/Solver.svc/?BoardID=" + boardId + "&Length=3",token);
-  
+                Task<HttpResponseMessage> getGameID = client.GetAsync(@"http://fuzzylogicinc.net/boggle/Solver.svc/?BoardID=" + boardId + "&Length=3", token);
+
                 //Awaiting post result.
                 HttpResponseMessage response = await getGameID;
 
@@ -790,8 +751,8 @@ namespace BoggleClient
                     string result = response.Content.ReadAsStringAsync().Result;
                     dynamic responseData = JsonConvert.DeserializeObject(result);
 
-                   
-                    return responseData;  
+
+                    return responseData;
                 }
                 else
                 {
@@ -831,7 +792,7 @@ namespace BoggleClient
         /// </summary>
         public async void HandleCheatSlow()
         {
-            if(int.Parse(window.timerDisplayBox) < 25)
+            if (int.Parse(window.timerDisplayBox) < 25)
             {
                 window.errorMessage("Sorry not enough time for the slow cheat please try fast cheat.");
                 return;
@@ -870,7 +831,7 @@ namespace BoggleClient
             {
                 wordSORT.Add(new Pair(wordObj.Word, wordObj.Score));
                 int tempScore = wordObj.Score;
-                if(tempScore > largestScore)
+                if (tempScore > largestScore)
                 {
                     largestScore = tempScore;
                     longestWord = wordObj.Word;
@@ -884,9 +845,9 @@ namespace BoggleClient
 
             wordSORT.Sort(pairCompare);
             string sortedFinalList = "";
-            foreach(Pair sorted in wordSORT)
+            foreach (Pair sorted in wordSORT)
             {
-                if(count == 0) { }
+                if (count == 0) { }
                 else { sortedFinalList = sortedFinalList + "\n"; }
                 sortedFinalList = sortedFinalList + sorted.GameID + " : " + sorted.Status;
                 count++;
@@ -894,9 +855,9 @@ namespace BoggleClient
             //Display them in a new window. 
             CheatForm cheatWindow = new CheatForm();
             cheatWindow.Show();
-            cheatWindow.displayWords(finalList,sortedFinalList.TrimStart('\n'));
+            cheatWindow.displayWords(finalList, sortedFinalList.TrimStart('\n'));
             cheatWindow.displayLargest(longestWord, largestScore);
-            
+
 
         }
 
