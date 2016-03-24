@@ -240,7 +240,7 @@ namespace BoggleClient
         }
 
         /// <summary>
-        /// Loops until the game that has been created is joined by another person.
+        /// Loops until the game that has been created is joined by another person..
         /// </summary>
         /// <returns>Boolean that determins if game was joined or not.</returns>
         public async Task<bool> pendingLoop()
