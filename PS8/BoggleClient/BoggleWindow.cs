@@ -501,6 +501,7 @@ namespace BoggleClient
         public event Action CheatEventFast;
         public event Action CheatEventSlow;
         public event Action CheatEventWindow;
+        public event Action CheatEventEthically;
 
         private void CloseButton_Click(object sender, EventArgs e)
         {
@@ -653,6 +654,14 @@ namespace BoggleClient
         public void endScoreUpdater()
         {
             timer3.Stop();
+        }
+
+        private void cheatEthicallyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(CheatEventEthically != null)
+            {
+                CheatEventEthically();
+            }
         }
     }
 }

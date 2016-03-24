@@ -85,6 +85,7 @@
             this.statusBox = new System.Windows.Forms.TextBox();
             this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.timer3 = new System.Windows.Forms.Timer(this.components);
+            this.cheatEthicallyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -110,7 +111,8 @@
             this.newWindowToolStripMenuItem,
             this.cheatToolStripMenuItem,
             this.cheatSlowToolStripMenuItem,
-            this.cheatWindowToolStripMenuItem});
+            this.cheatWindowToolStripMenuItem,
+            this.cheatEthicallyToolStripMenuItem});
             this.FileButton.Name = "FileButton";
             this.FileButton.Size = new System.Drawing.Size(37, 20);
             this.FileButton.Text = "File";
@@ -651,6 +653,13 @@
             // 
             this.timer3.Tick += new System.EventHandler(this.timer3_Tick);
             // 
+            // cheatEthicallyToolStripMenuItem
+            // 
+            this.cheatEthicallyToolStripMenuItem.Name = "cheatEthicallyToolStripMenuItem";
+            this.cheatEthicallyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.cheatEthicallyToolStripMenuItem.Text = "Cheat Ethically";
+            this.cheatEthicallyToolStripMenuItem.Click += new System.EventHandler(this.cheatEthicallyToolStripMenuItem_Click);
+            // 
             // BoggleWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -754,6 +763,7 @@
         private System.Windows.Forms.ToolStripMenuItem cheatWindowToolStripMenuItem;
         private System.Windows.Forms.Timer timer2;
         private System.Windows.Forms.Timer timer3;
+        private System.Windows.Forms.ToolStripMenuItem cheatEthicallyToolStripMenuItem;
     }
 }
 

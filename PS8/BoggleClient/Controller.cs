@@ -47,6 +47,7 @@ namespace BoggleClient
             window.CheatEventFast += HandleCheatFast;
             window.CheatEventSlow += HandleCheatSlow;
             window.CheatEventWindow += HandleCheatWindow;
+            window.CheatEventEthically += HandleCheatGoodandSlow;
             source = new CancellationTokenSource();
             token = source.Token;
             window.urlTextBox = @"http://bogglecs3500s16.azurewebsites.net/BoggleService.svc";
@@ -166,6 +167,18 @@ namespace BoggleClient
             catch (TaskCanceledException)
             {
                 //If any of the methods get canceled simply just reset the client. 
+                resetClient();
+                return;
+            }
+            catch (HttpRequestException)
+            {
+                window.errorMessage("Invalid URL make sure you spelled it correctly, and try again!");
+                resetClient();
+                return;
+            }
+            catch (UriFormatException)
+            {
+                window.errorMessage("Invalid URL make sure you spelled it correctly, and try again!");
                 resetClient();
                 return;
             }
@@ -699,10 +712,10 @@ namespace BoggleClient
             // Create a client whose base address is the GitHub server
             HttpClient client = new HttpClient();
             //TODO: Catch exceptions here. 
-          
+
             client.BaseAddress = new Uri(url);
-            
-            
+
+
             // Tell the server that the client will accept this particular type of response data
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Add("Accept", "application/json");
@@ -787,6 +800,33 @@ namespace BoggleClient
             }
         }
 
+        public async void HandleCheatGoodandSlow()
+        {
+            dynamic answer = await boggleSolver(boardString);
+
+            List<Pair> wordSORT = new List<Pair>();
+
+            foreach (dynamic wordObj in answer.Solutions)
+            {
+                wordSORT.Add(new Pair(wordObj.Word, wordObj.Score));
+            }
+
+            wordSORT.Sort(pairCompare);
+
+            //sleepTime = (sleepTime / 5) * 1000;
+            int sleepTime = 5000;
+            foreach (Pair words in wordSORT)
+            {
+                if (window.timerDisplayBox != 0.ToString())
+                {
+                    string x = words.GameID.ToString();
+                    HandleSubmitWordEvent(x);
+                    await Task.Delay(sleepTime);
+                }
+
+            }
+        }
+
         /// <summary>
         /// This method will make it look less suspicious of cheating. 
         /// </summary>
@@ -798,19 +838,19 @@ namespace BoggleClient
                 return;
             }
 
-            if (window.statusBox == "Connected" && window.timerDisplayBox != "0")
+
+            double sleepTime = int.Parse(window.timerDisplayBox);
+            //sleepTime = (sleepTime / 5) * 1000;
+            sleepTime = 5000;
+            dynamic answer = await boggleSolver(boardString);
+            foreach (dynamic word in answer.Solutions)
             {
-                double sleepTime = int.Parse(window.timerDisplayBox);
-                //sleepTime = (sleepTime / 5) * 1000;
-                sleepTime = 1000;
-                dynamic answer = await boggleSolver(boardString);
-                foreach (dynamic word in answer.Solutions)
+                if (window.timerDisplayBox != 0.ToString())
                 {
                     string x = word.Word.ToString();
                     HandleSubmitWordEvent(x);
                     await Task.Delay((int)sleepTime);
                 }
-
             }
         }
 
