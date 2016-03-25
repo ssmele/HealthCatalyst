@@ -112,7 +112,18 @@ namespace BoggleClient
             //If we are still pending then cancel the latest join request. 
             if (window.statusBox == "Trying to connect!")
             {
-                await cancelJoin();
+                try
+                {
+                    await cancelJoin();
+                }
+                catch (UriFormatException)
+                {
+                   //We do nothing here as this exception is already handled else where. 
+                }
+                catch (HttpRequestException)
+                {
+                    //Same as above.
+                }
             }
             refreshBoard("");
             window.statusBox = "Idle";
@@ -122,7 +133,6 @@ namespace BoggleClient
             source.Dispose();
             source = new CancellationTokenSource();
             token = source.Token;
-            // Initializations
             window.player1WordList = "";
             window.player2WordList = "";
             window.player1NameBox = "";
@@ -160,9 +170,7 @@ namespace BoggleClient
                 window.timeLengthBox = "60";
             }
 
-           
-
-
+  
             //TRY CATCH OVER ALL THE AWAIT METHODS AS THEY CAN ALL THROW CANCELLATION EXCEPTIONS. 
             try
             {
@@ -375,7 +383,6 @@ namespace BoggleClient
                     }
                     else if (response.StatusCode.ToString() == "Forbidden")
                     {
-                        //TODO: IF THE GAME ID GETS CORRUPTED NEEDS TO RESET FIGURE THAT OUT.
                         window.errorMessage("Your gameID seems to be corrupted please try again.");
                         return;
                     }
