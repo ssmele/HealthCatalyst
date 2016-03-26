@@ -64,7 +64,7 @@ namespace Boggle
             IISAgent.Stop();
         }
 
-        private RestTestClient client = new RestTestClient("http://localhost:50000/");
+        private RestTestClient client = new RestTestClient("http://localhost:60000/");
 
         [TestMethod]
         public void TestMethod1()
