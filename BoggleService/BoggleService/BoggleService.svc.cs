@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Net;
 using System.ServiceModel.Web;
@@ -9,23 +10,121 @@ namespace Boggle
 {
     public class BoggleService : IBoggleService
     {
-        private int gameNum = 0;
-        private Queue<string> needed = new Queue<string>();
-        //REPResents nickname to usertoken
+        //Represents the gameID.
+        private static int gameNum = 0;
+        /// <summary>
+        /// This queue should only hold one value at a time and that should be a UserToken.
+        /// </summary>
+        private static Queue<string> needed = new Queue<string>();
+
+        //REPResents Usertoken to Nickname.
         private readonly static Dictionary<String, string> users = new Dictionary<String, string>();
-        //represents usertoken to gameid.
+
+        //Represents Usertoken to gameID.
         private readonly static Dictionary<String, gameIDClass> currentPlayersinGame = new Dictionary<String, gameIDClass>();
-        //represents gameId to GameInfo
+
+        //Represents GameId to GameInfo.
         private readonly static Dictionary<string, GameInfo> games = new Dictionary<string, GameInfo>();
+
+        //Sync object.
         private static readonly object sync = new object();
 
+
+        public void CancelJoin(UserInfo UI)
+        {
+            lock (sync)
+            {
+                if(needed.Peek() == UI.UserToken)
+                {
+                    //TODO: Should we minus from the gameID, should we take the user out from users????
+                    needed.Dequeue();
+                    string tempGameId = currentPlayersinGame[UI.UserToken].GameID;
+                    currentPlayersinGame.Remove(tempGameId);
+                    games.Remove(tempGameId);
+                    SetStatus(OK);
+                }
+                else
+                {
+                    SetStatus(Forbidden);
+                }
+            }
+        }
+
+        public dynamic getGameStatus(gameIDClass GivenGameID,string brief)
+        {
+            if (games.ContainsKey(GivenGameID.GameID))
+            {
+                SetStatus(OK);
+                GameInfo currentGame = games[GivenGameID.GameID];
+                dynamic returnInfo = new ExpandoObject();
+                //IF THE GAME IS PENDING DO THIS.
+                if (currentGame.GameState == "pending")
+                {
+                    returnInfo.GameState = "pending";
+                }
+                //IF ITS ACTIVE OR COMPLETED DO THIS>
+                else if(currentGame.GameState == "active")
+                {
+                    //If brief is yes do this.
+                    if(brief == "yes")
+                    {
+                        returnInfo.GameState = "active";
+                        returnInfo.TimeLeft = currentGame.TimeLeft;
+                        returnInfo.Player1.Score = currentGame.Player1.Score;
+                        returnInfo.Player2.Score = currentGame.Player2.Score;
+                    }
+                    //If not brief do this.
+                    else
+                    {
+                        returnInfo.GameState = "active";
+                        returnInfo.Board = "BOARDGAMEDLDL";
+                        returnInfo.TimeLimit = currentGame.TimeLimit;
+                        returnInfo.TimeLeft = currentGame.TimeLeft;
+                        returnInfo.Player1.Nickname = currentGame.Player1.Nickname;
+                        returnInfo.Player1.Score = currentGame.Player1.Score;
+                        returnInfo.Player2.Nickname = currentGame.Player2.Nickname;
+                        returnInfo.Player2.Score = currentGame.Player2.Score;
+                    }
+                }
+                else
+                {
+                    if (brief == "yes")
+                    {
+                        returnInfo.GameState = "completed";
+                        returnInfo.TimeLeft = currentGame.TimeLeft;
+                        returnInfo.Player1.Score = currentGame.Player1.Score;
+                        returnInfo.Player2.Score = currentGame.Player2.Score;
+                    }
+                    //If not brief do this.
+                    else
+                    {
+                        returnInfo.GameState = "completed";
+                        returnInfo.Board = "BOARDGAMEDLDL";
+                        returnInfo.TimeLimit = currentGame.TimeLimit;
+                        returnInfo.TimeLeft = currentGame.TimeLeft;
+                        returnInfo.Player1.Nickname = currentGame.Player1.Nickname;
+                        returnInfo.Player1.Score = currentGame.Player1.Score;
+                        returnInfo.Player1.WordsPlayed = currentGame.Player1.WordsPlayed;
+                        returnInfo.Player2.Nickname = currentGame.Player2.Nickname;
+                        returnInfo.Player2.Score = currentGame.Player2.Score;
+                        returnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
+                    }
+
+                }
+            }
+            else
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
+        }
 
 
         public gameIDClass JoinGame(gameStart starter)
         {
             lock (sync)
             {
-                if (starter.TimeLimit > 120 || starter.TimeLimit < 5 || starter.UserToken.Length != 36)
+                if (starter.TimeLimit > 120 || starter.TimeLimit < 5 || starter.UserToken.Length != 36 || !users.ContainsKey(starter.UserToken))
                 {
                     SetStatus(Forbidden);
                     return null;
@@ -60,7 +159,7 @@ namespace Boggle
                         game.TimeLeft = starter.TimeLimit;
 
                         //Compute the gameID.
-                        string tempGameid = "G" + (gameNum + 1).ToString();
+                        string tempGameid = "G" + (gameNum++).ToString();
 
                         //Sets the gamestate to pending.
                         game.GameState = "pending";
@@ -70,11 +169,15 @@ namespace Boggle
 
                         //Returns the gameId.
                         id.GameID = tempGameid;
+
+                        //adding to currentplayersingame
+                        currentPlayersinGame.Add(starter.UserToken, id);
                     }
                     else
                     {
                         //gets the new users gameID and resets return value to equal that. 
                         string tempGameid = currentPlayersinGame[needed.Dequeue()].GameID;
+                        currentPlayersinGame.Add(starter.UserToken, id);
                         id.GameID = tempGameid;
 
                         //Get the game info that the user will be added to from dequeue and using the other dictionaries.
@@ -91,7 +194,6 @@ namespace Boggle
                         game.GameState = "active";
 
                         SetStatus(Created);
-
                     }
                     return id;
                 }
@@ -121,6 +223,8 @@ namespace Boggle
                 }
             }
         }
+
+
 
 
         //////////////////////////////////////////////////////////////////////////METHOD GIVEN BY JOE///////////////////////////////////////////////////

@@ -21,15 +21,21 @@ namespace Boggle
 
 
         /// <summary>
-        /// Creates a new game. 
+        /// This method will create a game.
+        /// Depending on if the player is the first or second person to join the game a different status
+        /// will be returned.
         /// </summary>
         /// <param name="Nickname"></param>
-        /// <returns></returns>
+        /// <returns>Game Id of game user joined.</returns>
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
         gameIDClass JoinGame(gameStart Nickname);
 
 
+        [WebInvoke(Method = "POST", UriTemplate = "/games")]
+        void CancelJoin(UserInfo UserToken);
 
+        [WebGet(UriTemplate = "/games/{GivenGameID}?Brief={answer}")]
+        dynamic getGameStatus(gameIDClass GivenGameID,string brief);
 
         //////////////JOE MADE THIS///////////////////////////////////////////////////////////////
 
