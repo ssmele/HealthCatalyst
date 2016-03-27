@@ -64,7 +64,7 @@ namespace Boggle
             IISAgent.Stop();
         }
 
-        private RestTestClient client = new RestTestClient("http://localhost:60000/");
+        private RestTestClient client = new RestTestClient("http://localhost:50000/");
 
         [TestMethod]
         public void TestMethod1()
@@ -85,5 +85,100 @@ namespace Boggle
             Assert.AreEqual(OK, r.Status);
             Assert.AreEqual(15, r.Data);
         }
+
+        //Testing createUser
+
+        [TestMethod]
+        public void TestCreateUserDefault()
+        {
+            dynamic user = new ExpandoObject();
+            user.Nickname = "Joe";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            string token = r.Data.UserToken;
+            Assert.AreEqual(36, token.Length);
+        }
+
+
+        [TestMethod]
+        public void TestCreateUserBad()
+        {
+            dynamic user = new ExpandoObject();
+            user.Nickname = null;
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+            Assert.IsNull(r.Data);
+        }
+
+        [TestMethod]
+        public void TestCreateUserEmpty()
+        {
+            dynamic user = new ExpandoObject();
+            user.Nickname = "";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+            Assert.IsNull(r.Data);
+        }
+
+        [TestMethod]
+        public void TestCreateUserEmptyLine()
+        {
+            dynamic user = new ExpandoObject();
+            user.Nickname = "\n";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+            Assert.IsNull(r.Data);
+        }
+
+
+        [TestMethod]
+        public void TestJoinGame1Player()
+        {
+            //Creating first user. 
+            dynamic user = new ExpandoObject();
+            user.Nickname = "swag";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            string token = r.Data.UserToken;
+
+            dynamic newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 60;
+            Response x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual(x.Status, Accepted);
+        }
+
+        [TestMethod]
+        public void TestJoinGame2Players()
+        {
+            //Creating first user. 
+            dynamic user = new ExpandoObject();
+            user.Nickname = "swag";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            string token = r.Data.UserToken;
+
+            //Joining game.
+            dynamic newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 60;
+            Response x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual(x.Data.GameID, "G1");
+            Assert.AreEqual(x.Status, Accepted);
+
+            //Creating second user. 
+            user.Nickname = "swag";
+            r = client.DoPostAsync("users", user).Result;
+            token = r.Data.UserToken;
+
+
+            newGame.UserToken = token;
+            newGame.TimeLimit = 60;
+            x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual(x.Data.GameID, "G1");
+            Assert.AreEqual(x.Status, Created);
+        }
+
+
     }
 }
