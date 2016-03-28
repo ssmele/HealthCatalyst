@@ -19,10 +19,10 @@ namespace Boggle
         private static Queue<string> needed = new Queue<string>();
 
         //REPResents Usertoken to Nickname.
-        private readonly static Dictionary<String, string> users = new Dictionary<String, string>();
+        private readonly static Dictionary<string, string> users = new Dictionary<string, string>();
 
         //Represents Usertoken to gameID.
-        private readonly static Dictionary<String, gameIDClass> currentPlayersinGame = new Dictionary<String, gameIDClass>();
+        private readonly static Dictionary<string, gameIDClass> currentPlayersinGame = new Dictionary<string, gameIDClass>();
 
         //Represents GameId to GameInfo.
         private readonly static Dictionary<string, GameInfo> games = new Dictionary<string, GameInfo>();
@@ -43,10 +43,13 @@ namespace Boggle
                 if (needed.Count == 1 && needed.Peek() == UI.UserToken)
                 {
                     //TODO: Should we minus from the gameID, should we take the user out from users????
+                    //TODO: SHOULD WE KEEP OR TAKE OUT USERS???
                     //If the UserToken is the same as the player in the queue remove them from the queue.
                     needed.Dequeue();
                     string tempGameId = currentPlayersinGame[UI.UserToken].GameID;
                     currentPlayersinGame.Remove(UI.UserToken);
+                    //KEEP OR NOT???
+                    users.Remove(UI.UserToken);
                     games.Remove(tempGameId);
                     //Set status to OK.
                     SetStatus(OK);
@@ -69,93 +72,96 @@ namespace Boggle
         /// <returns></returns>
         public ScoreResponse SubmitWord(WordSubmit wordInfo, string GivenGameID)
         {
-            GameInfo currentGame = games[currentPlayersinGame[wordInfo.UserToken].GameID];
-            //If word is empty or null, or usertoken is not in a real game then set status to forbidden.
-            if (wordInfo.Word == null || wordInfo.Word.Trim().Length == 0 || !currentPlayersinGame.ContainsKey(wordInfo.UserToken))
+            lock (sync)
             {
-                SetStatus(Forbidden);
-                return null;
-            }
-            //If game is not active. 
-            else if(currentGame.GameState != "active")
-            {
-                SetStatus(Conflict);
-                return null;
-            }
-            //If game is active then score word and add it to the players words_played list. 
-            else
-            {
-                SetStatus(OK);
-                ScoreResponse returnInfo = new ScoreResponse();
-                string word = wordInfo.Word.Trim();
-                if (currentGame.Board.CanBeFormed(word))
+                GameInfo currentGame = games[currentPlayersinGame[wordInfo.UserToken].GameID];
+                //If word is empty or null, or usertoken is not in a real game then set status to forbidden.
+                if (wordInfo.Word == null || wordInfo.Word.Trim().Length == 0 || !currentPlayersinGame.ContainsKey(wordInfo.UserToken))
                 {
-                    if (File.ReadAllText(".../.../dictionary.txt").Contains(wordInfo.Word))
+                    SetStatus(Forbidden);
+                    return null;
+                }
+                //If game is not active. 
+                else if (currentGame.GameState != "active")
+                {
+                    SetStatus(Conflict);
+                    return null;
+                }
+                //If game is active then score word and add it to the players words_played list. 
+                else
+                {
+                    SetStatus(OK);
+                    ScoreResponse returnInfo = new ScoreResponse();
+                    string word = wordInfo.Word.Trim();
+                    if (currentGame.Board.CanBeFormed(word))
                     {
-                        int word_length = word.Length;
+                        if (File.ReadAllText(".../.../dictionary.txt").Contains(wordInfo.Word))
+                        {
+                            int word_length = word.Length;
 
-                        if (word_length < 3)
-                        {
-                            returnInfo.Score = "0";
-                        }
-                        else if (word_length >= 3 && word_length < 5)
-                        {
-                            returnInfo.Score = "1";
-                        }
-                        else if (word_length == 5)
-                        {
-                            returnInfo.Score = "2";
-                        }
-                        else if (word_length == 6)
-                        {
-                            returnInfo.Score = "3";
-                        }
-                        else if (word_length == 7)
-                        {
-                            returnInfo.Score = "5";
+                            if (word_length < 3)
+                            {
+                                returnInfo.Score = "0";
+                            }
+                            else if (word_length >= 3 && word_length < 5)
+                            {
+                                returnInfo.Score = "1";
+                            }
+                            else if (word_length == 5)
+                            {
+                                returnInfo.Score = "2";
+                            }
+                            else if (word_length == 6)
+                            {
+                                returnInfo.Score = "3";
+                            }
+                            else if (word_length == 7)
+                            {
+                                returnInfo.Score = "5";
+                            }
+                            else
+                            {
+                                returnInfo.Score = "11";
+                            }
                         }
                         else
                         {
-                            returnInfo.Score = "11";
+                            returnInfo.Score = "-1";
                         }
+                    }
+                    if (currentGame.Player1.UserToken == wordInfo.UserToken)
+                    {
+                        WordValue info = new WordValue();
+                        foreach (WordValue x in currentGame.Player1.WordsPlayed)
+                        {
+                            if (x.Word == wordInfo.Word)
+                            {
+                                returnInfo.Score = "0";
+                                break;
+                            }
+                        }
+                        info.Word = wordInfo.Word;
+                        info.Score = returnInfo.Score;
+                        currentGame.Player1.WordsPlayed.Add(info);
                     }
                     else
                     {
-                        returnInfo.Score = "0";
-                    }
-                }
-                if(currentGame.Player1.UserToken == wordInfo.UserToken)
-                {
-                    WordValue info = new WordValue();
-                    foreach (WordValue x in currentGame.Player1.WordsPlayed)
-                    {
-                        if (x.Word == wordInfo.Word)
+                        WordValue info = new WordValue();
+                        foreach (WordValue x in currentGame.Player2.WordsPlayed)
                         {
-                            returnInfo.Score = "0";
-                            break;
+                            if (x.Word == wordInfo.Word)
+                            {
+                                returnInfo.Score = "0";
+                                break;
+                            }
                         }
+                        info.Word = wordInfo.Word;
+                        info.Score = returnInfo.Score;
+                        currentGame.Player2.WordsPlayed.Add(info);
                     }
-                    info.Word = wordInfo.Word;
-                    info.Score = returnInfo.Score;
-                    currentGame.Player1.WordsPlayed.Add(info);
+                    //RETURN WORD SCORE. 
+                    return returnInfo;
                 }
-                else
-                {
-                    WordValue info = new WordValue();
-                    foreach (WordValue x in currentGame.Player2.WordsPlayed)
-                    {
-                        if (x.Word == wordInfo.Word)
-                        {
-                            returnInfo.Score = "0";
-                            break;
-                        }
-                    }
-                    info.Word = wordInfo.Word;
-                    info.Score = returnInfo.Score;
-                    currentGame.Player2.WordsPlayed.Add(info);
-                }
-                //RETURN WORD SCORE. 
-                return returnInfo;
             }
         }
 
@@ -174,185 +180,159 @@ namespace Boggle
         {
             //This subtracts the currentTime from the start time. WE then divide it by 1000 to get a value in
             //seconds. Round the  value to get a more accurate result.
-            double seconds = -1*(startTime - (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond)) / 1000;
+            double seconds = ((DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) -startTime) / 1000;
             return (int)Math.Round(seconds);
         }
 
         public GameStateClass getGameStatus(string GivenGameID, string answer)
         {
-            if (games.ContainsKey(GivenGameID))
+            lock (sync)
             {
-                SetStatus(OK);
-                GameInfo currentGame = games[GivenGameID];
-                //dynamic returnInfo = new ExpandoObject();
-                //IF THE GAME IS PENDING DO THIS.
-                if (currentGame.GameState == "pending")
+                if (games.ContainsKey(GivenGameID))
                 {
+                    SetStatus(OK);
+                    GameInfo currentGame = games[GivenGameID];
                     GameStateClass ReturnInfo = new GameStateClass();
-                    ReturnInfo.GameState = "pending";
-                    //returnInfo.GameState = "pending";
-                    return ReturnInfo;
-                }
-                //IF ITS ACTIVE OR COMPLETED DO THIS>
-                else if (currentGame.GameState == "active")
-                {
-                    //If brief is yes do this.
-                    if (answer == "yes")
+                    //dynamic returnInfo = new ExpandoObject();
+                    //IF THE GAME IS PENDING DO THIS.
+                    if (currentGame.GameState == "pending")
                     {
-                        GameStateClass ReturnInfo = new GameStateClass();
-                        ReturnInfo.Player1 = new Player();
-                        ReturnInfo.Player2 = new Player();
-
-                        //If the time is already expired just set TimeLeft to 0. 
-                        int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
-                        if(minusTime >= currentGame.TimeLimit)
-                        {
-                            //If the game was previously active but the time got set to zero then add all the values we need for 
-                            //complete game.
-                            ReturnInfo.TimeLeft = 0;
-                            currentGame.GameState = "completed";
-                        }
-                        else
-                        {
-                            ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
-                        }
-
-                        //Setting state
-                        ReturnInfo.GameState = currentGame.GameState;
-
-                        //Setting Score
-                        ReturnInfo.Player1.Score = currentGame.Player1.Score;
-                        ReturnInfo.Player2.Score = currentGame.Player2.Score;
-                        //returnInfo.GameState = "active";
-                        //returnInfo.TimeLeft = currentGame.TimeLeft;
-                        //returnInfo.Player1.Score = currentGame.Player1.Score;
-                        //returnInfo.Player2.Score = currentGame.Player2.Score;
+                        ReturnInfo.GameState = "pending";
+                        //returnInfo.GameState = "pending";
                         return ReturnInfo;
                     }
-                    //If not brief do this.
-                    else
+                    //IF ITS ACTIVE OR COMPLETED DO THIS>
+                    else if (currentGame.GameState == "active")
                     {
-                        GameStateClass ReturnInfo = new GameStateClass();
-                        ReturnInfo.Player1 = new Player();
-                        ReturnInfo.Player2 = new Player();
-
-                        ReturnInfo.Board = currentGame.Board.ToString();
-                        int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
-                        if (minusTime >= currentGame.TimeLimit)
+                        //If brief is yes do this.
+                        if (answer == "yes")
                         {
-                            //If the game was previously active but the time got set to zero then add all the values we need for 
-                            //complete game.
-                            ReturnInfo.TimeLeft = 0;
-                            currentGame.GameState = "completed";
-                            ReturnInfo.Player1.WordsPlayed = currentGame.Player1.WordsPlayed;
-                            ReturnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
+
+                            ReturnInfo.Player1 = new Player();
+                            ReturnInfo.Player2 = new Player();
+
+                            //If the time is already expired just set TimeLeft to 0. 
+                            int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
+                            if (minusTime >= currentGame.TimeLimit)
+                            {
+                                //If the game was previously active but the time got set to zero then add all the values we need for 
+                                //complete game.
+                                ReturnInfo.TimeLeft = 0;
+                                currentGame.GameState = "completed";
+                            }
+                            else
+                            {
+                                ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
+                            }
+
+                            //Setting state
+                            ReturnInfo.GameState = currentGame.GameState;
+
+                            //Setting Score
+                            ReturnInfo.Player1.Score = currentGame.Player1.Score;
+                            ReturnInfo.Player2.Score = currentGame.Player2.Score;
+                            return ReturnInfo;
                         }
+                        //If not brief do this.
                         else
                         {
-                            ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
+                            ReturnInfo.Player1 = new Player();
+                            ReturnInfo.Player2 = new Player();
+
+                            ReturnInfo.Board = currentGame.Board.ToString();
+                            int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
+                            if (minusTime >= currentGame.TimeLimit)
+                            {
+                                //If the game was previously active but the time got set to zero then add all the values we need for 
+                                //complete game.
+                                ReturnInfo.TimeLeft = 0;
+                                currentGame.GameState = "completed";
+                                ReturnInfo.Player1.WordsPlayed = currentGame.Player1.WordsPlayed;
+                                ReturnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
+                            }
+                            else
+                            {
+                                ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
+                            }
+
+                            //Setting GameState
+                            ReturnInfo.GameState = currentGame.GameState;
+
+                            //Setting timelimit
+                            ReturnInfo.TimeLimit = currentGame.TimeLimit;
+                            ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
+                            ReturnInfo.Player1.Score = currentGame.Player1.Score;
+                            ReturnInfo.Player2.Nickname = currentGame.Player2.Nickname;
+                            ReturnInfo.Player2.Score = currentGame.Player2.Score;
+                            return ReturnInfo;
+                        }
+                    }
+                    ///THIS IS FOR COMPLETED. 
+                    else
+                    {
+                        if (answer == "yes")
+                        {
+                            ReturnInfo.Player1 = new Player();
+                            ReturnInfo.Player2 = new Player();
+
+                            ReturnInfo.GameState = "completed";
+                            int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
+                            if (minusTime >= currentGame.TimeLimit)
+                            {
+                                ReturnInfo.TimeLeft = 0;
+                            }
+                            else
+                            {
+                                ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
+                            }
+                            ReturnInfo.Player1.Score = currentGame.Player1.Score;
+                            ReturnInfo.Player2.Score = currentGame.Player2.Score;
+                            return ReturnInfo;
+                        }
+                        //If not brief do this.
+                        else
+                        {
+                            ReturnInfo.Player1 = new Player();
+                            ReturnInfo.Player2 = new Player();
+
+                            ReturnInfo.GameState = "completed";
+                            ReturnInfo.Board = currentGame.Board.ToString();
+                            //Setting TimeLeft
+                            int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
+                            if (minusTime >= currentGame.TimeLimit)
+                            {
+                                ReturnInfo.TimeLeft = 0;
+                            }
+                            else
+                            {
+                                ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
+                            }
+                            //Setting TimeLimit
+                            ReturnInfo.TimeLimit = currentGame.TimeLimit;
+                            ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
+                            ReturnInfo.Player1.Score = currentGame.Player1.Score;
+                            ReturnInfo.Player1.WordsPlayed = currentGame.Player1.WordsPlayed;
+                            ReturnInfo.Player2.Nickname = currentGame.Player2.Nickname;
+                            ReturnInfo.Player2.Score = currentGame.Player2.Score;
+                            ReturnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
+                            return ReturnInfo;
                         }
 
-                        //Setting GameState
-                        ReturnInfo.GameState = currentGame.GameState;
-
-                        //Setting timelimit
-                        ReturnInfo.TimeLimit = currentGame.TimeLimit;
-                        ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
-                        ReturnInfo.Player1.Score = currentGame.Player1.Score;
-                        ReturnInfo.Player2.Nickname = currentGame.Player2.Nickname;
-                        ReturnInfo.Player2.Score = currentGame.Player2.Score;
-
-                        //returnInfo.GameState = "active";
-                        //returnInfo.Board = "BOARDGAMEDLDL";
-                        //returnInfo.TimeLimit = currentGame.TimeLimit;
-                        //returnInfo.TimeLeft = currentGame.TimeLeft;
-                        //returnInfo.Player1.Nickname = currentGame.Player1.Nickname;
-                        //returnInfo.Player1.Score = currentGame.Player1.Score;
-                        //returnInfo.Player2.Nickname = currentGame.Player2.Nickname;
-                        //returnInfo.Player2.Score = currentGame.Player2.Score;
-                        return ReturnInfo;
                     }
                 }
                 else
                 {
-                    if (answer == "yes")
-                    {
-
-                        GameStateClass ReturnInfo = new GameStateClass();
-                        ReturnInfo.Player1 = new Player();
-                        ReturnInfo.Player2 = new Player();
-
-                        ReturnInfo.GameState = "completed";
-                        int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
-                        if (minusTime >= currentGame.TimeLimit)
-                        {
-                            ReturnInfo.TimeLeft = 0;
-                        }
-                        else
-                        {
-                            ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
-                        }
-                        ReturnInfo.Player1.Score = currentGame.Player1.Score;
-                        ReturnInfo.Player2.Score = currentGame.Player2.Score;
-
-                        //returnInfo.GameState = "completed";
-                        //returnInfo.TimeLeft = currentGame.TimeLeft;
-                        //returnInfo.Player1.Score = currentGame.Player1.Score;
-                        //returnInfo.Player2.Score = currentGame.Player2.Score;
-                        return ReturnInfo;
-                    }
-                    //If not brief do this.
-                    else
-                    {
-
-                        GameStateClass ReturnInfo = new GameStateClass();
-                        ReturnInfo.Player1 = new Player();
-                        ReturnInfo.Player2 = new Player();
-
-                        ReturnInfo.GameState = "completed";
-                        ReturnInfo.Board = currentGame.Board.ToString();
-                        //Setting TimeLeft
-                        int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
-                        if (minusTime >= currentGame.TimeLimit)
-                        {
-                            ReturnInfo.TimeLeft = 0;
-                        }
-                        else
-                        {
-                            ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
-                        }
-                        //Setting TimeLimit
-                        ReturnInfo.TimeLimit = currentGame.TimeLimit;
-                        ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
-                        ReturnInfo.Player1.Score = currentGame.Player1.Score;
-                        ReturnInfo.Player1.WordsPlayed = currentGame.Player1.WordsPlayed;
-                        ReturnInfo.Player2.Nickname = currentGame.Player2.Nickname;
-                        ReturnInfo.Player2.Score = currentGame.Player2.Score;
-                        ReturnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
-
-                        //returnInfo.GameState = "completed";
-                        //returnInfo.Board = "BOARDGAMEDLDL";
-                        //returnInfo.TimeLimit = currentGame.TimeLimit;
-                        //returnInfo.TimeLeft = currentGame.TimeLeft;
-                        //returnInfo.Player1.Nickname = currentGame.Player1.Nickname;
-                        //returnInfo.Player1.Score = currentGame.Player1.Score;
-                        //returnInfo.Player1.WordsPlayed = currentGame.Player1.WordsPlayed;
-                        //returnInfo.Player2.Nickname = currentGame.Player2.Nickname;
-                        //returnInfo.Player2.Score = currentGame.Player2.Score;
-                        //returnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
-                        return ReturnInfo;
-                    }
-
+                    SetStatus(Forbidden);
+                    return null;
                 }
-            }
-            else
-            {
-                SetStatus(Forbidden);
-                return null;
             }
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="starter"></param>
+        /// <returns></returns>
         public gameIDClass JoinGame(gameStart starter)
         {
             lock (sync)
@@ -465,7 +445,7 @@ namespace Boggle
                     UserTokenClass ut = new UserTokenClass();
                     SetStatus(Created);
                     ut.UserToken = Guid.NewGuid().ToString();
-                    users.Add(ut.UserToken, Nickname.Nickname);
+                    users.Add(ut.UserToken, Nickname.Nickname.Trim());
                     return ut;
                 }
             }

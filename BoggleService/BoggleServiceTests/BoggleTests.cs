@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Threading;
 using static System.Net.HttpStatusCode;
 using System.Diagnostics;
 
@@ -64,7 +65,7 @@ namespace Boggle
             IISAgent.Stop();
         }
 
-        private RestTestClient client = new RestTestClient("http://localhost:50000/");
+        private RestTestClient client = new RestTestClient("http://localhost:60000/");
 
         [TestMethod]
         public void TestMethod1()
@@ -121,6 +122,16 @@ namespace Boggle
         }
 
         [TestMethod]
+        public void TestCreateUserEmptySpace()
+        {
+            dynamic user = new ExpandoObject();
+            user.Nickname = "      ";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+            Assert.IsNull(r.Data);
+        }
+
+        [TestMethod]
         public void TestCreateUserEmptyLine()
         {
             dynamic user = new ExpandoObject();
@@ -129,6 +140,8 @@ namespace Boggle
             Assert.AreEqual(Forbidden, r.Status);
             Assert.IsNull(r.Data);
         }
+
+        //Testing JoinGame
 
         /// <summary>
         /// This test ensures that a userToken that doesnt exist in the system will return a FOrbidden response.
@@ -177,7 +190,7 @@ namespace Boggle
 
             dynamic newGame = new ExpandoObject();
             newGame.UserToken = token;
-            newGame.TimeLimit = 1;
+            newGame.TimeLimit = -78;
             Response x = client.DoPostAsync("games", newGame).Result;
             Assert.AreEqual(x.Status, Forbidden);
             Assert.IsNull(x.Data);
@@ -188,6 +201,11 @@ namespace Boggle
             Assert.AreEqual(x.Status, Forbidden);
             Assert.IsNull(x.Data);
 
+            newGame.UserToken = token;
+            newGame.TimeLimit = 4;
+            x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual(x.Status, Forbidden);
+            Assert.IsNull(x.Data);
         }
 
         /// <summary>
@@ -209,6 +227,13 @@ namespace Boggle
             Response x = client.DoPostAsync("games", newGame).Result;
             Assert.AreEqual((string)x.Data.GameID, "G0");
             Assert.AreEqual(x.Status, Accepted);
+
+
+            newGame.UserToken = token;
+            newGame.TimeLimit = 60;
+            x = client.DoPostAsync("games", newGame).Result;
+            Assert.IsNull(x.Data);
+            Assert.AreEqual(x.Status, Conflict);
         }
 
         /// <summary>
@@ -231,6 +256,12 @@ namespace Boggle
             Response x = client.DoPostAsync("games", newGame).Result;
             Assert.AreEqual((string)x.Data.GameID, "G0");
             Assert.AreEqual(x.Status, Created);
+
+            newGame.UserToken = token;
+            newGame.TimeLimit = 60;
+            x = client.DoPostAsync("games", newGame).Result;
+            Assert.IsNull(x.Data);
+            Assert.AreEqual(x.Status, Conflict);
 
             //Creating second user. 
             user.Nickname = "123";
@@ -258,6 +289,8 @@ namespace Boggle
             Assert.AreEqual(firstGame.Status, Created);
         }
 
+        //TESTING CANCELJOIN.
+
         //This test ensures that a game can be canceled. 
         [TestMethod]
         public void TestCancel()
@@ -283,6 +316,14 @@ namespace Boggle
             Response y = client.DoPutAsync(Cancel, "games").Result;
             Assert.AreEqual(y.Status, OK);
 
+
+            //MAKE NEW USER TO JOIN WITH.
+            user.Nickname = "newswag";
+            r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            token = (string)r.Data.UserToken;
+            newGame.UserToken = token;
+            newGame.TimeLimit = 60;
             //Make sure we can still join back.
             x = client.DoPostAsync("games", newGame).Result;
             Assert.AreEqual((string)x.Data.GameID, "G3");
@@ -371,7 +412,211 @@ namespace Boggle
             Assert.AreEqual(y.Status, Forbidden);
         }
 
+        //TESTING GAMESTATUS.
+
+        [TestMethod]
+        public void TestJoinGameStatusBadGameID()
+        {
+            Response getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G10000000", "yes").Result;
+            Assert.IsNull(getResponse.Data);
+            Assert.AreEqual(getResponse.Status, Forbidden);
+
+            getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G12231234", "no").Result;
+            Assert.IsNull(getResponse.Data);
+            Assert.AreEqual(getResponse.Status, Forbidden);
+
+            getResponse = client.DoGetAsync("games/{0}", "G12222224").Result;
+            Assert.IsNull(getResponse.Data);
+            Assert.AreEqual(getResponse.Status, Forbidden);
+        }
 
 
+
+        [TestMethod]
+        public void TestJoinGameStatusPENDING()
+        {
+            Response getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G4","yes").Result;
+            Assert.AreEqual((string)getResponse.Data.GameState, "pending");
+            Assert.AreEqual(getResponse.Status, OK);
+
+
+            getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G4", "no").Result;
+            Assert.AreEqual((string)getResponse.Data.GameState, "pending");
+            Assert.AreEqual(getResponse.Status, OK);
+
+            getResponse = client.DoGetAsync("games/{0}", "G4").Result;
+            Assert.AreEqual((string)getResponse.Data.GameState, "pending");
+            Assert.AreEqual(getResponse.Status, OK);
+        }
+
+        [TestMethod]
+        public void TestGetGameStatusActive()
+        {
+            //Creating first user. 
+            dynamic user = new ExpandoObject();
+            user.Nickname = "Tester";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            string token = (string)r.Data.UserToken;
+
+            //Joining Game
+            dynamic newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 60;
+            Response x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G4");
+            Assert.AreEqual(x.Status, Created);
+
+            Response getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G4", "yes").Result;
+            Assert.AreEqual((string)getResponse.Data.GameState, "active");
+            Assert.IsTrue((int)getResponse.Data.TimeLeft <= 60 && !((int)getResponse.Data.TimeLeft > 60));
+            Assert.AreEqual((int)getResponse.Data.Player1.Score, 0);
+            Assert.AreEqual((int)getResponse.Data.Player2.Score, 0);
+            Assert.AreEqual(getResponse.Status, OK);
+
+
+            getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G4", "no").Result;
+            Assert.AreEqual((string)getResponse.Data.GameState, "active");
+            Assert.IsTrue((int)getResponse.Data.TimeLeft <= 60 && !((int)getResponse.Data.TimeLeft > 60));
+            string board = getResponse.Data.Board;
+            Assert.IsTrue(board.Length == 16);
+            Assert.AreEqual((int)getResponse.Data.TimeLimit, 60);
+            Assert.AreEqual((int)getResponse.Data.Player1.Score, 0);
+            Assert.AreEqual((string)getResponse.Data.Player1.Nickname, "CancelBadTokenTest");
+            Assert.AreEqual((int)getResponse.Data.Player2.Score, 0);
+            Assert.AreEqual((string)getResponse.Data.Player2.Nickname, "Tester");
+            Assert.AreEqual(getResponse.Status, OK);
+
+            getResponse = client.DoGetAsync("games/{0}", "G4").Result;
+            Assert.AreEqual((string)getResponse.Data.GameState, "active");
+            Assert.IsTrue((int)getResponse.Data.TimeLeft <= 60 && !((int)getResponse.Data.TimeLeft > 60));
+            board = getResponse.Data.Board;
+            Assert.IsTrue(board.Length == 16);
+            Assert.AreEqual((int)getResponse.Data.Player1.Score, 0);
+            Assert.AreEqual((int)getResponse.Data.TimeLimit, 60);
+            Assert.AreEqual((string)getResponse.Data.Player1.Nickname, "CancelBadTokenTest");
+            Assert.AreEqual((int)getResponse.Data.Player2.Score, 0);
+            Assert.AreEqual((string)getResponse.Data.Player2.Nickname, "Tester");
+            Assert.AreEqual(getResponse.Status, OK);
+        }
+
+
+        [TestMethod]
+        public void TestGetGameStatusComplete()
+        {
+
+            //Creating first user. 
+            dynamic user = new ExpandoObject();
+            user.Nickname = "swag";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            string token = r.Data.UserToken;
+
+            dynamic newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 5;
+            Response x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G5");
+            Assert.AreEqual(x.Status, Accepted);
+
+
+            //Creating first user. 
+            user = new ExpandoObject();
+            user.Nickname = "swag2";
+            r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            token = r.Data.UserToken;
+
+            newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 5;
+            x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G5");
+            Assert.AreEqual(x.Status, Created);
+
+
+            Thread.Sleep(5010);
+
+            Response getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G5", "yes").Result;
+            Assert.AreEqual((string)getResponse.Data.GameState, "completed");
+            Assert.IsTrue((int)getResponse.Data.TimeLeft == 0);
+            Assert.AreEqual((int)getResponse.Data.Player1.Score, 0);
+            Assert.AreEqual((int)getResponse.Data.Player2.Score, 0);
+            Assert.AreEqual(getResponse.Status, OK);
+
+
+            getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G5", "no").Result;
+            Assert.AreEqual((string)getResponse.Data.GameState, "completed");
+            Assert.IsTrue((int)getResponse.Data.TimeLeft == 0);
+            string board = getResponse.Data.Board;
+            Assert.IsTrue(board.Length == 16);
+            Assert.AreEqual((int)getResponse.Data.TimeLimit, 5);
+            Assert.AreEqual((int)getResponse.Data.Player1.Score, 0);
+            Assert.AreEqual((string)getResponse.Data.Player1.Nickname, "swag");
+            //TESTING WORDSPLAYED
+            dynamic testList = getResponse.Data.Player1.WordsPlayed;
+            int count = 0;
+            foreach(dynamic WORDVALUE in testList)
+            {
+                count++;
+            }
+            Assert.IsTrue(count == 0);
+
+            Assert.AreEqual((int)getResponse.Data.Player2.Score, 0);
+            Assert.AreEqual((string)getResponse.Data.Player2.Nickname, "swag2");
+
+            //TESTING WORDS PLAYED.
+            testList = getResponse.Data.Player1.WordsPlayed;
+            count = 0;
+            foreach (dynamic WORDVALUE in testList)
+            {
+                count++;
+            }
+            Assert.IsTrue(count == 0);
+            Assert.AreEqual(getResponse.Status, OK);
+
+            getResponse = client.DoGetAsync("games/{0}", "G5").Result;
+            Assert.AreEqual((string)getResponse.Data.GameState, "completed");
+            Assert.IsTrue((int)getResponse.Data.TimeLeft == 0);
+            board = getResponse.Data.Board;
+            Assert.IsTrue(board.Length == 16);
+            Assert.AreEqual((int)getResponse.Data.TimeLimit, 5);
+            Assert.AreEqual((int)getResponse.Data.Player1.Score, 0);
+            Assert.AreEqual((string)getResponse.Data.Player1.Nickname, "swag");
+
+            testList = getResponse.Data.Player1.WordsPlayed;
+            count = 0;
+            foreach (dynamic WORDVALUE in testList)
+            {
+                count++;
+            }
+            Assert.IsTrue(count == 0);
+            Assert.AreEqual((int)getResponse.Data.Player2.Score, 0);
+            Assert.AreEqual((string)getResponse.Data.Player2.Nickname, "swag2");
+
+
+            testList = getResponse.Data.Player1.WordsPlayed;
+            count = 0;
+            foreach (dynamic WORDVALUE in testList)
+            {
+                count++;
+            }
+            Assert.IsTrue(count == 0);
+            Assert.AreEqual(getResponse.Status, OK);
+
+
+
+        }
+
+
+
+
+    }
+
+
+    public class WordValue
+    {
+        public string Word { get; set; }
+        public string Score { get; set; }
     }
 }
