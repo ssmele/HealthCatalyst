@@ -30,12 +30,30 @@ namespace Boggle
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
         gameIDClass JoinGame(gameStart Nickname);
 
-
+        /// <summary>
+        /// This method cancels a pending game join request. 
+        /// </summary>
+        /// <param name="UserToken"></param>
         [WebInvoke(Method = "PUT", UriTemplate = "/games")]
         void CancelJoin(UserInfo UserToken);
 
-        //[WebInvoke(Method = "GET",UriTemplate = "/games/{GivenGameID}?Brief={answer}")]
-        //GameStateClass getGameStatus(gameIDClass GivenGameID, string brief);
+        /// <summary>
+        /// This method gets info on given current game. 
+        /// </summary>
+        /// <param name="GivenGameID"></param>
+        /// <param name="answer"></param>
+        /// <returns></returns>
+        [WebInvoke(Method = "GET", UriTemplate = "/games/{GivenGameID}?Brief={answer}")]
+        GameStateClass getGameStatus(string GivenGameID, string answer);
+
+        /// <summary>
+        /// This method submits a word. 
+        /// </summary>
+        /// <param name="wordInfo"></param>
+        /// <param name="GivenGameID"></param>
+        /// <returns></returns>
+        [WebInvoke(Method = "PUT", UriTemplate = "/games/{GivenGameID}")]
+        ScoreResponse SubmitWord(WordSubmit wordInfo, string GivenGameID);
 
         //////////////JOE MADE THIS///////////////////////////////////////////////////////////////
 

@@ -59,14 +59,95 @@ namespace Boggle
         }
 
 
-        //TODO: IF we cancel a pending game do we want the gameID that was used for the previous game to be reused or should we just move to the next game?????
 
-        public GameStateClass getGameStatus(gameIDClass GivenGameID, string brief)
+        /// <summary>
+        /// This method accepts a userToken and a game ID. 
+        /// </summary>
+        /// <param name="wordInfo"></param>
+        /// <param name="GivenGameID"></param>
+        /// <returns></returns>
+        public ScoreResponse SubmitWord(WordSubmit wordInfo, string GivenGameID)
         {
-            if (games.ContainsKey(GivenGameID.GameID))
+            GameInfo currentGame = games[currentPlayersinGame[wordInfo.UserToken].GameID];
+            //If word is empty or null, or usertoken is not in a real game then set status to forbidden.
+            if (wordInfo.Word == null || wordInfo.Word.Trim().Length == 0 || !currentPlayersinGame.ContainsKey(wordInfo.UserToken))
+            {
+                SetStatus(Forbidden);
+                return null;
+            }
+            //If game is not active. 
+            else if(currentGame.GameState != "active")
+            {
+                SetStatus(Conflict);
+                return null;
+            }
+            //If game is active then score word and add it to the players words_played list. 
+            else
             {
                 SetStatus(OK);
-                GameInfo currentGame = games[GivenGameID.GameID];
+                ScoreResponse returnInfo = new ScoreResponse();
+                string word = wordInfo.Word.Trim();
+                if (currentGame.Board.CanBeFormed(word))
+                {
+                    if (File.ReadAllText(".../.../dictionary.txt").Contains(wordInfo.Word))
+                    {
+                        int word_length = word.Length;
+
+                        if (word_length < 3)
+                        {
+                            returnInfo.Score = "0";
+                        }
+                        else if (word_length >= 3 && word_length < 5)
+                        {
+                            returnInfo.Score = "1";
+                        }
+                        else if (word_length == 5)
+                        {
+                            returnInfo.Score = "2";
+                        }
+                        else if (word_length == 6)
+                        {
+                            returnInfo.Score = "3";
+                        }
+                        else if (word_length == 7)
+                        {
+                            returnInfo.Score = "5";
+                        }
+                        else
+                        {
+                            returnInfo.Score = "11";
+                        }
+                    }
+                    else
+                    {
+                        returnInfo.Score = "0";
+                    }
+                }
+                if(currentGame.Player1.UserToken == wordInfo.UserToken)
+                {
+                    //TEMPORARY
+                    currentGame.Player1.WordsPlayed[0] = returnInfo.Score;
+                }
+                else
+                {
+                    //TEMPORARY
+                    currentGame.Player2.WordsPlayed[0] = returnInfo.Score;
+                }
+                //RETURN WORD SCORE. 
+                return returnInfo;
+            }
+        }
+
+        //TODO: NEED TO FIGURE OUT THIS RETURN VALUE STUFF!!!!
+        //TODO: NEED TO FIX THE WORDSPLAYED DATA STRUCTURE?? OBJECT ARRAY????
+        //TODO: IF we cancel a pending game do we want the gameID that was used for the previous game to be reused or should we just move to the next game?????
+
+        public GameStateClass getGameStatus(string GivenGameID, string answer)
+        {
+            if (games.ContainsKey(GivenGameID))
+            {
+                SetStatus(OK);
+                GameInfo currentGame = games[GivenGameID];
                 //dynamic returnInfo = new ExpandoObject();
                 //IF THE GAME IS PENDING DO THIS.
                 if (currentGame.GameState == "pending")
@@ -80,9 +161,12 @@ namespace Boggle
                 else if (currentGame.GameState == "active")
                 {
                     //If brief is yes do this.
-                    if (brief == "yes")
+                    if (answer == "yes")
                     {
                         GameStateBrief ReturnInfo = new GameStateBrief();
+                        ReturnInfo.Player1 = new Player();
+                        ReturnInfo.Player2 = new Player();
+
                         ReturnInfo.GameState = "active";
                         ReturnInfo.TimeLeft = currentGame.TimeLeft;
                         ReturnInfo.Player1.Score = currentGame.Player1.Score;
@@ -97,6 +181,9 @@ namespace Boggle
                     else
                     {
                         GameStateActive ReturnInfo = new GameStateActive();
+                        ReturnInfo.Player1 = new Player();
+                        ReturnInfo.Player2 = new Player();
+
                         ReturnInfo.GameState = "active";
                         ReturnInfo.Board = "Boaoddldlldrld";
                         ReturnInfo.TimeLeft = currentGame.TimeLeft;
@@ -119,10 +206,13 @@ namespace Boggle
                 }
                 else
                 {
-                    if (brief == "yes")
+                    if (answer == "yes")
                     {
 
                         GameStateBrief ReturnInfo = new GameStateBrief();
+                        ReturnInfo.Player1 = new Player();
+                        ReturnInfo.Player2 = new Player();
+
                         ReturnInfo.GameState = "completed";
                         ReturnInfo.TimeLeft = currentGame.TimeLeft;
                         ReturnInfo.Player1.Score = currentGame.Player1.Score;
@@ -139,6 +229,9 @@ namespace Boggle
                     {
 
                         GameStateActive ReturnInfo = new GameStateActive();
+                        ReturnInfo.Player1 = new Player();
+                        ReturnInfo.Player2 = new Player();
+
                         ReturnInfo.GameState = "active";
                         ReturnInfo.Board = "Boaoddldlldrld";
                         ReturnInfo.TimeLeft = currentGame.TimeLeft;
@@ -236,12 +329,23 @@ namespace Boggle
                         //Get the game info that the user will be added to from dequeue and using the other dictionaries.
                         game = games[tempGameid];
 
+                        //Making the boggleBoard.
+                        game.Board = new BoggleBoard();
+
                         //Sets the newPlayer to player two as they are the second to enter this game.
                         game.Player2 = newPlayer;
 
                         //Takes the mean of the two players times and sets the timeLimit and timeLeft to it. 
                         game.TimeLimit = ((game.TimeLeft + starter.TimeLimit) / 2);
                         game.TimeLeft = game.TimeLimit;
+
+                        //Setting the score. 
+                        game.Player1.Score = 0;
+                        game.Player1.Score = 0;
+
+                        //Initializing the string arrays.
+                        game.Player1.WordsPlayed = new string[2];
+                        game.Player1.WordsPlayed = new string[2];
 
                         //set game to active and set status to created. 
                         game.GameState = "active";

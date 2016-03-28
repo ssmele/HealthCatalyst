@@ -14,6 +14,7 @@ namespace Boggle
         public string GameState { get; set; }
         public int TimeLimit { get; set; }
         public int TimeLeft {get; set;}
+        public BoggleBoard Board { get; set; }
     }
 
     [DataContract]
@@ -22,6 +23,8 @@ namespace Boggle
         public string Nickname { get; set; }
         public string UserToken { get; set; }
         public int Score { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public string[] WordsPlayed {get; set;}
     }
 
@@ -73,5 +76,17 @@ namespace Boggle
         public string Board { get; set; }
         public int TimeLimit { get; set; }
     }
+
+    public class WordSubmit
+    {
+        public string UserToken { get; set; }
+        public string Word { get; set; }
+    }
+
+    public class ScoreResponse
+    {
+        public string Score { get; set; }
+    }
+
 
 }
