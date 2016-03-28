@@ -190,10 +190,9 @@ namespace Boggle
 
         }
 
-
-
-
-
+        /// <summary>
+        /// This test ensures that a game can be accepted. 
+        /// </summary>
         [TestMethod]
         public void TestJoinGame1Player()
         {
@@ -212,6 +211,9 @@ namespace Boggle
             Assert.AreEqual(x.Status, Accepted);
         }
 
+        /// <summary>
+        /// This test ensures that a game can be created.
+        /// </summary>
         [TestMethod]
         public void TestJoinGame2Players()
         {
@@ -255,6 +257,120 @@ namespace Boggle
             Assert.AreEqual((string)firstGame.Data.GameID, "G1");
             Assert.AreEqual(firstGame.Status, Created);
         }
+
+        //This test ensures that a game can be canceled. 
+        [TestMethod]
+        public void TestCancel()
+        {
+            //Creating first user. 
+            dynamic user = new ExpandoObject();
+            user.Nickname = "swag";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            string token = (string)r.Data.UserToken;
+
+            //Joining Game
+            dynamic newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 60;
+            Response x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G2");
+            Assert.AreEqual(x.Status, Accepted);
+
+            //CANCELING PENDING
+            dynamic Cancel = new ExpandoObject();
+            Cancel.UserToken = token;
+            Response y = client.DoPutAsync(Cancel, "games").Result;
+            Assert.AreEqual(y.Status, OK);
+
+            //Make sure we can still join back.
+            x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G3");
+            Assert.AreEqual(x.Status, Accepted);
+
+
+            //New user
+            user = new ExpandoObject();
+            user.Nickname = "second";
+            r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            token = (string)r.Data.UserToken;
+
+            //joining game
+            newGame.UserToken = token;
+            newGame.TimeLimit = 85;
+            x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G3");
+            Assert.AreEqual(x.Status, Created);
+        }
+
+        /// <summary>
+        /// This test ensures that forbidden is returned when trying to cancel game with bad tokens. 
+        /// </summary>
+        [TestMethod]
+        public void TestCancelBadUserToken()
+        {
+            //Creating first user. 
+            dynamic user = new ExpandoObject();
+            user.Nickname = "CancelBadTokenTest";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            string token = (string)r.Data.UserToken;
+
+            //Joining Game
+            dynamic newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 60;
+            Response x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G4");
+            Assert.AreEqual(x.Status, Accepted);
+
+
+            //making test token.
+            user.Nickname = "TestToken";
+            r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            token = (string)r.Data.UserToken;
+
+
+            //CANCELING PENDIng with bad usertoken.
+            dynamic Cancel = new ExpandoObject();
+            Cancel.UserToken = "BadToken";
+            Response y = client.DoPutAsync(Cancel, "games").Result;
+            Assert.AreEqual(y.Status, Forbidden);
+
+            //Canceling pending with good token but not the right one. 
+            Cancel.UserToken = token;
+            y = client.DoPutAsync(Cancel, "games").Result;
+            Assert.AreEqual(y.Status, Forbidden);
+        }
+
+        /// <summary>
+        /// This test ensures forbidden is returned when trying to cancel a game that doesnt exist.
+        /// </summary>
+        [TestMethod]
+        public void TestCancelNoPendingGame()
+        {
+
+            //Creating first user. 
+            dynamic user = new ExpandoObject();
+            user.Nickname = "CancelBadTokenTest";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            string token = (string)r.Data.UserToken;
+
+            //CANCELING PENDIng with bad usertoken.
+            dynamic Cancel = new ExpandoObject();
+            Cancel.UserToken = "BadToken";
+            Response y = client.DoPutAsync(Cancel, "games").Result;
+            Assert.AreEqual(y.Status, Forbidden);
+
+            //Caneling with good token but no game to cancel. 
+            Cancel.UserToken = token;
+            y = client.DoPutAsync(Cancel, "games").Result;
+            Assert.AreEqual(y.Status, Forbidden);
+        }
+
 
 
     }

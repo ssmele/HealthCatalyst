@@ -16,7 +16,7 @@ namespace Boggle
         public int TimeLeft {get; set;}
     }
 
-
+    [DataContract]
     public class Player
     {
         public string Nickname { get; set; }
@@ -49,4 +49,29 @@ namespace Boggle
             get; set;
         }
     }
+
+    public class UserTokenClass
+    {
+        public string UserToken { get; set; }
+    }
+
+
+    public class GameStateClass
+    {
+        public string GameState { get; set; }
+    }
+
+    public class GameStateBrief :GameStateClass
+    {
+        public int TimeLeft { get; set; }
+        public Player Player1 { get; set; }
+        public Player Player2 { get; set; }
+    }
+
+    public class GameStateActive : GameStateBrief
+    {
+        public string Board { get; set; }
+        public int TimeLimit { get; set; }
+    }
+
 }

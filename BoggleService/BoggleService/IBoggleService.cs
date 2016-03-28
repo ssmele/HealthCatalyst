@@ -17,7 +17,7 @@ namespace Boggle
         /// <param name="Nickname">Desired nickname from user.</param>
         /// <returns>User token.</returns>
         [WebInvoke(Method = "POST", UriTemplate = "/users")]
-        UserInfo CreateUser(UserInfo Nickname);
+        UserTokenClass CreateUser(UserInfo Nickname);
 
 
         /// <summary>
@@ -31,11 +31,11 @@ namespace Boggle
         gameIDClass JoinGame(gameStart Nickname);
 
 
-        [WebInvoke(Method = "POST", UriTemplate = "/games")]
+        [WebInvoke(Method = "PUT", UriTemplate = "/games")]
         void CancelJoin(UserInfo UserToken);
 
-        [WebGet(UriTemplate = "/games/{GivenGameID}?Brief={answer}")]
-        dynamic getGameStatus(gameIDClass GivenGameID,string brief);
+        //[WebInvoke(Method = "GET",UriTemplate = "/games/{GivenGameID}?Brief={answer}")]
+        //GameStateClass getGameStatus(gameIDClass GivenGameID, string brief);
 
         //////////////JOE MADE THIS///////////////////////////////////////////////////////////////
 

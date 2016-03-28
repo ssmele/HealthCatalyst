@@ -29,85 +29,138 @@ namespace Boggle
         //Sync object.
         private static readonly object sync = new object();
 
-
+        /// <summary>
+        /// If the userToken that is given from the parameter matches that of the player in the pending
+        /// queue then that player will be removed from the pending queue and any other data
+        /// structor that holds a game state.
+        /// </summary>
+        /// <param name="UI">UserToken of player that wants to be taken from the Queue.</param>
         public void CancelJoin(UserInfo UI)
         {
             lock (sync)
             {
-                if(needed.Peek() == UI.UserToken)
+                if (needed.Count == 1 && needed.Peek() == UI.UserToken)
                 {
                     //TODO: Should we minus from the gameID, should we take the user out from users????
+                    //If the UserToken is the same as the player in the queue remove them from the queue.
                     needed.Dequeue();
                     string tempGameId = currentPlayersinGame[UI.UserToken].GameID;
-                    currentPlayersinGame.Remove(tempGameId);
+                    currentPlayersinGame.Remove(UI.UserToken);
                     games.Remove(tempGameId);
+                    //Set status to OK.
                     SetStatus(OK);
                 }
                 else
                 {
+                    //If there not in the queue then there is no where to take that user out from. 
                     SetStatus(Forbidden);
                 }
             }
         }
 
-        public dynamic getGameStatus(gameIDClass GivenGameID,string brief)
+
+        //TODO: IF we cancel a pending game do we want the gameID that was used for the previous game to be reused or should we just move to the next game?????
+
+        public GameStateClass getGameStatus(gameIDClass GivenGameID, string brief)
         {
             if (games.ContainsKey(GivenGameID.GameID))
             {
                 SetStatus(OK);
                 GameInfo currentGame = games[GivenGameID.GameID];
-                dynamic returnInfo = new ExpandoObject();
+                //dynamic returnInfo = new ExpandoObject();
                 //IF THE GAME IS PENDING DO THIS.
                 if (currentGame.GameState == "pending")
                 {
-                    returnInfo.GameState = "pending";
+                    GameStateClass ReturnInfo = new GameStateClass();
+                    ReturnInfo.GameState = "pending";
+                    //returnInfo.GameState = "pending";
+                    return ReturnInfo;
                 }
                 //IF ITS ACTIVE OR COMPLETED DO THIS>
-                else if(currentGame.GameState == "active")
+                else if (currentGame.GameState == "active")
                 {
                     //If brief is yes do this.
-                    if(brief == "yes")
+                    if (brief == "yes")
                     {
-                        returnInfo.GameState = "active";
-                        returnInfo.TimeLeft = currentGame.TimeLeft;
-                        returnInfo.Player1.Score = currentGame.Player1.Score;
-                        returnInfo.Player2.Score = currentGame.Player2.Score;
+                        GameStateBrief ReturnInfo = new GameStateBrief();
+                        ReturnInfo.GameState = "active";
+                        ReturnInfo.TimeLeft = currentGame.TimeLeft;
+                        ReturnInfo.Player1.Score = currentGame.Player1.Score;
+                        ReturnInfo.Player2.Score = currentGame.Player2.Score;
+                        //returnInfo.GameState = "active";
+                        //returnInfo.TimeLeft = currentGame.TimeLeft;
+                        //returnInfo.Player1.Score = currentGame.Player1.Score;
+                        //returnInfo.Player2.Score = currentGame.Player2.Score;
+                        return ReturnInfo;
                     }
                     //If not brief do this.
                     else
                     {
-                        returnInfo.GameState = "active";
-                        returnInfo.Board = "BOARDGAMEDLDL";
-                        returnInfo.TimeLimit = currentGame.TimeLimit;
-                        returnInfo.TimeLeft = currentGame.TimeLeft;
-                        returnInfo.Player1.Nickname = currentGame.Player1.Nickname;
-                        returnInfo.Player1.Score = currentGame.Player1.Score;
-                        returnInfo.Player2.Nickname = currentGame.Player2.Nickname;
-                        returnInfo.Player2.Score = currentGame.Player2.Score;
+                        GameStateActive ReturnInfo = new GameStateActive();
+                        ReturnInfo.GameState = "active";
+                        ReturnInfo.Board = "Boaoddldlldrld";
+                        ReturnInfo.TimeLeft = currentGame.TimeLeft;
+                        ReturnInfo.TimeLimit = currentGame.TimeLeft;
+                        ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
+                        ReturnInfo.Player1.Score = currentGame.Player1.Score;
+                        ReturnInfo.Player2.Nickname = currentGame.Player2.Nickname;
+                        ReturnInfo.Player2.Score = currentGame.Player2.Score;
+
+                        //returnInfo.GameState = "active";
+                        //returnInfo.Board = "BOARDGAMEDLDL";
+                        //returnInfo.TimeLimit = currentGame.TimeLimit;
+                        //returnInfo.TimeLeft = currentGame.TimeLeft;
+                        //returnInfo.Player1.Nickname = currentGame.Player1.Nickname;
+                        //returnInfo.Player1.Score = currentGame.Player1.Score;
+                        //returnInfo.Player2.Nickname = currentGame.Player2.Nickname;
+                        //returnInfo.Player2.Score = currentGame.Player2.Score;
+                        return ReturnInfo;
                     }
                 }
                 else
                 {
                     if (brief == "yes")
                     {
-                        returnInfo.GameState = "completed";
-                        returnInfo.TimeLeft = currentGame.TimeLeft;
-                        returnInfo.Player1.Score = currentGame.Player1.Score;
-                        returnInfo.Player2.Score = currentGame.Player2.Score;
+
+                        GameStateBrief ReturnInfo = new GameStateBrief();
+                        ReturnInfo.GameState = "completed";
+                        ReturnInfo.TimeLeft = currentGame.TimeLeft;
+                        ReturnInfo.Player1.Score = currentGame.Player1.Score;
+                        ReturnInfo.Player2.Score = currentGame.Player2.Score;
+
+                        //returnInfo.GameState = "completed";
+                        //returnInfo.TimeLeft = currentGame.TimeLeft;
+                        //returnInfo.Player1.Score = currentGame.Player1.Score;
+                        //returnInfo.Player2.Score = currentGame.Player2.Score;
+                        return ReturnInfo;
                     }
                     //If not brief do this.
                     else
                     {
-                        returnInfo.GameState = "completed";
-                        returnInfo.Board = "BOARDGAMEDLDL";
-                        returnInfo.TimeLimit = currentGame.TimeLimit;
-                        returnInfo.TimeLeft = currentGame.TimeLeft;
-                        returnInfo.Player1.Nickname = currentGame.Player1.Nickname;
-                        returnInfo.Player1.Score = currentGame.Player1.Score;
-                        returnInfo.Player1.WordsPlayed = currentGame.Player1.WordsPlayed;
-                        returnInfo.Player2.Nickname = currentGame.Player2.Nickname;
-                        returnInfo.Player2.Score = currentGame.Player2.Score;
-                        returnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
+
+                        GameStateActive ReturnInfo = new GameStateActive();
+                        ReturnInfo.GameState = "active";
+                        ReturnInfo.Board = "Boaoddldlldrld";
+                        ReturnInfo.TimeLeft = currentGame.TimeLeft;
+                        ReturnInfo.TimeLimit = currentGame.TimeLeft;
+                        ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
+                        ReturnInfo.Player1.Score = currentGame.Player1.Score;
+                        ReturnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
+                        ReturnInfo.Player2.Nickname = currentGame.Player2.Nickname;
+                        ReturnInfo.Player2.Score = currentGame.Player2.Score;
+                        ReturnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
+
+                        //returnInfo.GameState = "completed";
+                        //returnInfo.Board = "BOARDGAMEDLDL";
+                        //returnInfo.TimeLimit = currentGame.TimeLimit;
+                        //returnInfo.TimeLeft = currentGame.TimeLeft;
+                        //returnInfo.Player1.Nickname = currentGame.Player1.Nickname;
+                        //returnInfo.Player1.Score = currentGame.Player1.Score;
+                        //returnInfo.Player1.WordsPlayed = currentGame.Player1.WordsPlayed;
+                        //returnInfo.Player2.Nickname = currentGame.Player2.Nickname;
+                        //returnInfo.Player2.Score = currentGame.Player2.Score;
+                        //returnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
+                        return ReturnInfo;
                     }
 
                 }
@@ -203,7 +256,7 @@ namespace Boggle
             
         }
 
-        UserInfo IBoggleService.CreateUser(UserInfo Nickname)
+        UserTokenClass IBoggleService.CreateUser(UserInfo Nickname)
         {
             lock (sync)
             {
@@ -216,10 +269,11 @@ namespace Boggle
                 //IF nickname is valud set status to created, and generate the GUID and returns it.
                 else
                 {
+                    UserTokenClass ut = new UserTokenClass();
                     SetStatus(Created);
-                    Nickname.UserToken = Guid.NewGuid().ToString();
-                    users.Add(Nickname.UserToken, Nickname.Nickname);
-                    return Nickname;
+                    ut.UserToken = Guid.NewGuid().ToString();
+                    users.Add(ut.UserToken, Nickname.Nickname);
+                    return ut;
                 }
             }
         }
