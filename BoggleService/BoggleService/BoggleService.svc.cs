@@ -183,17 +183,24 @@ namespace Boggle
                         ReturnInfo.Player1 = new Player();
                         ReturnInfo.Player2 = new Player();
 
-                        ReturnInfo.GameState = "active";
                         //If the time is already expired just set TimeLeft to 0. 
                         int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
                         if(minusTime >= currentGame.TimeLimit)
                         {
+                            //If the game was previously active but the time got set to zero then add all the values we need for 
+                            //complete game.
                             ReturnInfo.TimeLeft = 0;
+                            currentGame.GameState = "completed";
                         }
                         else
                         {
                             ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
                         }
+
+                        //Setting state
+                        ReturnInfo.GameState = currentGame.GameState;
+
+                        //Setting Score
                         ReturnInfo.Player1.Score = currentGame.Player1.Score;
                         ReturnInfo.Player2.Score = currentGame.Player2.Score;
                         //returnInfo.GameState = "active";
@@ -209,18 +216,27 @@ namespace Boggle
                         ReturnInfo.Player1 = new Player();
                         ReturnInfo.Player2 = new Player();
 
-                        ReturnInfo.GameState = "active";
                         ReturnInfo.Board = currentGame.Board.ToString();
                         int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
                         if (minusTime >= currentGame.TimeLimit)
                         {
+                            //If the game was previously active but the time got set to zero then add all the values we need for 
+                            //complete game.
                             ReturnInfo.TimeLeft = 0;
+                            currentGame.GameState = "completed";
+                            ReturnInfo.Player1.WordsPlayed = currentGame.Player1.WordsPlayed;
+                            ReturnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
                         }
                         else
                         {
                             ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
                         }
-                        ReturnInfo.TimeLimit = currentGame.TimeLeft;
+
+                        //Setting GameState
+                        ReturnInfo.GameState = currentGame.GameState;
+
+                        //Setting timelimit
+                        ReturnInfo.TimeLimit = currentGame.TimeLimit;
                         ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
                         ReturnInfo.Player1.Score = currentGame.Player1.Score;
                         ReturnInfo.Player2.Nickname = currentGame.Player2.Nickname;
@@ -273,8 +289,9 @@ namespace Boggle
                         ReturnInfo.Player1 = new Player();
                         ReturnInfo.Player2 = new Player();
 
-                        ReturnInfo.GameState = "active";
+                        ReturnInfo.GameState = "completed";
                         ReturnInfo.Board = currentGame.Board.ToString();
+                        //Setting TimeLeft
                         int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
                         if (minusTime >= currentGame.TimeLimit)
                         {
@@ -284,10 +301,11 @@ namespace Boggle
                         {
                             ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
                         }
-                        ReturnInfo.TimeLimit = currentGame.TimeLeft;
+                        //Setting TimeLimit
+                        ReturnInfo.TimeLimit = currentGame.TimeLimit;
                         ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
                         ReturnInfo.Player1.Score = currentGame.Player1.Score;
-                        ReturnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
+                        ReturnInfo.Player1.WordsPlayed = currentGame.Player1.WordsPlayed;
                         ReturnInfo.Player2.Nickname = currentGame.Player2.Nickname;
                         ReturnInfo.Player2.Score = currentGame.Player2.Score;
                         ReturnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
@@ -388,13 +406,13 @@ namespace Boggle
                         game.TimeLimit = ((game.TimeLeft + starter.TimeLimit) / 2);
                         game.TimeLeft = game.TimeLimit;
 
-                        //Setting the score. 
+                        //Setting the score of both player.s
                         game.Player1.Score = 0;
-                        game.Player1.Score = 0;
+                        game.Player2.Score = 0;
 
-                        //Initializing the string arrays.
+                        //Initializing the arrays of each player. 
                         game.Player1.WordsPlayed = new string[2];
-                        game.Player1.WordsPlayed = new string[2];
+                        game.Player2.WordsPlayed = new string[2];
 
                         //set game to active and set status to created. 
                         game.GameState = "active";

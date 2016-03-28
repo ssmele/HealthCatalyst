@@ -27,7 +27,7 @@ namespace Boggle
         public string UserToken { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public int Score { get; set; }
+        public int? Score { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
         public string[] WordsPlayed {get; set;}
@@ -76,7 +76,7 @@ namespace Boggle
         public int TimeLimit { get; set;}
 
         [DataMember(EmitDefaultValue = false)]
-        public int TimeLeft { get; set; }
+        public int? TimeLeft { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
         public Player Player1 { get; set; }
