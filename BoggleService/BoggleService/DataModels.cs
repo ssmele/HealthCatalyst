@@ -15,6 +15,7 @@ namespace Boggle
         public int TimeLimit { get; set; }
         public int TimeLeft {get; set;}
         public BoggleBoard Board { get; set; }
+        public long StartTimeInMilliseconds { get; set; }
     }
 
     [DataContract]

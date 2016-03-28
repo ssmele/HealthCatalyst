@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
+using System.Diagnostics;
 using System.Net;
 using System.ServiceModel.Web;
 using static System.Net.HttpStatusCode;
@@ -138,9 +139,24 @@ namespace Boggle
             }
         }
 
-        //TODO: NEED TO FIGURE OUT THIS RETURN VALUE STUFF!!!!
+        //TODO: Need to check to see if the current time changing method words. 
+        //TODO: NEED TO FIGURE OUT THIS RETURN VALUE STUFF for gameState!!!!
         //TODO: NEED TO FIX THE WORDSPLAYED DATA STRUCTURE?? OBJECT ARRAY????
         //TODO: IF we cancel a pending game do we want the gameID that was used for the previous game to be reused or should we just move to the next game?????
+        //TODO: PUT A LOCK AROUND ALL THE METHODS>
+
+        /// <summary>
+        /// This method will get the elapsed time in seconds from a given long time. 
+        /// </summary>
+        /// <param name="startTime"></param>
+        /// <returns></returns>
+        private int getElapsedTime(long startTime)
+        {
+            //This subtracts the currentTime from the start time. WE then divide it by 1000 to get a value in
+            //seconds. Round the  value to get a more accurate result.
+            double seconds = (startTime - (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond)) / 1000;
+            return (int)Math.Round(seconds);
+        }
 
         public GameStateClass getGameStatus(string GivenGameID, string answer)
         {
@@ -168,7 +184,7 @@ namespace Boggle
                         ReturnInfo.Player2 = new Player();
 
                         ReturnInfo.GameState = "active";
-                        ReturnInfo.TimeLeft = currentGame.TimeLeft;
+                        ReturnInfo.TimeLeft = currentGame.TimeLimit - getElapsedTime(currentGame.StartTimeInMilliseconds);
                         ReturnInfo.Player1.Score = currentGame.Player1.Score;
                         ReturnInfo.Player2.Score = currentGame.Player2.Score;
                         //returnInfo.GameState = "active";
@@ -185,8 +201,8 @@ namespace Boggle
                         ReturnInfo.Player2 = new Player();
 
                         ReturnInfo.GameState = "active";
-                        ReturnInfo.Board = "Boaoddldlldrld";
-                        ReturnInfo.TimeLeft = currentGame.TimeLeft;
+                        ReturnInfo.Board = currentGame.Board.ToString();
+                        ReturnInfo.TimeLeft = currentGame.TimeLimit - getElapsedTime(currentGame.StartTimeInMilliseconds);
                         ReturnInfo.TimeLimit = currentGame.TimeLeft;
                         ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
                         ReturnInfo.Player1.Score = currentGame.Player1.Score;
@@ -214,7 +230,7 @@ namespace Boggle
                         ReturnInfo.Player2 = new Player();
 
                         ReturnInfo.GameState = "completed";
-                        ReturnInfo.TimeLeft = currentGame.TimeLeft;
+                        ReturnInfo.TimeLeft = currentGame.TimeLimit - getElapsedTime(currentGame.StartTimeInMilliseconds);
                         ReturnInfo.Player1.Score = currentGame.Player1.Score;
                         ReturnInfo.Player2.Score = currentGame.Player2.Score;
 
@@ -233,8 +249,8 @@ namespace Boggle
                         ReturnInfo.Player2 = new Player();
 
                         ReturnInfo.GameState = "active";
-                        ReturnInfo.Board = "Boaoddldlldrld";
-                        ReturnInfo.TimeLeft = currentGame.TimeLeft;
+                        ReturnInfo.Board = currentGame.Board.ToString();
+                        ReturnInfo.TimeLeft = currentGame.TimeLimit - getElapsedTime(currentGame.StartTimeInMilliseconds);
                         ReturnInfo.TimeLimit = currentGame.TimeLeft;
                         ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
                         ReturnInfo.Player1.Score = currentGame.Player1.Score;
@@ -351,6 +367,8 @@ namespace Boggle
                         game.GameState = "active";
 
                         SetStatus(Created);
+
+                        game.StartTimeInMilliseconds = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
                     }
                     return id;
                 }
