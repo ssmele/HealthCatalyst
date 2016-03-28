@@ -126,13 +126,33 @@ namespace Boggle
                 }
                 if(currentGame.Player1.UserToken == wordInfo.UserToken)
                 {
-                    //TEMPORARY
-                    currentGame.Player1.WordsPlayed[0] = returnInfo.Score;
+                    WordValue info = new WordValue();
+                    foreach (WordValue x in currentGame.Player1.WordsPlayed)
+                    {
+                        if (x.Word == wordInfo.Word)
+                        {
+                            returnInfo.Score = "0";
+                            break;
+                        }
+                    }
+                    info.Word = wordInfo.Word;
+                    info.Score = returnInfo.Score;
+                    currentGame.Player1.WordsPlayed.Add(info);
                 }
                 else
                 {
-                    //TEMPORARY
-                    currentGame.Player2.WordsPlayed[0] = returnInfo.Score;
+                    WordValue info = new WordValue();
+                    foreach (WordValue x in currentGame.Player2.WordsPlayed)
+                    {
+                        if (x.Word == wordInfo.Word)
+                        {
+                            returnInfo.Score = "0";
+                            break;
+                        }
+                    }
+                    info.Word = wordInfo.Word;
+                    info.Score = returnInfo.Score;
+                    currentGame.Player2.WordsPlayed.Add(info);
                 }
                 //RETURN WORD SCORE. 
                 return returnInfo;
@@ -411,8 +431,8 @@ namespace Boggle
                         game.Player2.Score = 0;
 
                         //Initializing the arrays of each player. 
-                        game.Player1.WordsPlayed = new string[2];
-                        game.Player2.WordsPlayed = new string[2];
+                        game.Player1.WordsPlayed = new List<WordValue>();
+                        game.Player2.WordsPlayed = new List<WordValue>();
 
                         //set game to active and set status to created. 
                         game.GameState = "active";

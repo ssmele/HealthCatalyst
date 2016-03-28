@@ -30,8 +30,15 @@ namespace Boggle
         public int? Score { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public string[] WordsPlayed {get; set;}
+        public List<WordValue> WordsPlayed {get; set;}
     }
+
+    public class WordValue
+    {
+        public string Word { get; set; }
+        public string Score { get; set; }
+    }
+
 
     [DataContract]
     public class UserInfo
