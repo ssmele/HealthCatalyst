@@ -143,7 +143,7 @@ namespace Boggle
         //TODO: NEED TO FIGURE OUT THIS RETURN VALUE STUFF for gameState!!!!
         //TODO: NEED TO FIX THE WORDSPLAYED DATA STRUCTURE?? OBJECT ARRAY????
         //TODO: IF we cancel a pending game do we want the gameID that was used for the previous game to be reused or should we just move to the next game?????
-        //TODO: PUT A LOCK AROUND ALL THE METHODS>
+        //TODO: PUT A LOCK AROUND ALL THE METHODS bodies. 
 
         /// <summary>
         /// This method will get the elapsed time in seconds from a given long time. 
