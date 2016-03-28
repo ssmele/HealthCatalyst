@@ -154,7 +154,7 @@ namespace Boggle
         {
             //This subtracts the currentTime from the start time. WE then divide it by 1000 to get a value in
             //seconds. Round the  value to get a more accurate result.
-            double seconds = (startTime - (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond)) / 1000;
+            double seconds = -1*(startTime - (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond)) / 1000;
             return (int)Math.Round(seconds);
         }
 
@@ -179,12 +179,21 @@ namespace Boggle
                     //If brief is yes do this.
                     if (answer == "yes")
                     {
-                        GameStateBrief ReturnInfo = new GameStateBrief();
+                        GameStateClass ReturnInfo = new GameStateClass();
                         ReturnInfo.Player1 = new Player();
                         ReturnInfo.Player2 = new Player();
 
                         ReturnInfo.GameState = "active";
-                        ReturnInfo.TimeLeft = currentGame.TimeLimit - getElapsedTime(currentGame.StartTimeInMilliseconds);
+                        //If the time is already expired just set TimeLeft to 0. 
+                        int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
+                        if(minusTime >= currentGame.TimeLimit)
+                        {
+                            ReturnInfo.TimeLeft = 0;
+                        }
+                        else
+                        {
+                            ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
+                        }
                         ReturnInfo.Player1.Score = currentGame.Player1.Score;
                         ReturnInfo.Player2.Score = currentGame.Player2.Score;
                         //returnInfo.GameState = "active";
@@ -196,13 +205,21 @@ namespace Boggle
                     //If not brief do this.
                     else
                     {
-                        GameStateActive ReturnInfo = new GameStateActive();
+                        GameStateClass ReturnInfo = new GameStateClass();
                         ReturnInfo.Player1 = new Player();
                         ReturnInfo.Player2 = new Player();
 
                         ReturnInfo.GameState = "active";
                         ReturnInfo.Board = currentGame.Board.ToString();
-                        ReturnInfo.TimeLeft = currentGame.TimeLimit - getElapsedTime(currentGame.StartTimeInMilliseconds);
+                        int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
+                        if (minusTime >= currentGame.TimeLimit)
+                        {
+                            ReturnInfo.TimeLeft = 0;
+                        }
+                        else
+                        {
+                            ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
+                        }
                         ReturnInfo.TimeLimit = currentGame.TimeLeft;
                         ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
                         ReturnInfo.Player1.Score = currentGame.Player1.Score;
@@ -225,12 +242,20 @@ namespace Boggle
                     if (answer == "yes")
                     {
 
-                        GameStateBrief ReturnInfo = new GameStateBrief();
+                        GameStateClass ReturnInfo = new GameStateClass();
                         ReturnInfo.Player1 = new Player();
                         ReturnInfo.Player2 = new Player();
 
                         ReturnInfo.GameState = "completed";
-                        ReturnInfo.TimeLeft = currentGame.TimeLimit - getElapsedTime(currentGame.StartTimeInMilliseconds);
+                        int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
+                        if (minusTime >= currentGame.TimeLimit)
+                        {
+                            ReturnInfo.TimeLeft = 0;
+                        }
+                        else
+                        {
+                            ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
+                        }
                         ReturnInfo.Player1.Score = currentGame.Player1.Score;
                         ReturnInfo.Player2.Score = currentGame.Player2.Score;
 
@@ -244,13 +269,21 @@ namespace Boggle
                     else
                     {
 
-                        GameStateActive ReturnInfo = new GameStateActive();
+                        GameStateClass ReturnInfo = new GameStateClass();
                         ReturnInfo.Player1 = new Player();
                         ReturnInfo.Player2 = new Player();
 
                         ReturnInfo.GameState = "active";
                         ReturnInfo.Board = currentGame.Board.ToString();
-                        ReturnInfo.TimeLeft = currentGame.TimeLimit - getElapsedTime(currentGame.StartTimeInMilliseconds);
+                        int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
+                        if (minusTime >= currentGame.TimeLimit)
+                        {
+                            ReturnInfo.TimeLeft = 0;
+                        }
+                        else
+                        {
+                            ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
+                        }
                         ReturnInfo.TimeLimit = currentGame.TimeLeft;
                         ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
                         ReturnInfo.Player1.Score = currentGame.Player1.Score;

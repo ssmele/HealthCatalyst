@@ -21,8 +21,12 @@ namespace Boggle
     [DataContract]
     public class Player
     {
+        [DataMember(EmitDefaultValue = false)]
         public string Nickname { get; set; }
+
         public string UserToken { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public int Score { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
@@ -59,25 +63,27 @@ namespace Boggle
         public string UserToken { get; set; }
     }
 
-
+    [DataContract]
     public class GameStateClass
     {
+        [DataMember(EmitDefaultValue = false)]
         public string GameState { get; set; }
-    }
 
-    public class GameStateBrief :GameStateClass
-    {
+        [DataMember(EmitDefaultValue = false)]
+        public string Board { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public int TimeLimit { get; set;}
+
+        [DataMember(EmitDefaultValue = false)]
         public int TimeLeft { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public Player Player1 { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public Player Player2 { get; set; }
     }
-
-    public class GameStateActive : GameStateBrief
-    {
-        public string Board { get; set; }
-        public int TimeLimit { get; set; }
-    }
-
     public class WordSubmit
     {
         public string UserToken { get; set; }
