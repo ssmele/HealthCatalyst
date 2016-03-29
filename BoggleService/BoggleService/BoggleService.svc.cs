@@ -95,7 +95,7 @@ namespace Boggle
                     string word = wordInfo.Word.Trim();
                     if (currentGame.Board.CanBeFormed(word))
                     {
-                        if (File.ReadAllText(".../.../dictionary.txt").Contains(wordInfo.Word))
+                        if (File.ReadAllText(@"C:\Users\Stone\Source\Repos\x0897718\BoggleService\BoggleService\dictionary.txt").Contains(wordInfo.Word))
                         {
                             int word_length = word.Length;
 
@@ -129,6 +129,10 @@ namespace Boggle
                             returnInfo.Score = "-1";
                         }
                     }
+                    else
+                    {
+                        returnInfo.Score = "-1";
+                    }
                     if (currentGame.Player1.UserToken == wordInfo.UserToken)
                     {
                         WordValue info = new WordValue();
@@ -143,6 +147,10 @@ namespace Boggle
                         info.Word = wordInfo.Word;
                         info.Score = returnInfo.Score;
                         currentGame.Player1.WordsPlayed.Add(info);
+
+                        //Updating the score. 
+                        int scoreValue = int.Parse(returnInfo.Score);
+                        currentGame.Player1.Score = currentGame.Player1.Score + scoreValue;
                     }
                     else
                     {
@@ -158,6 +166,10 @@ namespace Boggle
                         info.Word = wordInfo.Word;
                         info.Score = returnInfo.Score;
                         currentGame.Player2.WordsPlayed.Add(info);
+
+                        //Upadting the score.
+                        int scoreValue = int.Parse(returnInfo.Score);
+                        currentGame.Player2.Score = currentGame.Player2.Score + scoreValue;
                     }
                     //RETURN WORD SCORE. 
                     return returnInfo;
