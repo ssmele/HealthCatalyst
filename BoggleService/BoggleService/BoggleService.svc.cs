@@ -177,9 +177,6 @@ namespace Boggle
             }
         }
 
-        //TODO: Need to check to see if the current time changing method words. 
-        //TODO: NEED TO FIGURE OUT THIS RETURN VALUE STUFF for gameState!!!!
-        //TODO: NEED TO FIX THE WORDSPLAYED DATA STRUCTURE?? OBJECT ARRAY????
         //TODO: IF we cancel a pending game do we want the gameID that was used for the previous game to be reused or should we just move to the next game?????
         //TODO: PUT A LOCK AROUND ALL THE METHODS bodies. 
 
@@ -195,6 +192,8 @@ namespace Boggle
             double seconds = ((DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) -startTime) / 1000;
             return (int)Math.Round(seconds);
         }
+
+        //TODO: Testing and got stuck after I tried to start a new game on the server need to look into that. 
 
         public GameStateClass getGameStatus(string GivenGameID, string answer)
         {
