@@ -95,7 +95,7 @@ namespace Boggle
                     string word = wordInfo.Word.Trim();
                     if (currentGame.Board.CanBeFormed(word))
                     {
-                        if (File.ReadAllText(@"C:\Users\Stone\Source\Repos\x0897718\BoggleService\BoggleService\dictionary.txt").Contains(wordInfo.Word))
+                        if (File.ReadAllText(@"\...\dictionary.txt").Contains(wordInfo.Word))
                         {
                             int word_length = word.Length;
 

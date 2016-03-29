@@ -65,30 +65,17 @@ namespace Boggle
             IISAgent.Stop();
         }
 
-        private RestTestClient client = new RestTestClient("http://localhost:50000/");
+        /// <summary>
+        /// Creates the client to be used
+        /// </summary>
+        private RestTestClient client = new RestTestClient("http://localhost:60000/");
 
-        [TestMethod]
-        public void TestMethod1()
-        {
-            Response r = client.DoGetAsync("/numbers?length={0}", "5").Result;
-            Assert.AreEqual(OK, r.Status);
-            Assert.AreEqual(5, r.Data.Count);
-            r = client.DoGetAsync("/numbers?length={0}", "-5").Result;
-            Assert.AreEqual(Forbidden, r.Status);
-        }
-
-        [TestMethod]
-        public void TestMethod2()
-        {
-            List<int> list = new List<int>();
-            list.Add(15);
-            Response r = client.DoPostAsync("/first", list).Result;
-            Assert.AreEqual(OK, r.Status);
-            Assert.AreEqual(15, r.Data);
-        }
 
         //Testing createUser
 
+        /// <summary>
+        /// This tests creating a standard user
+        /// </summary>
         [TestMethod]
         public void TestCreateUserDefault()
         {
@@ -101,6 +88,9 @@ namespace Boggle
         }
 
 
+        /// <summary>
+        /// This tests creating a bad user (null)
+        /// </summary>
         [TestMethod]
         public void TestCreateUserBad()
         {
@@ -111,6 +101,9 @@ namespace Boggle
             Assert.IsNull(r.Data);
         }
 
+        /// <summary>
+        /// This tests creating a bad user (empty nickname)
+        /// </summary>
         [TestMethod]
         public void TestCreateUserEmpty()
         {
@@ -121,6 +114,9 @@ namespace Boggle
             Assert.IsNull(r.Data);
         }
 
+        /// <summary>
+        /// This tests to make sure nicknames are trimmed correctly
+        /// </summary>
         [TestMethod]
         public void TestCreateUserEmptySpace()
         {
@@ -131,6 +127,9 @@ namespace Boggle
             Assert.IsNull(r.Data);
         }
 
+        /// <summary>
+        /// Testing trimming for nicknames
+        /// </summary>
         [TestMethod]
         public void TestCreateUserEmptyLine()
         {
@@ -291,7 +290,9 @@ namespace Boggle
 
         //TESTING CANCELJOIN.
 
-        //This test ensures that a game can be canceled. 
+        /// <summary>
+        /// This test ensures that a game can be canceled.
+        /// </summary> 
         [TestMethod]
         public void TestCancel()
         {
@@ -414,6 +415,10 @@ namespace Boggle
 
         //TESTING GAMESTATUS.
 
+
+        /// <summary>
+        /// This tests for attempting to get the game status when gameID is bad
+        /// </summary>
         [TestMethod]
         public void TestJoinGameStatusBadGameID()
         {
@@ -431,7 +436,9 @@ namespace Boggle
         }
 
 
-
+        /// <summary>
+        /// This tests getting the game status when it should be pending
+        /// </summary>
         [TestMethod]
         public void TestJoinGameStatusPENDING()
         {
@@ -449,6 +456,9 @@ namespace Boggle
             Assert.AreEqual(getResponse.Status, OK);
         }
 
+        /// <summary>
+        /// This tests getting the game status when it should be active
+        /// </summary>
         [TestMethod]
         public void TestGetGameStatusActive()
         {
@@ -500,7 +510,9 @@ namespace Boggle
             Assert.AreEqual(getResponse.Status, OK);
         }
 
-
+        /// <summary>
+        /// This tests for getting the game status when it is complete
+        /// </summary>
         [TestMethod]
         public void TestGetGameStatusComplete()
         {
@@ -553,6 +565,7 @@ namespace Boggle
             Assert.AreEqual((int)getResponse.Data.TimeLimit, 5);
             Assert.AreEqual((int)getResponse.Data.Player1.Score, 0);
             Assert.AreEqual((string)getResponse.Data.Player1.Nickname, "swag");
+
             //TESTING WORDSPLAYED
             dynamic testList = getResponse.Data.Player1.WordsPlayed;
             int count = 0;
@@ -603,13 +616,7 @@ namespace Boggle
             }
             Assert.IsTrue(count == 0);
             Assert.AreEqual(getResponse.Status, OK);
-
-
-
         }
-
-
-
 
     }
 
