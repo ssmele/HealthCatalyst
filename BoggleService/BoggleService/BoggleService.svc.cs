@@ -13,6 +13,7 @@ namespace Boggle
     {
         //Represents the gameID.
         private static int gameNum = 0;
+
         /// <summary>
         /// This queue should only hold one value at a time and that should be a UserToken.
         /// </summary>
@@ -30,6 +31,7 @@ namespace Boggle
         //Sync object.
         private static readonly object sync = new object();
 
+        private const string STONESDICTIONARYLOCATIONTEM = @"C:\Users\mele\Source\Repos\x0897718\BoggleService\BoggleService\dictionary.txt";
         private const string  dictionaryLocation= @"C:\Users\hannal\Documents\CS 3500 Boggle\x0897718\BoggleService\BoggleService\dictionary.txt";
 
         /// <summary>
@@ -97,7 +99,7 @@ namespace Boggle
                     string word = wordInfo.Word.Trim();
                     if (currentGame.Board.CanBeFormed(word))
                     {
-                        if (File.ReadAllText(dictionaryLocation).Contains(wordInfo.Word.ToUpper()))
+                        if (File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + @"dictionary.txt").Contains(wordInfo.Word.ToUpper()))
                         {
                             int word_length = word.Length;
 
@@ -195,8 +197,13 @@ namespace Boggle
             return (int)Math.Round(seconds);
         }
 
-        //TODO: Testing and got stuck after I tried to start a new game on the server need to look into that. 
-
+        /// <summary>
+        /// Gets the current status of game with Given GameID. If a bad GameID is given or one that does not exist in the 
+        /// current service then respond with a Forbidden Status. 
+        /// </summary>
+        /// <param name="GivenGameID">TGameID that user wants to get gameStatus from. </param>
+        /// <param name="answer">The answer that is given in the brief address.</param>
+        /// <returns>An object with serialized information on the gameStatus.</returns>
         public GameStateClass getGameStatus(string GivenGameID, string answer)
         {
             lock (sync)

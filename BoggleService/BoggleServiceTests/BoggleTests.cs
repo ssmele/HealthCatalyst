@@ -76,7 +76,7 @@ namespace Boggle
         /// </summary>
         private RestTestClient client = new RestTestClient("http://localhost:60000/");
         private const string dictionaryLocation = @"C:\Users\hannal\Documents\CS 3500 Boggle\x0897718\BoggleService\BoggleService\dictionary.txt";
-
+        private const string STONESDICTIONARYLOCATIONTEM = @"C:\Users\mele\Source\Repos\x0897718\BoggleService\BoggleService\dictionary.txt";
 
         //Testing createUser
 
@@ -429,11 +429,11 @@ namespace Boggle
         [TestMethod]
         public void TestJoinGameStatusBadGameID()
         {
-            Response getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G10000000", "yes").Result;
+            Response getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G10000000", "yes").Result;
             Assert.IsNull(getResponse.Data);
             Assert.AreEqual(getResponse.Status, Forbidden);
 
-            getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G12231234", "no").Result;
+            getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G12231234", "no").Result;
             Assert.IsNull(getResponse.Data);
             Assert.AreEqual(getResponse.Status, Forbidden);
 
@@ -449,12 +449,12 @@ namespace Boggle
         [TestMethod]
         public void TestJoinGameStatusPENDING()
         {
-            Response getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G4", "yes").Result;
+            Response getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G4", "yes").Result;
             Assert.AreEqual((string)getResponse.Data.GameState, "pending");
             Assert.AreEqual(getResponse.Status, OK);
 
 
-            getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G4", "no").Result;
+            getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G4", "no").Result;
             Assert.AreEqual((string)getResponse.Data.GameState, "pending");
             Assert.AreEqual(getResponse.Status, OK);
 
@@ -484,7 +484,7 @@ namespace Boggle
             Assert.AreEqual((string)x.Data.GameID, "G4");
             Assert.AreEqual(x.Status, Created);
 
-            Response getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G4", "yes").Result;
+            Response getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G4", "yes").Result;
             Assert.AreEqual((string)getResponse.Data.GameState, "active");
             Assert.IsTrue((int)getResponse.Data.TimeLeft <= 60 && !((int)getResponse.Data.TimeLeft > 60));
             Assert.AreEqual((int)getResponse.Data.Player1.Score, 0);
@@ -492,7 +492,7 @@ namespace Boggle
             Assert.AreEqual(getResponse.Status, OK);
 
 
-            getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G4", "no").Result;
+            getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G4", "no").Result;
             Assert.AreEqual((string)getResponse.Data.GameState, "active");
             Assert.IsTrue((int)getResponse.Data.TimeLeft <= 60 && !((int)getResponse.Data.TimeLeft > 60));
             string board = getResponse.Data.Board;
@@ -554,9 +554,16 @@ namespace Boggle
             Assert.AreEqual(x.Status, Created);
 
 
-            Thread.Sleep(5010);
+            Thread.Sleep(5500);
 
-            Response getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G5", "yes").Result;
+            Response getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G5", "yes").Result;
+            Assert.AreEqual((string)getResponse.Data.GameState, "completed");
+            Assert.IsTrue((int)getResponse.Data.TimeLeft == 0);
+            Assert.AreEqual((int)getResponse.Data.Player1.Score, 0);
+            Assert.AreEqual((int)getResponse.Data.Player2.Score, 0);
+            Assert.AreEqual(getResponse.Status, OK);
+
+            getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G5", "yes").Result;
             Assert.AreEqual((string)getResponse.Data.GameState, "completed");
             Assert.IsTrue((int)getResponse.Data.TimeLeft == 0);
             Assert.AreEqual((int)getResponse.Data.Player1.Score, 0);
@@ -564,7 +571,7 @@ namespace Boggle
             Assert.AreEqual(getResponse.Status, OK);
 
 
-            getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G5", "no").Result;
+            getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G5", "no").Result;
             Assert.AreEqual((string)getResponse.Data.GameState, "completed");
             Assert.IsTrue((int)getResponse.Data.TimeLeft == 0);
             string board = getResponse.Data.Board;
@@ -674,17 +681,19 @@ namespace Boggle
             // dynamic wordToBeSubmitted = new ExpandoObject();
             dynamic HannasDyanmic = new ExpandoObject();
             HannasDyanmic.UserToken = HannahsToken;
-            StreamReader dictionaryL = new StreamReader(dictionaryLocation);
+            StreamReader dictionaryL = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "/dictionary.txt");
             string currentLine;
             user.UserToken = token;
+            dynamic wordSubmitter = new ExpandoObject();
+            wordSubmitter.UserToken = token;
             while ((currentLine = dictionaryL.ReadLine()) != null)
             {
                 if (testBoard.CanBeFormed(currentLine))
                 {
                     wordSubmitted.Add(currentLine);
 
-                    user.Word = currentLine;
-                    Response putReponse = client.DoPutAsync(user, "games/G6").Result;
+                    wordSubmitter.Word = currentLine;
+                    Response putReponse = client.DoPutAsync(wordSubmitter, "games/G6").Result;
                     Assert.AreEqual(OK, putReponse.Status);
 
                     HannasDyanmic.Word = currentLine;
@@ -698,17 +707,25 @@ namespace Boggle
             getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G6", "no").Result;
             dynamic WORDSPLAYED = getResponse.Data.Player2.WordsPlayed;
             HannasDyanmic = getResponse.Data.Player1.WordsPlayed;
-
+            HashSet<string> setOfWords = new HashSet<string>(wordSubmitted);
+            List<string> wordsPlayedLIST = new List<string>();
 
             foreach (dynamic checkWord in WORDSPLAYED)
             {
                 Assert.IsTrue(wordSubmitted.Contains((string)checkWord.Word));
+                wordsPlayedLIST.Add((string)checkWord.Word);
             }
+
+            Assert.IsTrue(setOfWords.SetEquals(wordsPlayedLIST));
+            wordsPlayedLIST.Clear();
 
             foreach (dynamic checkWord in HannasDyanmic)
             {
                 Assert.IsTrue(wordSubmitted.Contains((string)checkWord.Word));
+                wordsPlayedLIST.Add((string)checkWord.Word);
             }
+
+            Assert.IsTrue(setOfWords.SetEquals(wordsPlayedLIST));
         }
 
         /// <summary>
@@ -805,7 +822,7 @@ namespace Boggle
             HannasDyanmic.UserToken = HannahsToken;
             user.UserToken = token;
             user.Word = "";
-            Response putReponse = client.DoPutAsync(user, "games/8").Result;
+            Response putReponse = client.DoPutAsync(user, "games/G8").Result;
             Assert.AreEqual(Forbidden, putReponse.Status);
 
             HannasDyanmic.Word = "";
