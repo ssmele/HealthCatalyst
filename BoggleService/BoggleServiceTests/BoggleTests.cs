@@ -636,6 +636,7 @@ namespace Boggle
             Response r = client.DoPostAsync("users", user).Result;
             Assert.AreEqual(Created, r.Status);
             string token = r.Data.UserToken;
+            string HannahsToken = token;
 
             dynamic newGame = new ExpandoObject();
             newGame.UserToken = token;
@@ -666,16 +667,23 @@ namespace Boggle
 
             List<string> wordSubmitted = new List<string>();
             dynamic wordToBeSubmitted = new ExpandoObject();
+            dynamic HannasDyanmic = new ExpandoObject();
+            HannasDyanmic.UserToken = HannahsToken;
             StreamReader dictionaryL = new StreamReader(dictionaryLocation);
             string currentLine;
+            user.UserToken = token;
             while ((currentLine = dictionaryL.ReadLine()) != null)
             {
                 if (testBoard.CanBeFormed(currentLine))
                 {
                     wordSubmitted.Add(currentLine);
-                    user.UserToken = token;
+                    
                     user.Word = currentLine;
                     Response putReponse = client.DoPutAsync(user,"games/G6").Result;
+                    Assert.AreEqual(OK, putReponse.Status);
+
+                    HannasDyanmic.Word = currentLine;
+                    putReponse = client.DoPutAsync(HannasDyanmic, "games/G6").Result;
                     Assert.AreEqual(OK, putReponse.Status);
                 }
             }
@@ -684,9 +692,15 @@ namespace Boggle
 
             getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G6","no").Result;
             dynamic WORDSPLAYED = getResponse.Data.Player2.WordsPlayed;
+            HannasDyanmic = getResponse.Data.Player1.WordsPlayed;
 
 
             foreach (dynamic checkWord in WORDSPLAYED)
+            {
+                Assert.IsTrue(wordSubmitted.Contains((string)checkWord.Word));
+            }
+
+            foreach (dynamic checkWord in HannasDyanmic)
             {
                 Assert.IsTrue(wordSubmitted.Contains((string)checkWord.Word));
             }
