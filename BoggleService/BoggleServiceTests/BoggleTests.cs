@@ -45,6 +45,11 @@ namespace Boggle
             }
         }
     }
+    /// <summary>
+    /// Tests all methods for the Boggle server.
+    /// NOTE: ALL TESTS MUST BE RAN AT THE SAME TIME, OTHERWISE SOME ASSERTIONS WILL FAIL'
+    /// BASED ON HOW MANY GAMES ARE CREATED
+    /// </summary>
     [TestClass]
     public class BoggleTests
     {
@@ -444,7 +449,7 @@ namespace Boggle
         [TestMethod]
         public void TestJoinGameStatusPENDING()
         {
-            Response getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G4","yes").Result;
+            Response getResponse = client.DoGetAsync("games/{0}?Brief{1}", "G4", "yes").Result;
             Assert.AreEqual((string)getResponse.Data.GameState, "pending");
             Assert.AreEqual(getResponse.Status, OK);
 
@@ -571,7 +576,7 @@ namespace Boggle
             //TESTING WORDSPLAYED
             dynamic testList = getResponse.Data.Player1.WordsPlayed;
             int count = 0;
-            foreach(dynamic WORDVALUE in testList)
+            foreach (dynamic WORDVALUE in testList)
             {
                 count++;
             }
@@ -623,7 +628,7 @@ namespace Boggle
         // Testing SUBMIT WORD
 
         /// <summary>
-        /// Tests for submitting a three letter word that is valid
+        /// Tests for submitting all words that are valid
         /// </summary>
         [TestMethod]
         public void TestSubmitWord1()
@@ -666,7 +671,7 @@ namespace Boggle
             BoggleBoard testBoard = new BoggleBoard(board);
 
             List<string> wordSubmitted = new List<string>();
-            dynamic wordToBeSubmitted = new ExpandoObject();
+            // dynamic wordToBeSubmitted = new ExpandoObject();
             dynamic HannasDyanmic = new ExpandoObject();
             HannasDyanmic.UserToken = HannahsToken;
             StreamReader dictionaryL = new StreamReader(dictionaryLocation);
@@ -677,9 +682,9 @@ namespace Boggle
                 if (testBoard.CanBeFormed(currentLine))
                 {
                     wordSubmitted.Add(currentLine);
-                    
+
                     user.Word = currentLine;
-                    Response putReponse = client.DoPutAsync(user,"games/G6").Result;
+                    Response putReponse = client.DoPutAsync(user, "games/G6").Result;
                     Assert.AreEqual(OK, putReponse.Status);
 
                     HannasDyanmic.Word = currentLine;
@@ -690,7 +695,7 @@ namespace Boggle
 
             Thread.Sleep(7000);
 
-            getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G6","no").Result;
+            getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G6", "no").Result;
             dynamic WORDSPLAYED = getResponse.Data.Player2.WordsPlayed;
             HannasDyanmic = getResponse.Data.Player1.WordsPlayed;
 
@@ -705,9 +710,161 @@ namespace Boggle
                 Assert.IsTrue(wordSubmitted.Contains((string)checkWord.Word));
             }
         }
+
+        /// <summary>
+        /// Tests submitting a word when the string is null
+        /// </summary>
+        [TestMethod]
+        public void TestSubmitNull()
+        {
+            //Creating the game
+
+            //Creating first user. 
+            dynamic user = new ExpandoObject();
+            user.Nickname = "hanna";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            string token = r.Data.UserToken;
+            string HannahsToken = token;
+
+            dynamic newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 7;
+            Response x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G7");
+            Assert.AreEqual(x.Status, Accepted);
+
+
+            //Creating second user. 
+            user = new ExpandoObject();
+            user.Nickname = "stone";
+            r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            token = r.Data.UserToken;
+
+            newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 7;
+            x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G7");
+            Assert.AreEqual(x.Status, Created);
+            Response getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G7", "no").Result;
+
+            dynamic HannasDyanmic = new ExpandoObject();
+            HannasDyanmic.UserToken = HannahsToken;
+            user.UserToken = token;
+            user.Word = null;
+            Response putReponse = client.DoPutAsync(user, "games/G7").Result;
+            Assert.AreEqual(Forbidden, putReponse.Status);
+
+            HannasDyanmic.Word = null;
+            putReponse = client.DoPutAsync(HannasDyanmic, "games/G7").Result;
+            Assert.AreEqual(Forbidden, putReponse.Status);
+        }
+
+        /// <summary>
+        /// Tests submitting a word when the string is empty
+        /// </summary>
+        [TestMethod]
+        public void TestSubmitEmpty()
+        {
+            //Creating the game
+
+            //Creating first user. 
+            dynamic user = new ExpandoObject();
+            user.Nickname = "hanna";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            string token = r.Data.UserToken;
+            string HannahsToken = token;
+
+            dynamic newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 7;
+            Response x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G8");
+            Assert.AreEqual(x.Status, Accepted);
+
+
+            //Creating second user. 
+            user = new ExpandoObject();
+            user.Nickname = "stone";
+            r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            token = r.Data.UserToken;
+
+            newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 7;
+            x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G8");
+            Assert.AreEqual(x.Status, Created);
+            Response getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G8", "no").Result;
+
+            dynamic HannasDyanmic = new ExpandoObject();
+            HannasDyanmic.UserToken = HannahsToken;
+            user.UserToken = token;
+            user.Word = "";
+            Response putReponse = client.DoPutAsync(user, "games/8").Result;
+            Assert.AreEqual(Forbidden, putReponse.Status);
+
+            HannasDyanmic.Word = "";
+            putReponse = client.DoPutAsync(HannasDyanmic, "games/G8").Result;
+            Assert.AreEqual(Forbidden, putReponse.Status);
+        }
+
+        /// <summary>
+        /// Tests submitting a word when game is not active
+        /// </summary>
+        [TestMethod]
+        public void TestSubmitNotActive()
+        {
+            //Creating the game
+
+            //Creating first user. 
+            dynamic user = new ExpandoObject();
+            user.Nickname = "hanna";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            string token = r.Data.UserToken;
+            string HannahsToken = token;
+
+            dynamic newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 7;
+            Response x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G9");
+            Assert.AreEqual(x.Status, Accepted);
+
+
+            //Creating second user. 
+            user = new ExpandoObject();
+            user.Nickname = "stone";
+            r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            token = r.Data.UserToken;
+
+            newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 7;
+            x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G9");
+            Assert.AreEqual(x.Status, Created);
+            Thread.Sleep(7000);
+            Response getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G9", "no").Result;
+
+            dynamic HannasDyanmic = new ExpandoObject();
+            HannasDyanmic.UserToken = HannahsToken;
+            user.UserToken = token;
+            user.Word = "test";
+            Response putReponse = client.DoPutAsync(user, "games/G9").Result;
+            Assert.AreEqual(Conflict, putReponse.Status);
+
+            HannasDyanmic.Word = "test";
+            putReponse = client.DoPutAsync(HannasDyanmic, "games/G9").Result;
+            Assert.AreEqual(Conflict, putReponse.Status);
+        }
     }
-
-
     public class WordValue
     {
         public string Word { get; set; }
