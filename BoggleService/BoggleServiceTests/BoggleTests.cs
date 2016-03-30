@@ -5,6 +5,7 @@ using System.Dynamic;
 using System.Threading;
 using static System.Net.HttpStatusCode;
 using System.Diagnostics;
+using System.IO;
 
 namespace Boggle
 {
@@ -69,6 +70,7 @@ namespace Boggle
         /// Creates the client to be used
         /// </summary>
         private RestTestClient client = new RestTestClient("http://localhost:60000/");
+        private const string dictionaryLocation = @"C:\Users\hannal\Documents\CS 3500 Boggle\x0897718\BoggleService\BoggleService\dictionary.txt";
 
 
         //Testing createUser
@@ -532,7 +534,7 @@ namespace Boggle
             Assert.AreEqual(x.Status, Accepted);
 
 
-            //Creating first user. 
+            //Creating second user. 
             user = new ExpandoObject();
             user.Nickname = "swag2";
             r = client.DoPostAsync("users", user).Result;
@@ -618,6 +620,77 @@ namespace Boggle
             Assert.AreEqual(getResponse.Status, OK);
         }
 
+        // Testing SUBMIT WORD
+
+        /// <summary>
+        /// Tests for submitting a three letter word that is valid
+        /// </summary>
+        [TestMethod]
+        public void TestSubmitWord1()
+        {
+            //Creating the game
+
+            //Creating first user. 
+            dynamic user = new ExpandoObject();
+            user.Nickname = "hanna";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            string token = r.Data.UserToken;
+
+            dynamic newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 7;
+            Response x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G6");
+            Assert.AreEqual(x.Status, Accepted);
+
+
+            //Creating second user. 
+            user = new ExpandoObject();
+            user.Nickname = "stone";
+            r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            token = r.Data.UserToken;
+
+            newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 7;
+            x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G6");
+            Assert.AreEqual(x.Status, Created);
+            Response getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G6", "no").Result;
+
+            string board = getResponse.Data.Board;
+
+            BoggleBoard testBoard = new BoggleBoard(board);
+
+            List<string> wordSubmitted = new List<string>();
+            dynamic wordToBeSubmitted = new ExpandoObject();
+            StreamReader dictionaryL = new StreamReader(dictionaryLocation);
+            string currentLine;
+            while ((currentLine = dictionaryL.ReadLine()) != null)
+            {
+                if (testBoard.CanBeFormed(currentLine))
+                {
+                    wordSubmitted.Add(currentLine);
+                    user.UserToken = token;
+                    user.Word = currentLine;
+                    Response putReponse = client.DoPutAsync(user,"games/G6").Result;
+                    Assert.AreEqual(OK, putReponse.Status);
+                }
+            }
+
+            Thread.Sleep(7000);
+
+            getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G6","no").Result;
+            dynamic WORDSPLAYED = getResponse.Data.Player2.WordsPlayed;
+
+
+            foreach (dynamic checkWord in WORDSPLAYED)
+            {
+                Assert.IsTrue(wordSubmitted.Contains((string)checkWord.Word));
+            }
+        }
     }
 
 

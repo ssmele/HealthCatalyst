@@ -30,6 +30,8 @@ namespace Boggle
         //Sync object.
         private static readonly object sync = new object();
 
+        private const string  dictionaryLocation= @"C:\Users\hannal\Documents\CS 3500 Boggle\x0897718\BoggleService\BoggleService\dictionary.txt";
+
         /// <summary>
         /// If the userToken that is given from the parameter matches that of the player in the pending
         /// queue then that player will be removed from the pending queue and any other data
@@ -95,7 +97,7 @@ namespace Boggle
                     string word = wordInfo.Word.Trim();
                     if (currentGame.Board.CanBeFormed(word))
                     {
-                        if (File.ReadAllText(@"\...\dictionary.txt").Contains(wordInfo.Word))
+                        if (File.ReadAllText(dictionaryLocation).Contains(wordInfo.Word.ToUpper()))
                         {
                             int word_length = word.Length;
 
