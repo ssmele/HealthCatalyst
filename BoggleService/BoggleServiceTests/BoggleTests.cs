@@ -677,6 +677,7 @@ namespace Boggle
 
             BoggleBoard testBoard = new BoggleBoard(board);
 
+
             List<string> wordSubmitted = new List<string>();
             // dynamic wordToBeSubmitted = new ExpandoObject();
             dynamic HannasDyanmic = new ExpandoObject();
@@ -686,6 +687,9 @@ namespace Boggle
             user.UserToken = token;
             dynamic wordSubmitter = new ExpandoObject();
             wordSubmitter.UserToken = token;
+
+            int count = 0;
+
             while ((currentLine = dictionaryL.ReadLine()) != null)
             {
                 if (testBoard.CanBeFormed(currentLine))
@@ -699,6 +703,28 @@ namespace Boggle
                     HannasDyanmic.Word = currentLine;
                     putReponse = client.DoPutAsync(HannasDyanmic, "games/G6").Result;
                     Assert.AreEqual(OK, putReponse.Status);
+
+                    //Add two of the same words twice. 
+                    if(count == 0)
+                    {
+
+                         putReponse = client.DoPutAsync(wordSubmitter, "games/G6").Result;
+                        Assert.AreEqual(OK, putReponse.Status);
+                        putReponse = client.DoPutAsync(HannasDyanmic, "games/G6").Result;
+                        Assert.AreEqual(OK, putReponse.Status);
+                        //Testing in the board not in the dictionary. 
+                        string boardWORD = "";
+                        boardWORD = boardWORD + board[0] + board[1] + board[2] + board[3] + board[7] + board[6] + board[5] + board[4];
+                        wordSubmitted.Add(boardWORD);
+                        HannasDyanmic.Word = boardWORD;
+                        putReponse = client.DoPutAsync(HannasDyanmic, "games/G6").Result;
+                        Assert.AreEqual(OK, putReponse.Status);
+                        wordSubmitter.Word = boardWORD;
+                        putReponse = client.DoPutAsync(wordSubmitter, "games/G6").Result;
+                        Assert.AreEqual(OK, putReponse.Status);
+
+                    }
+                    count++;
                 }
             }
 
@@ -830,6 +856,8 @@ namespace Boggle
             Assert.AreEqual(Forbidden, putReponse.Status);
         }
 
+
+
         /// <summary>
         /// Tests submitting a word when game is not active
         /// </summary>
@@ -880,6 +908,57 @@ namespace Boggle
             HannasDyanmic.Word = "test";
             putReponse = client.DoPutAsync(HannasDyanmic, "games/G9").Result;
             Assert.AreEqual(Conflict, putReponse.Status);
+        }
+
+        /// <summary>
+        /// Tests submitting a word when the string is invalid
+        /// </summary>
+        [TestMethod]
+        public void TestSubmitInvalid()
+        {
+            //Creating the game
+
+            //Creating first user. 
+            dynamic user = new ExpandoObject();
+            user.Nickname = "hanna";
+            Response r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            string token = r.Data.UserToken;
+            string HannahsToken = token;
+
+            dynamic newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 7;
+            Response x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G10");
+            Assert.AreEqual(x.Status, Accepted);
+
+
+            //Creating second user. 
+            user = new ExpandoObject();
+            user.Nickname = "stone";
+            r = client.DoPostAsync("users", user).Result;
+            Assert.AreEqual(Created, r.Status);
+            token = r.Data.UserToken;
+
+            newGame = new ExpandoObject();
+            newGame.UserToken = token;
+            newGame.TimeLimit = 7;
+            x = client.DoPostAsync("games", newGame).Result;
+            Assert.AreEqual((string)x.Data.GameID, "G10");
+            Assert.AreEqual(x.Status, Created);
+            Response getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G10", "no").Result;
+
+            dynamic HannasDyanmic = new ExpandoObject();
+            HannasDyanmic.UserToken = HannahsToken;
+            user.UserToken = token;
+            user.Word = "123";
+            Response putReponse = client.DoPutAsync(user, "games/G10").Result;
+            Assert.AreEqual(OK, putReponse.Status);
+
+            HannasDyanmic.Word = "123";
+            putReponse = client.DoPutAsync(HannasDyanmic, "games/G10").Result;
+            Assert.AreEqual(OK, putReponse.Status);
         }
     }
     public class WordValue

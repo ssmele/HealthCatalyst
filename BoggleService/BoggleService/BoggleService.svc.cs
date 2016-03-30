@@ -31,9 +31,7 @@ namespace Boggle
         //Sync object.
         private static readonly object sync = new object();
 
-        private const string STONESDICTIONARYLOCATIONTEM = @"C:\Users\mele\Source\Repos\x0897718\BoggleService\BoggleService\dictionary.txt";
-        private const string  dictionaryLocation= @"C:\Users\hannal\Documents\CS 3500 Boggle\x0897718\BoggleService\BoggleService\dictionary.txt";
-
+       
         /// <summary>
         /// If the userToken that is given from the parameter matches that of the player in the pending
         /// queue then that player will be removed from the pending queue and any other data
@@ -67,7 +65,6 @@ namespace Boggle
         }
 
 
-        //TODO:NEED TO FIX THE FILEREAD THING!!!!
         /// <summary>
         /// This method accepts a userToken and a game ID. 
         /// </summary>
@@ -294,17 +291,8 @@ namespace Boggle
                         {
                             ReturnInfo.Player1 = new Player();
                             ReturnInfo.Player2 = new Player();
-
                             ReturnInfo.GameState = "completed";
-                            int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
-                            if (minusTime >= currentGame.TimeLimit)
-                            {
-                                ReturnInfo.TimeLeft = 0;
-                            }
-                            else
-                            {
-                                ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
-                            }
+                            ReturnInfo.TimeLeft = 0;
                             ReturnInfo.Player1.Score = currentGame.Player1.Score;
                             ReturnInfo.Player2.Score = currentGame.Player2.Score;
                             return ReturnInfo;
@@ -314,20 +302,9 @@ namespace Boggle
                         {
                             ReturnInfo.Player1 = new Player();
                             ReturnInfo.Player2 = new Player();
-
                             ReturnInfo.GameState = "completed";
                             ReturnInfo.Board = currentGame.Board.ToString();
-                            //Setting TimeLeft
-                            int minusTime = getElapsedTime(currentGame.StartTimeInMilliseconds);
-                            if (minusTime >= currentGame.TimeLimit)
-                            {
-                                ReturnInfo.TimeLeft = 0;
-                            }
-                            else
-                            {
-                                ReturnInfo.TimeLeft = currentGame.TimeLimit - minusTime;
-                            }
-                            //Setting TimeLimit
+                            ReturnInfo.TimeLeft = 0;
                             ReturnInfo.TimeLimit = currentGame.TimeLimit;
                             ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
                             ReturnInfo.Player1.Score = currentGame.Player1.Score;
