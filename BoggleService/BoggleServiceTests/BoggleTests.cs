@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Hanna Larsen & Salvatore Stone Mele
+// u0741837        u0897718
+// CS 3500  PS9 
+// 03/31/16
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -75,9 +79,7 @@ namespace Boggle
         /// Creates the client to be used
         /// </summary>
         private RestTestClient client = new RestTestClient("http://localhost:60000/");
-        private const string dictionaryLocation = @"C:\Users\hannal\Documents\CS 3500 Boggle\x0897718\BoggleService\BoggleService\dictionary.txt";
-        private const string STONESDICTIONARYLOCATIONTEM = @"C:\Users\mele\Source\Repos\x0897718\BoggleService\BoggleService\dictionary.txt";
-
+        
         //Testing createUser
 
         /// <summary>
@@ -961,6 +963,10 @@ namespace Boggle
             Assert.AreEqual(OK, putReponse.Status);
         }
     }
+
+    /// <summary>
+    /// Stores the components of a word: Score & string
+    /// </summary>
     public class WordValue
     {
         public string Word { get; set; }

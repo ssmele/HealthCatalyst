@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿// Hanna Larsen & Salvatore Stone Mele
+// u0741837        u0897718
+// CS 3500  PS9 
+// 03/31/16
+using System.Collections.Generic;
 using System.IO;
 using System.ServiceModel;
 using System.ServiceModel.Web;
@@ -25,7 +29,7 @@ namespace Boggle
         /// Depending on if the player is the first or second person to join the game a different status
         /// will be returned.
         /// </summary>
-        /// <param name="Nickname"></param>
+        /// <param name="Nickname">user token & time limit</param>
         /// <returns>Game Id of game user joined.</returns>
         [WebInvoke(Method = "POST", UriTemplate = "/games")]
         gameIDClass JoinGame(gameStart Nickname);
@@ -33,25 +37,25 @@ namespace Boggle
         /// <summary>
         /// This method cancels a pending game join request. 
         /// </summary>
-        /// <param name="UserToken"></param>
+        /// <param name="UserToken">user token</param>
         [WebInvoke(Method = "PUT", UriTemplate = "/games")]
         void CancelJoin(UserInfo UserToken);
 
         /// <summary>
         /// This method gets info on given current game. 
         /// </summary>
-        /// <param name="GivenGameID"></param>
-        /// <param name="answer"></param>
-        /// <returns></returns>
+        /// <param name="GivenGameID">game id</param>
+        /// <param name="answer">brief answer</param>
+        /// <returns>various game information depending on the game state</returns>
         [WebInvoke(Method = "GET", UriTemplate = "/games/{GivenGameID}?Brief={answer}")]
         GameStateClass getGameStatus(string GivenGameID, string answer);
 
         /// <summary>
         /// This method submits a word. 
         /// </summary>
-        /// <param name="wordInfo"></param>
-        /// <param name="GivenGameID"></param>
-        /// <returns></returns>
+        /// <param name="wordInfo"> word & user token</param>
+        /// <param name="GivenGameID">game id</param>
+        /// <returns>score</returns>
         [WebInvoke(Method = "PUT", UriTemplate = "/games/{GivenGameID}")]
         ScoreResponse SubmitWord(WordSubmit wordInfo, string GivenGameID);
 

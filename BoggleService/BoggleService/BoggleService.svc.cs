@@ -1,17 +1,24 @@
-﻿using System;
+﻿// Hanna Larsen & Salvatore Stone Mele
+// u0741837        u0897718
+// CS 3500  PS9 
+// 03/31/16
+using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
-using System.Diagnostics;
 using System.Net;
 using System.ServiceModel.Web;
 using static System.Net.HttpStatusCode;
 
 namespace Boggle
 {
+    /// <summary>
+    /// This class creates a service that returns game information when interacting with the client
+    /// </summary>
     public class BoggleService : IBoggleService
     {
-        //Represents the gameID.
+        /// <summary>
+        /// Represents the gameID
+        /// </summary>
         private static int gameNum = 0;
 
         /// <summary>
@@ -19,38 +26,49 @@ namespace Boggle
         /// </summary>
         private static Queue<string> needed = new Queue<string>();
 
-        //REPResents Usertoken to Nickname.
+        /// <summary>
+        /// Maps the user token to the nickname
+        /// </summary>
         private readonly static Dictionary<string, string> users = new Dictionary<string, string>();
 
-        //Represents Usertoken to gameID.
+        /// <summary>
+        /// Maps the user token to the gameID
+        /// </summary>
         private readonly static Dictionary<string, gameIDClass> currentPlayersinGame = new Dictionary<string, gameIDClass>();
 
-        //Represents GameId to GameInfo.
+        /// <summary>
+        /// Maps the gameID to game info
+        /// </summary>
         private readonly static Dictionary<string, GameInfo> games = new Dictionary<string, GameInfo>();
 
-        //Sync object.
+        /// <summary>
+        /// HashSet that contains all the words in the dictionary.txt.
+        /// </summary>
+        private static HashSet<string> dictonaryWords = new HashSet<string>();
+
+        /// <summary>
+        /// object used for syncing
+        /// </summary>
         private static readonly object sync = new object();
 
        
         /// <summary>
         /// If the userToken that is given from the parameter matches that of the player in the pending
         /// queue then that player will be removed from the pending queue and any other data
-        /// structor that holds a game state.
+        /// structure that holds a game state.
         /// </summary>
         /// <param name="UI">UserToken of player that wants to be taken from the Queue.</param>
         public void CancelJoin(UserInfo UI)
         {
             lock (sync)
             {
+                // Check if pending player
                 if (needed.Count == 1 && needed.Peek() == UI.UserToken)
-                {
-                    //TODO: Should we minus from the gameID, should we take the user out from users????
-                    //TODO: SHOULD WE KEEP OR TAKE OUT USERS???
+                { 
                     //If the UserToken is the same as the player in the queue remove them from the queue.
                     needed.Dequeue();
                     string tempGameId = currentPlayersinGame[UI.UserToken].GameID;
                     currentPlayersinGame.Remove(UI.UserToken);
-                    //KEEP OR NOT???
                     users.Remove(UI.UserToken);
                     games.Remove(tempGameId);
                     //Set status to OK.
@@ -94,10 +112,13 @@ namespace Boggle
                     SetStatus(OK);
                     ScoreResponse returnInfo = new ScoreResponse();
                     string word = wordInfo.Word.Trim();
+                    // If the word can be formed on the board
                     if (currentGame.Board.CanBeFormed(word))
                     {
-                        if (File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + @"dictionary.txt").Contains(wordInfo.Word.ToUpper()))
+                        // If the word is in the dictionary
+                        if (dictonaryWords.Contains(wordInfo.Word.ToUpper()))
                         {
+                            // Determines the score based on word length
                             int word_length = word.Length;
 
                             if (word_length < 3)
@@ -134,6 +155,8 @@ namespace Boggle
                     {
                         returnInfo.Score = "-1";
                     }
+                    // Checks to see if a word has already been played
+                    // If yes, returns a score of 0
                     if (currentGame.Player1.UserToken == wordInfo.UserToken)
                     {
                         WordValue info = new WordValue();
@@ -153,6 +176,7 @@ namespace Boggle
                         int scoreValue = int.Parse(returnInfo.Score);
                         currentGame.Player1.Score = currentGame.Player1.Score + scoreValue;
                     }
+                    // Same for Player 2
                     else
                     {
                         WordValue info = new WordValue();
@@ -168,7 +192,7 @@ namespace Boggle
                         info.Score = returnInfo.Score;
                         currentGame.Player2.WordsPlayed.Add(info);
 
-                        //Upadting the score.
+                        //Updating the score.
                         int scoreValue = int.Parse(returnInfo.Score);
                         currentGame.Player2.Score = currentGame.Player2.Score + scoreValue;
                     }
@@ -177,9 +201,6 @@ namespace Boggle
                 }
             }
         }
-
-        //TODO: IF we cancel a pending game do we want the gameID that was used for the previous game to be reused or should we just move to the next game?????
-        //TODO: PUT A LOCK AROUND ALL THE METHODS bodies. 
 
         /// <summary>
         /// This method will get the elapsed time in seconds from a given long time. 
@@ -210,21 +231,18 @@ namespace Boggle
                     SetStatus(OK);
                     GameInfo currentGame = games[GivenGameID];
                     GameStateClass ReturnInfo = new GameStateClass();
-                    //dynamic returnInfo = new ExpandoObject();
                     //IF THE GAME IS PENDING DO THIS.
                     if (currentGame.GameState == "pending")
                     {
                         ReturnInfo.GameState = "pending";
-                        //returnInfo.GameState = "pending";
                         return ReturnInfo;
                     }
-                    //IF ITS ACTIVE OR COMPLETED DO THIS>
+                    //IF ITS ACTIVE DO THIS
                     else if (currentGame.GameState == "active")
                     {
                         //If brief is yes do this.
                         if (answer == "yes")
                         {
-
                             ReturnInfo.Player1 = new Player();
                             ReturnInfo.Player2 = new Player();
 
@@ -275,7 +293,7 @@ namespace Boggle
                             //Setting GameState
                             ReturnInfo.GameState = currentGame.GameState;
 
-                            //Setting timelimit
+                            //Setting timelimit & player info
                             ReturnInfo.TimeLimit = currentGame.TimeLimit;
                             ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
                             ReturnInfo.Player1.Score = currentGame.Player1.Score;
@@ -284,7 +302,7 @@ namespace Boggle
                             return ReturnInfo;
                         }
                     }
-                    ///THIS IS FOR COMPLETED. 
+                    // If the status is completed
                     else
                     {
                         if (answer == "yes")
@@ -306,15 +324,16 @@ namespace Boggle
                             ReturnInfo.Board = currentGame.Board.ToString();
                             ReturnInfo.TimeLeft = 0;
                             ReturnInfo.TimeLimit = currentGame.TimeLimit;
+                            // Player 1
                             ReturnInfo.Player1.Nickname = currentGame.Player1.Nickname;
                             ReturnInfo.Player1.Score = currentGame.Player1.Score;
                             ReturnInfo.Player1.WordsPlayed = currentGame.Player1.WordsPlayed;
+                            // Player 2
                             ReturnInfo.Player2.Nickname = currentGame.Player2.Nickname;
                             ReturnInfo.Player2.Score = currentGame.Player2.Score;
                             ReturnInfo.Player2.WordsPlayed = currentGame.Player2.WordsPlayed;
                             return ReturnInfo;
                         }
-
                     }
                 }
                 else
@@ -326,19 +345,35 @@ namespace Boggle
         }
 
         /// <summary>
-        /// 
+        /// Creates a new game if there is a pending player.
+        /// Otherwise creates a pending player.
         /// </summary>
-        /// <param name="starter"></param>
-        /// <returns></returns>
+        /// <param name="starter">Represents time limit & user token</param>
+        /// <returns>gameID of game created</returns>
         public gameIDClass JoinGame(gameStart starter)
         {
             lock (sync)
             {
+
+                // Adds the words from the dictionary to a hashset if this is the first game. 
+                if (games.Count == 0 && dictonaryWords.Count == 0)
+                {
+                    string currentLine;
+                    StreamReader dictionaryReader = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "/dictionary.txt");
+                    while ((currentLine = dictionaryReader.ReadLine()) != null)
+                    {
+                        dictonaryWords.Add(currentLine);
+                    }
+                }
+
+
+                // Checks for invalid time & invalid user token
                 if (starter.TimeLimit > 120 || starter.TimeLimit < 5 || starter.UserToken.Length != 36 || !users.ContainsKey(starter.UserToken))
                 {
                     SetStatus(Forbidden);
                     return null;
                 }
+                // If the user token is already a player in a pending game
                 else if (currentPlayersinGame.ContainsKey(starter.UserToken))
                 {
                     SetStatus(Conflict);
@@ -359,7 +394,7 @@ namespace Boggle
                         //Set the games player one to the new player as it will be the first. 
                         game.Player1 = newPlayer;
 
-                        //Queue the userToken. *** MIGHT NOT NEED THIS MAY ONLY NEED BOOL NOW.
+                        //Queue the userToken.
                         needed.Enqueue(starter.UserToken);
 
                         //Set status to accepted.
@@ -421,11 +456,13 @@ namespace Boggle
                     return id;
                 }
             }
-
-
-            
         }
 
+        /// <summary>
+        /// Creates a user w/ a given nickname
+        /// </summary>
+        /// <param name="Nickname">nickname given by user</param>
+        /// <returns>user token</returns>
         UserTokenClass IBoggleService.CreateUser(UserInfo Nickname)
         {
             lock (sync)
@@ -436,7 +473,7 @@ namespace Boggle
                     SetStatus(Forbidden);
                     return null;
                 }
-                //IF nickname is valud set status to created, and generate the GUID and returns it.
+                //IF nickname is value set status to created, and generate the GUID and returns it.
                 else
                 {
                     UserTokenClass ut = new UserTokenClass();
@@ -447,9 +484,6 @@ namespace Boggle
                 }
             }
         }
-
-
-
 
         //////////////////////////////////////////////////////////////////////////METHOD GIVEN BY JOE///////////////////////////////////////////////////
 
