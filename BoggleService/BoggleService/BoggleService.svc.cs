@@ -535,7 +535,7 @@ namespace Boggle
                         string newUserToken = Guid.NewGuid().ToString();
 
                         // This is where the placeholders are replaced.
-                        command.Parameters.AddWithValue("@UserID", newUserToken);
+                        command.Parameters.AddWithValue("@UserToken", newUserToken);
                         command.Parameters.AddWithValue("@Nickname", Nickname.Nickname.Trim());
 
                         // This executes the command within the transaction over the connection.  The number of rows
@@ -555,8 +555,6 @@ namespace Boggle
                     }
                 }
             }
-
-
         }
 
         //////////////////////////////////////////////////////////////////////////METHOD GIVEN BY JOE///////////////////////////////////////////////////
