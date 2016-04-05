@@ -54,7 +54,9 @@ namespace Boggle
         private static readonly object sync = new object();
 
 
-        // The connection string to the DB
+        /// <summary>
+        /// The connection string to the DB
+        /// </summary>
         private static string BoggleDB;
 
         static BoggleService()
