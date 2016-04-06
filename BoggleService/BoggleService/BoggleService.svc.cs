@@ -80,6 +80,11 @@ namespace Boggle
             // Rather than build the connection string into the program, I store it in the Web.config
             // file where it can be easily found and changed.  You should do that too.
             BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
+
+
+            //Starts the game off by making an empty game. 
+
+
         }
 
         /// <summary>
@@ -94,7 +99,7 @@ namespace Boggle
             {
                 // Check if pending player
                 if (needed.Count == 1 && needed.Peek() == UI.UserToken)
-                { 
+                {
                     //If the UserToken is the same as the player in the queue remove them from the queue.
                     needed.Dequeue();
                     string tempGameId = currentPlayersinGame[UI.UserToken].GameID;
@@ -241,7 +246,7 @@ namespace Boggle
         {
             //This subtracts the currentTime from the start time. WE then divide it by 1000 to get a value in
             //seconds. Round the  value to get a more accurate result.
-            double seconds = ((DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) -startTime) / 1000;
+            double seconds = ((DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) - startTime) / 1000;
             return (int)Math.Round(seconds);
         }
 
@@ -374,6 +379,7 @@ namespace Boggle
             }
         }
 
+        ///CURENTLY TRYING TO PUSH THIS MOFUCKA
         /// <summary>
         /// Creates a new game if there is a pending player.
         /// Otherwise creates a pending player.
@@ -382,108 +388,144 @@ namespace Boggle
         /// <returns>gameID of game created</returns>
         public gameIDClass JoinGame(gameStart starter)
         {
-            lock (sync)
+
+            // Checks for invalid time & invalid user token
+            if (starter.TimeLimit > 120 || starter.TimeLimit < 5 || starter.UserToken.Length != 36)
             {
-
-                // Adds the words from the dictionary to a hashset if this is the first game. 
-                if (games.Count == 0 && dictonaryWords.Count == 0)
+                SetStatus(Forbidden);
+                return null;
+            }
+            //STILL NEED TO CHECK TO MAKE SURE USER IS IN THE DB.
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
+            {
+                conn.Open();
+                using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    string currentLine;
-                    StreamReader dictionaryReader = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "/dictionary.txt");
-                    while ((currentLine = dictionaryReader.ReadLine()) != null)
+
+                    //Query to check if usertoken is in actual DB.
+                    using (SqlCommand command = new SqlCommand("select UserToken from Users where UserToken = @UserToken ", conn, trans))
                     {
-                        dictonaryWords.Add(currentLine);
+                        command.Parameters.AddWithValue("@UserToken", starter.UserToken);
+
+                        // This executes a query (i.e. a select statement).  The result is an
+                        // SqlDataReader that you can use to iterate through the rows in the response.
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows == false)
+                            {
+                                SetStatus(Forbidden);
+                                return null;
+                            }
+                            reader.Close();
+                        }
                     }
-                }
 
+                    bool isAccepted = false;
+                    bool isCreated = false;
+                    string currentGameID = null;
 
-                // Checks for invalid time & invalid user token
-                if (starter.TimeLimit > 120 || starter.TimeLimit < 5 || starter.UserToken.Length != 36 || !users.ContainsKey(starter.UserToken))
-                {
-                    SetStatus(Forbidden);
-                    return null;
-                }
-                // If the user token is already a player in a pending game
-                else if (currentPlayersinGame.ContainsKey(starter.UserToken))
-                {
-                    SetStatus(Conflict);
-                    return null;
-                }
-                else
-                {
-                    gameIDClass id = new gameIDClass();
-                    GameInfo game = new GameInfo();
-                    Player newPlayer = new Player();
-
-                    //Sets up the new players values. 
-                    newPlayer.UserToken = starter.UserToken;
-                    newPlayer.Nickname = users[starter.UserToken];
-                    //If the currently pending games is 0 then we need to add to it. 
-                    if(needed.Count == 0)
+                    //Gets game ID and decides if we are accepting or creating a game. 
+                    using (SqlCommand command = new SqlCommand("select top 1 * from Games order by GameId desc", conn, trans))
                     {
-                        //Set the games player one to the new player as it will be the first. 
-                        game.Player1 = newPlayer;
+                        using (SqlDataReader reader2 = command.ExecuteReader())
+                        {
+                            //If there is not games then set isAccepted = true.
+                            if (!reader2.HasRows)
+                            {
+                                isAccepted = true;
+                            }
 
-                        //Queue the userToken.
-                        needed.Enqueue(starter.UserToken);
 
-                        //Set status to accepted.
-                        SetStatus(Accepted);
+                            while (reader2.Read())
+                            {
+                                //If the player is already in a pending game then SetStatus to conflict and return. 
+                                string player1 = (string)reader2["Player1"];
+                                if (player1 == starter.UserToken)
+                                {
+                                    SetStatus(Conflict);
+                                    return null;
+                                }
 
-                        //Set the timeLeft temporarly so we can compute the average in the next step.
-                        game.TimeLeft = starter.TimeLimit;
+                                object player2 = reader2["Player2"];
+                                //Accept Game
+                                if (!(player2 is DBNull))
+                                {
+                                    isAccepted = true;
+                                }
 
-                        //Compute the gameID.
-                        string tempGameid = "G" + (gameNum++).ToString();
+                                //Create Game
+                                else
+                                {
+                                    isCreated = true;
+                                }
 
-                        //Sets the gamestate to pending.
-                        game.GameState = "pending";
+                                currentGameID = reader2["GameID"].ToString();
+                            }
+                            reader2.Close();
+                        }
+                    }
 
-                        //Adds the game to the game dictionary.
-                        games.Add(tempGameid, game);
 
-                        //Returns the gameId.
-                        id.GameID = tempGameid;
+                    gameIDClass returnInfo = new gameIDClass();
+                    returnInfo.GameID = currentGameID;
+                    //If we need to make a created game.
+                    if (isCreated == true)
+                    {
+                        using (SqlCommand command = new SqlCommand("update Games set Player2 = @UserToken,TimeLimit = (TimeLimit + @TimeLimit)/2, StartTime = @StartTime,Board = @Board where GameID = @GameID", conn, trans))
+                        {
 
-                        //adding to currentplayersingame
-                        currentPlayersinGame.Add(starter.UserToken, id);
+                            command.Parameters.AddWithValue("@UserToken", starter.UserToken);
+                            command.Parameters.AddWithValue("@TimeLimit", starter.TimeLimit);
+                            command.Parameters.AddWithValue("@StartTime", DateTime.Now);
+                            command.Parameters.AddWithValue("@Board", (new BoggleBoard()).ToString());
+                            command.Parameters.AddWithValue("@GameID", currentGameID);
+                            if (command.ExecuteNonQuery() == 0)
+                            {
+                                SetStatus(Forbidden);
+                                return null;
+                            }
+                            trans.Commit();
+                            SetStatus(Created);
+                        }
+                    }
+
+                    //If we need to accept a game. 
+                    else if (isAccepted == true)
+                    {
+                        using (SqlCommand command = new SqlCommand("insert into Games(Player1,TimeLimit) output inserted.GameID values(@UserToken,@TimeLimit)", conn, trans))
+                        {
+                            command.Parameters.AddWithValue("@UserToken", starter.UserToken);
+                            command.Parameters.AddWithValue("@TimeLimit", starter.TimeLimit);
+
+                            //If we dont have a current ID Then get the gameID from the command. 
+
+                            using (SqlDataReader reader3 = command.ExecuteReader())
+                            {
+
+                                if (reader3.HasRows == false)
+                                {
+                                    SetStatus(Forbidden);
+                                    return null;
+                                }
+
+                                while (reader3.Read())
+                                {
+                                    currentGameID = reader3["GameID"].ToString();
+                                    returnInfo.GameID = currentGameID;
+                                }
+                            }
+
+                            trans.Commit();
+                            SetStatus(Accepted);
+                        }
                     }
                     else
                     {
-                        //gets the new users gameID and resets return value to equal that. 
-                        string tempGameid = currentPlayersinGame[needed.Dequeue()].GameID;
-                        currentPlayersinGame.Add(starter.UserToken, id);
-                        id.GameID = tempGameid;
-
-                        //Get the game info that the user will be added to from dequeue and using the other dictionaries.
-                        game = games[tempGameid];
-
-                        //Making the boggleBoard.
-                        game.Board = new BoggleBoard();
-
-                        //Sets the newPlayer to player two as they are the second to enter this game.
-                        game.Player2 = newPlayer;
-
-                        //Takes the mean of the two players times and sets the timeLimit and timeLeft to it. 
-                        game.TimeLimit = ((game.TimeLeft + starter.TimeLimit) / 2);
-                        game.TimeLeft = game.TimeLimit;
-
-                        //Setting the score of both player.s
-                        game.Player1.Score = 0;
-                        game.Player2.Score = 0;
-
-                        //Initializing the arrays of each player. 
-                        game.Player1.WordsPlayed = new List<WordValue>();
-                        game.Player2.WordsPlayed = new List<WordValue>();
-
-                        //set game to active and set status to created. 
-                        game.GameState = "active";
-
-                        SetStatus(Created);
-
-                        game.StartTimeInMilliseconds = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+                        SetStatus(Forbidden);
+                        return null;
                     }
-                    return id;
+
+                    return returnInfo;
                 }
             }
         }
@@ -494,7 +536,7 @@ namespace Boggle
         /// <param name="Nickname">nickname given by user</param>
         /// <returns>user token</returns>
         UserTokenClass IBoggleService.CreateUser(UserInfo Nickname)
-        { 
+        {
             //DB VERSION
             //If nickname is invalid then set status to forbidden and returns null.
             if (Nickname.Nickname == null || Nickname.Nickname.Trim().Length == 0)
