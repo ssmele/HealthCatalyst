@@ -10,6 +10,7 @@ using System.Threading;
 using static System.Net.HttpStatusCode;
 using System.Diagnostics;
 using System.IO;
+using Boggle;
 
 namespace Boggle
 {
@@ -80,6 +81,7 @@ namespace Boggle
         /// </summary>
         private RestTestClient client = new RestTestClient("http://localhost:60000/");
         
+
         //Testing createUser
 
         /// <summary>
@@ -222,26 +224,28 @@ namespace Boggle
         [TestMethod]
         public void TestJoinGame1Player()
         {
-            //Creating first user. 
-            dynamic user = new ExpandoObject();
-            user.Nickname = "swag";
-            Response r = client.DoPostAsync("users", user).Result;
-            Assert.AreEqual(Created, r.Status);
-            string token = r.Data.UserToken;
+            BoggleService b = new BoggleService();
+            
+            ////Creating first user. 
+            //dynamic user = new ExpandoObject();
+            //user.Nickname = "swag";
+            //Response r = client.DoPostAsync("users", user).Result;
+            //Assert.AreEqual(Created, r.Status);
+            //string token = r.Data.UserToken;
 
-            dynamic newGame = new ExpandoObject();
-            newGame.UserToken = token;
-            newGame.TimeLimit = 60;
-            Response x = client.DoPostAsync("games", newGame).Result;
-            Assert.AreEqual((string)x.Data.GameID, "G0");
-            Assert.AreEqual(x.Status, Accepted);
+            //dynamic newGame = new ExpandoObject();
+            //newGame.UserToken = token;
+            //newGame.TimeLimit = 60;
+            //Response x = client.DoPostAsync("games", newGame).Result;
+            //Assert.AreEqual((string)x.Data.GameID, "1");
+            //Assert.AreEqual(x.Status, Accepted);
 
 
-            newGame.UserToken = token;
-            newGame.TimeLimit = 60;
-            x = client.DoPostAsync("games", newGame).Result;
-            Assert.IsNull(x.Data);
-            Assert.AreEqual(x.Status, Conflict);
+            //newGame.UserToken = token;
+            //newGame.TimeLimit = 60;
+            //x = client.DoPostAsync("games", newGame).Result;
+            //Assert.IsNull(x.Data);
+            //Assert.AreEqual(x.Status, Conflict);
         }
 
         /// <summary>
@@ -262,7 +266,7 @@ namespace Boggle
             newGame.UserToken = token;
             newGame.TimeLimit = 60;
             Response x = client.DoPostAsync("games", newGame).Result;
-            Assert.AreEqual((string)x.Data.GameID, "G0");
+            Assert.AreEqual((string)x.Data.GameID, "1");
             Assert.AreEqual(x.Status, Created);
 
             newGame.UserToken = token;
@@ -280,7 +284,7 @@ namespace Boggle
             newGame2.UserToken = token;
             newGame2.TimeLimit = 60;
             Response firstGame = client.DoPostAsync("games", newGame2).Result;
-            Assert.AreEqual((string)firstGame.Data.GameID, "G1");
+            Assert.AreEqual((string)firstGame.Data.GameID, "2");
             Assert.AreEqual(firstGame.Status, Accepted);
 
 
@@ -293,7 +297,7 @@ namespace Boggle
             newGame2.UserToken = token;
             newGame2.TimeLimit = 60;
             firstGame = client.DoPostAsync("games", newGame2).Result;
-            Assert.AreEqual((string)firstGame.Data.GameID, "G1");
+            Assert.AreEqual((string)firstGame.Data.GameID, "2");
             Assert.AreEqual(firstGame.Status, Created);
         }
 
