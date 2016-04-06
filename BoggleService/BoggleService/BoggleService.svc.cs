@@ -80,11 +80,6 @@ namespace Boggle
             // Rather than build the connection string into the program, I store it in the Web.config
             // file where it can be easily found and changed.  You should do that too.
             BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
-
-
-            //Starts the game off by making an empty game. 
-
-
         }
 
         /// <summary>
@@ -95,24 +90,35 @@ namespace Boggle
         /// <param name="UI">UserToken of player that wants to be taken from the Queue.</param>
         public void CancelJoin(UserInfo UI)
         {
-            lock (sync)
+
+            if (UI.UserToken.Length != 36)
             {
-                // Check if pending player
-                if (needed.Count == 1 && needed.Peek() == UI.UserToken)
+                SetStatus(Forbidden);
+                return;
+            }
+
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
+            {
+                conn.Open();
+                using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    //If the UserToken is the same as the player in the queue remove them from the queue.
-                    needed.Dequeue();
-                    string tempGameId = currentPlayersinGame[UI.UserToken].GameID;
-                    currentPlayersinGame.Remove(UI.UserToken);
-                    users.Remove(UI.UserToken);
-                    games.Remove(tempGameId);
-                    //Set status to OK.
-                    SetStatus(OK);
-                }
-                else
-                {
-                    //If there not in the queue then there is no where to take that user out from. 
-                    SetStatus(Forbidden);
+
+                    //THIS IS AN INTENSE QUERY!!!!!!!!! YEAH!!!!!!! DOES ALL THE WORK FOR US YEAH!!!!!
+                    using (SqlCommand topCommand = new SqlCommand("Delete from Games where (Select Max(GameID) from Games) = GameID and Player2 IS NULL and Player1 = @UserToken and (select top 1 Player1 from Games order by GameID desc) = @UserToken", conn, trans))
+                    {
+                        topCommand.Parameters.AddWithValue("@UserToken", UI.UserToken);
+
+                        //IF no columns were removed then SetStatus to forbidden.
+                        if (topCommand.ExecuteNonQuery() == 0)
+                        {
+                            SetStatus(Forbidden);
+                        }
+                        else
+                        {
+                            trans.Commit();
+                            SetStatus(OK);
+                        }
+                    }
                 }
             }
         }
@@ -259,6 +265,112 @@ namespace Boggle
         /// <returns>An object with serialized information on the gameStatus.</returns>
         public GameStateClass getGameStatus(string GivenGameID, string answer)
         {
+            using (SqlConnection conn = new SqlConnection(BoggleDB))
+            {
+                conn.Open();
+                using (SqlTransaction trans = conn.BeginTransaction())
+                {
+
+                    GameStateClass returnInfo = new GameStateClass();
+                    string Board;
+                    int TimeLimit;
+                    int? GameID = null;
+                    string Player1UserToken = "", Player2UserToken = "";
+
+                    //Determine which state we are in. 
+                    using (SqlCommand GameInfoCommand = new SqlCommand("Select * from Games where GameID = @GameID", conn, trans))
+                    {
+                        GameInfoCommand.Parameters.AddWithValue("@GameID", GivenGameID);
+
+                        using (SqlDataReader reader = GameInfoCommand.ExecuteReader())
+                        {
+                            //If there was no GameID by the given GameID
+                            if (!reader.HasRows)
+                            {
+                                SetStatus(Forbidden);
+                                return null;
+                            }
+
+                            while (reader.Read())
+                            {
+                                object Player2 = reader["Player2"];
+                                if (Player2 is DBNull)
+                                {
+                                    returnInfo.GameState = "pending";
+                                    SetStatus(OK);
+                                    return returnInfo;
+                                }
+
+                                Player2UserToken = (string)Player2;
+                                Player1UserToken = (string)reader["Player1"];
+                                GameID = (int)reader["GameID"];
+
+                                //Getting all the current info from the board as it is now either active or completed. 
+                                Board = (string)reader["Board"];
+                                TimeLimit = (int)reader["TimeLimit"];
+                                DateTime startTime = (DateTime)reader["StartTime"];
+                                long startTimeInMilli = startTime.Ticks / TimeSpan.TicksPerMillisecond;
+
+                                //Getting currentTime that has passed since game and setting gameState accordingly. 
+                                int minusTime = getElapsedTime(startTimeInMilli);
+                                if (minusTime >= TimeLimit)
+                                {
+                                    returnInfo.GameState = "completed";
+                                    returnInfo.TimeLeft = 0;
+                                }
+                                else
+                                {
+                                    returnInfo.GameState = "active";
+                                    returnInfo.TimeLeft = TimeLimit-minusTime;
+                                }
+                            }
+                            reader.Close();
+                        }
+                    }
+
+                    //Getting scores for both players. 
+                    using (SqlCommand ScoreCommand = new SqlCommand("Select Sum(Score) as Player1Score from Words where GameID = @GameID and Player = @Player1UserToken union Select Sum(Score) as Player2Score from Words where GameID = @GameID and Player = @Player2UserToken ", conn, trans))
+                    {
+                        ScoreCommand.Parameters.AddWithValue("@Player1UserToken", Player1UserToken);
+                        ScoreCommand.Parameters.AddWithValue("@Player2UserToken", Player2UserToken);
+                        ScoreCommand.Parameters.AddWithValue("@GameID", GameID);
+
+                        using (SqlDataReader reader2 = ScoreCommand.ExecuteReader())
+                        {
+                            reader2.Read();
+                            object Score2 = reader2["Score"];
+                            if (Score2 is DBNull)
+                            {
+                                returnInfo.Player2.Score = 0;
+                            }
+                            else
+                            {
+                                returnInfo.Player2.Score = (int)reader2["Score"];
+                            }
+                            
+                            reader2.Read();
+                            object Score1 = reader2["Score"];
+                            if(Score1 is DBNull)
+                            {
+                                returnInfo.Player1.Score = 0;
+                            }
+                            else
+                            {
+                                returnInfo.Player1.Score = (int)reader2["Score"];
+                            }
+                            reader2.Close();
+                        }
+                    }
+
+                    if(answer == "yes")
+                    {
+                        SetStatus(OK);
+                        return returnInfo;
+                    }
+                }
+            }
+
+
             lock (sync)
             {
                 if (games.ContainsKey(GivenGameID))
