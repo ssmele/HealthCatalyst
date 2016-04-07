@@ -278,11 +278,11 @@ namespace Boggle
                     string Player1UserToken = "", Player2UserToken = "";
 
                     //Determine which state we are in. 
-                    using (SqlCommand command = new SqlCommand("Select * from Games where GameID = @GameID", conn, trans))
+                    using (SqlCommand GameInfoCommand = new SqlCommand("Select * from Games where GameID = @GameID", conn, trans))
                     {
-                        command.Parameters.AddWithValue("@GameID", GivenGameID);
+                        GameInfoCommand.Parameters.AddWithValue("@GameID", GivenGameID);
 
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        using (SqlDataReader reader = GameInfoCommand.ExecuteReader())
                         {
                             //If there was no GameID by the given GameID
                             if (!reader.HasRows)
@@ -323,21 +323,19 @@ namespace Boggle
                                     returnInfo.GameState = "active";
                                     returnInfo.TimeLeft = TimeLimit-minusTime;
                                 }
-
                             }
                             reader.Close();
                         }
                     }
-                    
 
                     //Getting scores for both players. 
-                    using (SqlCommand command = new SqlCommand("Select Sum(Score) as Player1Score from Words where GameID = @GameID and Player = @Player1UserToken union Select Sum(Score) as Player2Score from Words where GameID = @GameID and Player = @Player2UserToken ", conn, trans))
+                    using (SqlCommand ScoreCommand = new SqlCommand("Select Sum(Score) as Player1Score from Words where GameID = @GameID and Player = @Player1UserToken union Select Sum(Score) as Player2Score from Words where GameID = @GameID and Player = @Player2UserToken ", conn, trans))
                     {
-                        command.Parameters.AddWithValue("@Player1UserToken", Player1UserToken);
-                        command.Parameters.AddWithValue("@Player2UserToken", Player2UserToken);
-                        command.Parameters.AddWithValue("@GameID", GameID);
+                        ScoreCommand.Parameters.AddWithValue("@Player1UserToken", Player1UserToken);
+                        ScoreCommand.Parameters.AddWithValue("@Player2UserToken", Player2UserToken);
+                        ScoreCommand.Parameters.AddWithValue("@GameID", GameID);
 
-                        using (SqlDataReader reader2 = command.ExecuteReader())
+                        using (SqlDataReader reader2 = ScoreCommand.ExecuteReader())
                         {
                             reader2.Read();
                             object Score2 = reader2["Score"];
