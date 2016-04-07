@@ -2,8 +2,10 @@
 // u0741837        u0897718
 // CS 3500  PS10 
 // 04/07/16
+
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.SqlClient;
 using System.IO;
 using System.Net;
@@ -13,7 +15,7 @@ using static System.Net.HttpStatusCode;
 namespace Boggle
 {
     /// <summary>
-    /// This class creates a service that returns game information when interacting with the client
+    /// This class creates a service that returns game information when interacting with the client..
     /// </summary>
     public class BoggleService : IBoggleService
     {
@@ -32,8 +34,13 @@ namespace Boggle
         /// </summary>
         static BoggleService()
         {
+
+           
             // Saves the connection string for the database.  A connection string contains the
             // information necessary to connect with the database server.  ;
+            BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
+
+            //Setting up dictionary HashSet
             string currentLine;
             StreamReader dictionaryReader = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "/dictionary.txt");
             while ((currentLine = dictionaryReader.ReadLine()) != null)
@@ -63,7 +70,7 @@ namespace Boggle
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
 
-                    //THIS IS AN INTENSE QUERY!!!!!!!!! YEAH!!!!!!! DOES ALL THE WORK FOR US YEAH!!!!!
+                    //Query to cancel the game if most recent game is pending and is equal to given UserToken. 
                     using (SqlCommand topCommand = new SqlCommand("Delete from Games where (Select Max(GameID) from Games) = GameID and Player2 IS NULL and Player1 = @UserToken and (select top 1 Player1 from Games order by GameID desc) = @UserToken", conn, trans))
                     {
                         topCommand.Parameters.AddWithValue("@UserToken", UI.UserToken);
@@ -86,10 +93,11 @@ namespace Boggle
 
 
         /// <summary>
-        /// This method accepts a userToken and a game ID. 
+        /// This method accepts a userToken, GameID, and Word. If all values and games match up the word will be submitted to the
+        /// user. 
         /// </summary>
-        /// <param name="wordInfo"></param>
-        /// <param name="GivenGameID"></param>
+        /// <param name="wordInfo">UserToken and Word</param>
+        /// <param name="GivenGameID">GameID user wants to submit word to.</param>
         /// <returns></returns>
         public ScoreResponse SubmitWord(WordSubmit wordInfo, string GivenGameID)
         {
@@ -115,6 +123,7 @@ namespace Boggle
 
                         using (SqlDataReader reader = Command.ExecuteReader())
                         {
+                            //If no game set to forbideen and return null. 
                             if (!reader.HasRows)
                             {
                                 SetStatus(Forbidden);
@@ -137,6 +146,7 @@ namespace Boggle
                                 DateTime gameTime = (DateTime)reader["StartTime"];
                                 long gameTimeInMilli = gameTime.Ticks / TimeSpan.TicksPerMillisecond;
                                 long minusTime = getElapsedTime(gameTimeInMilli);
+
                                 //Check to see if game is already completed if it is then setStatus to conflict and return null. 
                                 int TimeLimit = (int)reader["TimeLimit"];
                                 if (minusTime >= TimeLimit)
@@ -154,6 +164,7 @@ namespace Boggle
                     string word = wordInfo.Word.Trim();
 
                     BoggleBoard currentBoard = new BoggleBoard(board);
+
                     // If the word is less than 3 long, automatically 0 points
                     if (word.Length < 3)
                     {
@@ -206,6 +217,7 @@ namespace Boggle
 
                         using (SqlDataReader reader = Command.ExecuteReader())
                         {
+                            //If they have already played the game then set the word score to zero. 
                             if (reader.HasRows)
                             {
                                 returnInfo.Score = "0";
@@ -234,8 +246,8 @@ namespace Boggle
         /// <summary>
         /// This method will get the elapsed time in seconds from a given long time. 
         /// </summary>
-        /// <param name="startTime"></param>
-        /// <returns></returns>
+        /// <param name="startTime">Time that user wants to get the elapsed time from. </param>
+        /// <returns>Time in seconds that have elapsed from given startTime. </returns>
         private int getElapsedTime(long startTime)
         {
             //This subtracts the currentTime from the start time. WE then divide it by 1000 to get a value in
@@ -280,6 +292,7 @@ namespace Boggle
 
                             while (reader.Read())
                             {
+                                //If player2 is null then its a pending game. 
                                 object Player2 = reader["Player2"];
                                 if (Player2 is DBNull)
                                 {
@@ -288,6 +301,7 @@ namespace Boggle
                                     return returnInfo;
                                 }
 
+                                //Set playerUserTokens.
                                 Player2UserToken = (string)Player2;
                                 Player1UserToken = (string)reader["Player1"];
                                 GameID = (int)reader["GameID"];
@@ -315,6 +329,7 @@ namespace Boggle
                         }
                     }
 
+                    //Initializing player variables. 
                     returnInfo.Player1 = new Player();
                     returnInfo.Player2 = new Player();
                     returnInfo.Player1.Score = playerScoreGetter(Player1UserToken, GameID);
@@ -364,7 +379,7 @@ namespace Boggle
         /// <summary>
         /// This method gets all the words played and there respective scores for the given userToken. 
         /// </summary>
-        /// <param name="playerToken"></param>
+        /// <param name="playerToken">UserToken that user wants to get all the wordsPlayed for. </param>
         /// <returns></returns>
         private List<WordValue> playerWordsPlayedGetter(string playerToken)
         {
@@ -384,7 +399,6 @@ namespace Boggle
                             while (reader2.Read())
                             {
                                 string word = (string)reader2["Word"];
-                                //TODO: WE might need to change our data models to an INT!!! REFRENCE THE API.
                                 string Score = reader2["Score"].ToString();
                                 WordValue entry = new WordValue();
                                 entry.Word = word;
@@ -401,7 +415,7 @@ namespace Boggle
         /// <summary>
         /// This method gets the nickname for the given userToken. 
         /// </summary>
-        /// <param name="playerToken"></param>
+        /// <param name="playerToken">UserToken of player that user wants to get the nickname of.</param>
         /// <returns></returns>
         private string playerNicknameGetter(string playerToken)
         {
@@ -435,8 +449,8 @@ namespace Boggle
         /// <summary>
         /// This method gets the score for the given userToken.
         /// </summary>
-        /// <param name="playerToken"></param>
-        /// <param name="GameID"></param>
+        /// <param name="playerToken">UserToken that the user wants to get the gameScore from. </param>
+        /// <param name="GameID">GameID that the user wants to get the given userTokens score from. </param>
         /// <returns></returns>
         private int playerScoreGetter(string playerToken, int? GameID)
         {
@@ -445,7 +459,7 @@ namespace Boggle
                 conn.Open();
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    // Gets total score from the words in that database
+                    // Gets total score from the words in that database where userToken and gameID match parameters. 
                     using (SqlCommand command = new SqlCommand("Select Sum(Score) as Score from Words where GameID = @GameID and Player = @Player1UserToken ", conn, trans))
                     {
                         command.Parameters.AddWithValue("@Player1UserToken", playerToken);
@@ -478,11 +492,12 @@ namespace Boggle
         public gameIDClass JoinGame(gameStart starter)
         {
             // Checks for invalid time & invalid user token
-            if (starter.TimeLimit > 120 || starter.TimeLimit < 5 || starter.UserToken.Length != 36)
+            if (starter.TimeLimit > 120 || starter.TimeLimit < 5 || starter.UserToken == null || starter.UserToken.Length != 36)
             {
                 SetStatus(Forbidden);
                 return null;
             }
+
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
@@ -602,12 +617,14 @@ namespace Boggle
                             SetStatus(Accepted);
                         }
                     }
+                    //This is if something went wrong just return forbidden and return null. 
                     else
                     {
                         SetStatus(Forbidden);
                         return null;
                     }
 
+                    //Return the appropirate response info. 
                     return returnInfo;
                 }
             }
