@@ -1,10 +1,9 @@
 ﻿// Hanna Larsen & Salvatore Stone Mele
 // u0741837        u0897718
 // CS 3500  PS10 
-// 04/05/16
+// 04/07/16
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data.SqlClient;
 using System.IO;
 using System.Net;
@@ -28,37 +27,19 @@ namespace Boggle
         /// </summary>
         private static string BoggleDB;
 
+        /// <summary>
+        /// Creates a boggle service
+        /// </summary>
         static BoggleService()
         {
             // Saves the connection string for the database.  A connection string contains the
-            // information necessary to connect with the database server.  When you create a
-            // DB, there is generally a way to obtain the connection string.  From the Server
-            // Explorer pane, obtain the properties of DB to see the connection string.
-
-            // The connection string of my ToDoDB.mdf shows as
-            //
-            //    Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="C:\Users\zachary\Source\CS 3500 S16\examples\ToDoList\ToDoListDB\App_Data\ToDoDB.mdf";Integrated Security=True
-            //
-            // Unfortunately, this is absolute pathname on my computer, which means that it
-            // won't work if the solution is moved.  Fortunately, it can be shorted to
-            //
-            //    Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename="|DataDirectory|\ToDoDB.mdf";Integrated Security=True
-            //
-            // You should shorten yours this way as well.
-            //
-            // Rather than build the connection string into the program, I store it in the Web.config
-            // file where it can be easily found and changed.  You should do that too.
-            BoggleDB = ConfigurationManager.ConnectionStrings["BoggleDB"].ConnectionString;
-
-
+            // information necessary to connect with the database server.  ;
             string currentLine;
             StreamReader dictionaryReader = new StreamReader(AppDomain.CurrentDomain.BaseDirectory + "/dictionary.txt");
             while ((currentLine = dictionaryReader.ReadLine()) != null)
             {
                 dictonaryWords.Add(currentLine);
             }
-
-
         }
 
         /// <summary>
@@ -69,8 +50,8 @@ namespace Boggle
         /// <param name="UI">UserToken of player that wants to be taken from the Queue.</param>
         public void CancelJoin(UserInfo UI)
         {
-
-            if (UI.UserToken.Length != 36)
+            // If user token is invalid
+            if (UI.UserToken == null || UI.UserToken.Length != 36)
             {
                 SetStatus(Forbidden);
                 return;
@@ -100,6 +81,7 @@ namespace Boggle
                     }
                 }
             }
+
         }
 
 
@@ -111,7 +93,8 @@ namespace Boggle
         /// <returns></returns>
         public ScoreResponse SubmitWord(WordSubmit wordInfo, string GivenGameID)
         {
-            if (wordInfo.Word == null || wordInfo.Word.Trim().Length == 0)
+            // If the user token is invalid or the word is invalid
+            if (wordInfo.UserToken == null || wordInfo.UserToken.Length != 36 || wordInfo.Word == null || wordInfo.Word.Trim().Length == 0)
             {
                 SetStatus(Forbidden);
                 return null;
@@ -125,7 +108,7 @@ namespace Boggle
                     //This query checks to make sure the userToken given is actually in given gameId. It also gets the StartTime, and TimeLimit to determine
                     //if the game is active or completed.
                     string board = null;
-                    using (SqlCommand Command = new SqlCommand("select StartTime,TimeLimit,Board from Games where GameID = @GameID and Player1 = @UserToken or Player2 = @UserToken", conn, trans))
+                    using (SqlCommand Command = new SqlCommand("select StartTime,TimeLimit,Board,Player2 from Games where GameID = @GameID and Player1 = @UserToken or Player2 = @UserToken", conn, trans))
                     {
                         Command.Parameters.AddWithValue("@UserToken", wordInfo.UserToken);
                         Command.Parameters.AddWithValue("@GameID", GivenGameID);
@@ -140,10 +123,21 @@ namespace Boggle
                             else
                             {
                                 reader.Read();
+
+                                //Checking to see if player2 is null meaning the game is pending and words cant be submitted. 
+                                object player2 = reader["Player2"];
+                                if (player2 is DBNull)
+                                {
+                                    SetStatus(Conflict);
+                                    return null;
+                                }
+
+                                // Creates a board & gets game info
                                 board = (string)reader["Board"];
                                 DateTime gameTime = (DateTime)reader["StartTime"];
                                 long gameTimeInMilli = gameTime.Ticks / TimeSpan.TicksPerMillisecond;
                                 long minusTime = getElapsedTime(gameTimeInMilli);
+                                //Check to see if game is already completed if it is then setStatus to conflict and return null. 
                                 int TimeLimit = (int)reader["TimeLimit"];
                                 if (minusTime >= TimeLimit)
                                 {
@@ -160,20 +154,20 @@ namespace Boggle
                     string word = wordInfo.Word.Trim();
 
                     BoggleBoard currentBoard = new BoggleBoard(board);
+                    // If the word is less than 3 long, automatically 0 points
+                    if (word.Length < 3)
+                    {
+                        returnInfo.Score = "0";
+                    }
                     // If the word can be formed on the board
-                    if (currentBoard.CanBeFormed(word))
+                    else if (currentBoard.CanBeFormed(word))
                     {
                         // If the word is in the dictionary
                         if (dictonaryWords.Contains(wordInfo.Word.ToUpper()))
                         {
                             // Determines the score based on word length
                             int word_length = word.Length;
-
-                            if (word_length < 3)
-                            {
-                                returnInfo.Score = "0";
-                            }
-                            else if (word_length >= 3 && word_length < 5)
+                            if (word_length >= 3 && word_length < 5)
                             {
                                 returnInfo.Score = "1";
                             }
@@ -218,7 +212,6 @@ namespace Boggle
                             }
                             reader.Close();
                         }
-
                     }
 
                     //If it gets out of that command its active and a valid request.
@@ -236,7 +229,6 @@ namespace Boggle
                     }
                 }
             }
-
         }
 
         /// <summary>
@@ -266,18 +258,17 @@ namespace Boggle
                 conn.Open();
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-
+                    // Initializes game info variables
                     GameStateClass returnInfo = new GameStateClass();
                     string Board = "";
                     int TimeLimit = 0;
                     int? GameID = null;
                     string Player1UserToken = "", Player2UserToken = "";
 
-                    //Determine which state we are in. 
+                    //Determine which state the game is in. 
                     using (SqlCommand command = new SqlCommand("Select * from Games where GameID = @GameID", conn, trans))
                     {
                         command.Parameters.AddWithValue("@GameID", GivenGameID);
-
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
                             //If there was no GameID by the given GameID
@@ -365,14 +356,13 @@ namespace Boggle
                             SetStatus(Forbidden);
                             return null;
                         }
-
                     }
                 }
             }
         }
 
         /// <summary>
-        /// This method gets all the words played and there respectice scores for the given userToken. 
+        /// This method gets all the words played and there respective scores for the given userToken. 
         /// </summary>
         /// <param name="playerToken"></param>
         /// <returns></returns>
@@ -383,6 +373,7 @@ namespace Boggle
                 conn.Open();
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
+                    // Gets the word & score from the database
                     using (SqlCommand command = new SqlCommand("Select Word,Score from Words where Player = @PlayerUserToken", conn, trans))
                     {
                         List<WordValue> wordsPlayedList = new List<WordValue>();
@@ -419,8 +410,7 @@ namespace Boggle
                 conn.Open();
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-
-
+                    // Gets the nickname
                     using (SqlCommand command = new SqlCommand("Select Nickname from Users where UserToken = @Player1UserToken", conn, trans))
                     {
                         command.Parameters.AddWithValue("@Player1UserToken", playerToken);
@@ -455,13 +445,11 @@ namespace Boggle
                 conn.Open();
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-
-
+                    // Gets total score from the words in that database
                     using (SqlCommand command = new SqlCommand("Select Sum(Score) as Score from Words where GameID = @GameID and Player = @Player1UserToken ", conn, trans))
                     {
                         command.Parameters.AddWithValue("@Player1UserToken", playerToken);
                         command.Parameters.AddWithValue("@GameID", GameID);
-
 
                         using (SqlDataReader reader2 = command.ExecuteReader())
                         {
@@ -481,8 +469,6 @@ namespace Boggle
             }
         }
 
-        //TODO: Need to check to make sure we arnt adding a user that is already in a game.
-        ///CURENTLY TRYING TO PUSH THIS MOFUCKA
         /// <summary>
         /// Creates a new game if there is a pending player.
         /// Otherwise creates a pending player.
@@ -491,20 +477,17 @@ namespace Boggle
         /// <returns>gameID of game created</returns>
         public gameIDClass JoinGame(gameStart starter)
         {
-
             // Checks for invalid time & invalid user token
             if (starter.TimeLimit > 120 || starter.TimeLimit < 5 || starter.UserToken.Length != 36)
             {
                 SetStatus(Forbidden);
                 return null;
             }
-            //STILL NEED TO CHECK TO MAKE SURE USER IS IN THE DB.
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 conn.Open();
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-
                     //Query to check if usertoken is in actual DB.
                     using (SqlCommand command = new SqlCommand("select UserToken from Users where UserToken = @UserToken ", conn, trans))
                     {
@@ -538,7 +521,6 @@ namespace Boggle
                                 isAccepted = true;
                             }
 
-
                             while (reader2.Read())
                             {
                                 //If the player is already in a pending game then SetStatus to conflict and return. 
@@ -568,7 +550,6 @@ namespace Boggle
                         }
                     }
 
-
                     gameIDClass returnInfo = new gameIDClass();
                     returnInfo.GameID = currentGameID;
                     //If we need to make a created game.
@@ -576,7 +557,6 @@ namespace Boggle
                     {
                         using (SqlCommand command = new SqlCommand("update Games set Player2 = @UserToken,TimeLimit = (TimeLimit + @TimeLimit)/2, StartTime = @StartTime,Board = @Board where GameID = @GameID", conn, trans))
                         {
-
                             command.Parameters.AddWithValue("@UserToken", starter.UserToken);
                             command.Parameters.AddWithValue("@TimeLimit", starter.TimeLimit);
                             command.Parameters.AddWithValue("@StartTime", DateTime.Now);
@@ -640,7 +620,6 @@ namespace Boggle
         /// <returns>user token</returns>
         UserTokenClass IBoggleService.CreateUser(UserInfo Nickname)
         {
-            //DB VERSION
             //If nickname is invalid then set status to forbidden and returns null.
             if (Nickname.Nickname == null || Nickname.Nickname.Trim().Length == 0)
             {
@@ -648,31 +627,13 @@ namespace Boggle
                 return null;
             }
 
-            // The first step to using the DB is opening a connection to it.  Creating it in a
-            // using block guarantees that the connection will be closed when control leaves
-            // the block.  As you'll see below, I also follow this pattern for SQLTransactions,
-            // SqlCommands, and SqlDataReaders.
             using (SqlConnection conn = new SqlConnection(BoggleDB))
             {
                 // Connections must be opened
                 conn.Open();
 
-                // Database commands should be executed within a transaction.  When commands 
-                // are executed within a transaction, either all of the commands will succeed
-                // or all will be canceled.  You don't have to worry about some of the commands
-                // changing the DB and others failing.
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    // An SqlCommand executes a SQL statement on the database.  In this case it is an
-                    // insert statement.  The first parameter is the statement, the second is the
-                    // connection, and the third is the transaction.  
-                    //
-                    // Note that I use symbols like @UserID as placeholders for values that need to appear
-                    // in the statement.  You will see below how the placeholders are replaced.  You may be
-                    // tempted to simply paste the values into the string, but this is a BAD IDEA that violates
-                    // a cardinal rule of DB Security 101.  By using the placeholder approach, you don't have
-                    // to worry about escaping special characters and you don't have to worry about one form
-                    // of the SQL insertion attack.
                     using (SqlCommand command =
                         new SqlCommand("insert into Users (UserToken, Nickname) values(@UserToken, @Nickname)",
                                         conn,
@@ -684,16 +645,8 @@ namespace Boggle
                         // This is where the placeholders are replaced.
                         command.Parameters.AddWithValue("@UserToken", newUserToken);
                         command.Parameters.AddWithValue("@Nickname", Nickname.Nickname.Trim());
-
-                        // This executes the command within the transaction over the connection.  The number of rows
-                        // that were modified is returned.  Perhaps I should check and make sure that 1 is returned
-                        // as expected.
                         command.ExecuteNonQuery();
                         SetStatus(Created);
-
-                        // Immediately before each return that appears within the scope of a transaction, it is
-                        // important to commit the transaction.  Otherwise, the transaction will be aborted and
-                        // rolled back as soon as control leaves the scope of the transaction. 
                         trans.Commit();
 
                         UserTokenClass returnToken = new UserTokenClass();
