@@ -125,7 +125,7 @@ namespace Boggle
                     //This query checks to make sure the userToken given is actually in given gameId. It also gets the StartTime, and TimeLimit to determine
                     //if the game is active or completed.
                     string board = null;
-                    using (SqlCommand Command = new SqlCommand("select StartTime,TimeLimit,Board from Games where GameID = @GameID and Player1 = @UserToken or Player2 = '@UserToken", conn, trans))
+                    using (SqlCommand Command = new SqlCommand("select StartTime,TimeLimit,Board from Games where GameID = @GameID and Player1 = @UserToken or Player2 = @UserToken", conn, trans))
                     {
                         Command.Parameters.AddWithValue("@UserToken", wordInfo.UserToken);
                         Command.Parameters.AddWithValue("@GameID", GivenGameID);
@@ -156,7 +156,6 @@ namespace Boggle
                     }
 
                     //Determining word score. 
-                    SetStatus(OK);
                     ScoreResponse returnInfo = new ScoreResponse();
                     string word = wordInfo.Word.Trim();
 
@@ -226,7 +225,7 @@ namespace Boggle
                     using (SqlCommand Command = new SqlCommand("insert into Words(Word, Score, Player,GameID) values(@Word,@Score,@Player,@GameID)", conn, trans))
                     {
                         Command.Parameters.AddWithValue("@Word", wordInfo.Word);
-                        Command.Parameters.AddWithValue("@Score", null);
+                        Command.Parameters.AddWithValue("@Score", returnInfo.Score);
                         Command.Parameters.AddWithValue("@Player", wordInfo.UserToken);
                         Command.Parameters.AddWithValue("@GameID", GivenGameID);
 
@@ -482,6 +481,7 @@ namespace Boggle
             }
         }
 
+        //TODO: Need to check to make sure we arnt adding a user that is already in a game.
         ///CURENTLY TRYING TO PUSH THIS MOFUCKA
         /// <summary>
         /// Creates a new game if there is a pending player.
