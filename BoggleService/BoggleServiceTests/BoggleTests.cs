@@ -62,9 +62,11 @@ namespace Boggle
         /// </summary>
         [ClassInitialize()]
         public static void StartIIS(TestContext testContext)
-        {
+        { 
             IISAgent.Start(@"/site:""BoggleService"" /apppool:""Clr4IntegratedAppPool"" /config:""..\..\..\.vs\config\applicationhost.config""");
         }
+
+        private static string gameIDforTest = "";
 
         /// <summary>
         /// This is automatically run when all tests have completed to stop the server
@@ -78,7 +80,7 @@ namespace Boggle
         /// <summary>
         /// Creates the client to be used
         /// </summary>
-        private RestTestClient client = new RestTestClient("http://localhost:60000/");
+        private RestTestClient client = new RestTestClient("http://localhost:50000/");
         
 
         //Testing createUser
@@ -371,6 +373,7 @@ namespace Boggle
             newGame.TimeLimit = 60;
             Response x = client.DoPostAsync("games", newGame).Result;
             Assert.AreEqual(x.Status, Accepted);
+            gameIDforTest = x.Data.GameID;
 
 
             //making test token.
@@ -425,7 +428,7 @@ namespace Boggle
         /// This tests for attempting to get the game status when gameID is bad
         /// </summary>
         [TestMethod]
-        public void TestJoinGameStatusBadGameID()
+        public void TestJoinGameStatusBadGameID(string gameID)
         {
             Response getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G10000000", "yes").Result;
             Assert.IsNull(getResponse.Data);
@@ -447,16 +450,16 @@ namespace Boggle
         [TestMethod]
         public void TestJoinGameStatusPENDING()
         {
-            Response getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G4", "yes").Result;
+            Response getResponse = client.DoGetAsync("games/{0}?Brief={1}", gameIDforTest, "yes").Result;
             Assert.AreEqual((string)getResponse.Data.GameState, "pending");
             Assert.AreEqual(getResponse.Status, OK);
 
 
-            getResponse = client.DoGetAsync("games/{0}?Brief={1}", "G4", "no").Result;
+            getResponse = client.DoGetAsync("games/{0}?Brief={1}", gameIDforTest, "no").Result;
             Assert.AreEqual((string)getResponse.Data.GameState, "pending");
             Assert.AreEqual(getResponse.Status, OK);
 
-            getResponse = client.DoGetAsync("games/{0}", "G4").Result;
+            getResponse = client.DoGetAsync("games/{0}", gameIDforTest).Result;
             Assert.AreEqual((string)getResponse.Data.GameState, "pending");
             Assert.AreEqual(getResponse.Status, OK);
         }
