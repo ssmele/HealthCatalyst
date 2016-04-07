@@ -1,0 +1,1 @@
+﻿select * from Words where Player = 'ede4c20f-8bcc-43c8-8dab-cc95ac4ce0d7' and Word = 'swag'
