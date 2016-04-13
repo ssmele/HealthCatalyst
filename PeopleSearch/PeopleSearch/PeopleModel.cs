@@ -23,20 +23,26 @@ namespace PeopleSearch
         public string imagePath { get; set; }
     }
 
-
     public class PeopleContext : DbContext
     {
+
+        public PeopleContext() : base ("PeopleDB")
+        {
+
+        }
+
         public DbSet<PeopleModel> People { get;set; }
 
-
-        public void addPersonToDB(PeopleModel data)
-        {
-            using(var db = new PeopleContext())
-            {
-                db.People.Add(data);
-                db.SaveChanges();
-            }
-        }
+        //public void addPersonToDB(PeopleModel data)
+        //{
+        //    using(var db = new PeopleContext())
+        //    {
+        //        db.People.Add(data);
+        //        db.SaveChanges();
+        //    }
+        //}
     }
+
+    
 
 }

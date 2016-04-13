@@ -97,6 +97,13 @@ namespace PeopleSearch
             }
         }
 
+        public Image imageObject
+        {
+            set
+            {
+                this.image.Source = null;
+            }
+        }
 
         public addPersonWindow()
         {
@@ -132,6 +139,8 @@ namespace PeopleSearch
         private void fileDialogButton_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog();
+            dialog.DefaultExt = ".jpeg";
+            dialog.Filter = "Image (.jpg)| *.jpg";
             dialog.ShowDialog();
 
             imagePath = dialog.FileName;

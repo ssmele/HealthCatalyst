@@ -15,43 +15,46 @@ using System.Windows.Shapes;
 
 namespace PeopleSearch
 {
+
+
+    public class Test
+    {
+        public TextBox FirstName { get; set; }
+        public TextBox LastName { get; set; }
+        public TextBox Age { get; set; }
+    }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window, IMainWindow
     {
+
+
+
         public MainWindow()
-        {
+        {   
             InitializeComponent();
             IAddPersonWindow addPersonWindow = new addPersonWindow();
             new PeopleSearchController(this,addPersonWindow);
-            List<string> x = new List<string>();
-            //x.Add("swag");
-            //x.Add("yo");
-            //x.Add("swag");
-            //x.Add("yo");
-            //x.Add("swag");
-            //x.Add("yo");
-            //x.Add("swag");
-            //x.Add("yo");
-            //x.Add("swag");
-            //x.Add("yo");
-            //x.Add("swag");
-            //x.Add("yo");
-            //x.Add("swag");
-            //x.Add("yo");
-            //x.Add("swag");
-            //x.Add("yo");
-            //PeopleModel d = new PeopleModel();
-            //d.address = "swag";
-            //d.age = 3;
-            //d.firstName = "stone";
-            //d.lastName = "mele";
-            //d.interests = "cool stuff";
-            //x.Add(d);
-            //x.Add(d);
-            //x.Add(d);
-            this.peopleListBox.ItemsSource = x;
+
+            //Test init = new Test();
+            //init.FirstName = new TextBox();
+            //init.LastName = new TextBox();
+            //init.Age = new TextBox();
+
+            //init.FirstName.Text = "swag";
+            //init.LastName.Text = "yung";
+            //init.Age.Text = "15";
+            PeopleModel tester = new PeopleModel();
+            tester.age = 0;
+            tester.address = "swag";
+            tester.firstName = "yo";
+            tester.lastName = "swag";
+
+            List<PeopleModel> x = new List<PeopleModel>();
+            x.Add(tester);
+
+            this.listView.ItemsSource = x;
         }
 
         public event Action CloseEvent;

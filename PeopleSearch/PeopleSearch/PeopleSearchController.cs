@@ -15,11 +15,11 @@ namespace PeopleSearch
 
         public PeopleSearchController(IMainWindow window,IAddPersonWindow windowAddPerson)
         {
-            boggleDB = new PeopleContext();
-            using (boggleDB)
-            {
-                boggleDB.People.Create();
-            }
+            //boggleDB = new PeopleContext();
+            //using (boggleDB)
+            //{
+            //    boggleDB.People.
+            //}
 
             this.window = window;
             this.windowAddPerson = windowAddPerson;
@@ -93,7 +93,19 @@ namespace PeopleSearch
             }
             currentPerson.imagePath = filePath;
 
-            boggleDB.addPersonToDB(currentPerson);
+            //boggleDB.addPersonToDB(currentPerson);
+
+
+
+            //Clear all input texts boxes now.
+            windowAddPerson.Address = "";
+            windowAddPerson.Age = 0;
+            windowAddPerson.FirstName = "";
+            windowAddPerson.Lastname = "";
+            windowAddPerson.Lastname = "";
+            windowAddPerson.interests = "";
+            windowAddPerson.imagePath = "";
+            windowAddPerson.imageObject = null;
         }
 
         public void HandleCloseEvent()

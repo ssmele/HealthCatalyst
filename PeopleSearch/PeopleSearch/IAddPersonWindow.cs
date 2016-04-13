@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace PeopleSearch
 {
@@ -22,6 +23,6 @@ namespace PeopleSearch
         int Age { get; set; }
         string interests { get; set; }
         string imagePath { get; set; }
-
+        Image imageObject { set; }
     }
 }

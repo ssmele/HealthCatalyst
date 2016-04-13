@@ -16,7 +16,26 @@
                 <MenuItem Header="Close" Click ="CloseMenu_Click" HorizontalAlignment="Left" Width="142" Margin="0,0,-2.8,0"/>
             </MenuItem>
         </Menu>
-        <ListBox x:Name="peopleListBox" Margin="0,65,-0.4,0.2"/>
+        <ListView x:Name="listView" Margin="0,77,-0.4,0.2">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <WrapPanel>
+                        <TextBlock Text="Name: " />
+                        <TextBlock Text="{Binding firstName}" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding lastName}"  FontWeight="Bold"/>
+                        <TextBlock Text=", " />
+                        <TextBlock Text="Age: "/>
+                        <!--<TextBlock Text="{Binding Age}" FontWeight="Bold"/>-->
+                        <TextBlock Text=", "/>
+                    </WrapPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn/>
+                </GridView>
+            </ListView.View>
+        </ListView>
 
     </Grid>
 </Window>
