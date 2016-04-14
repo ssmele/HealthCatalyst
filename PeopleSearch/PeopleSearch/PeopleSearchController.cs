@@ -30,10 +30,27 @@ namespace PeopleSearch
             window.addPersonEvent += HandleAddPersonEvent;
             windowAddPerson.CloseEventAddPerson += HandleAddPersonWindowCloseEvent;
             windowAddPerson.AddPersonEvent += HandleAddToDBPersonEvent;
+            window.ResetEvent += HandleResetEvent;
+            window.HelpEvent += HandleHelpEvent;
 
 
         }
 
+        public void HandleHelpEvent()
+        {
+            helpWindow hw = new helpWindow();
+            hw.Show();
+        }
+
+        public void HandleResetEvent()
+        {
+            window.resetPeople();
+        }
+
+        /// <summary>
+        /// This will take the current information from the addPerson window and construct an object representing that person. It will then add that PeopleModel object
+        /// to the database. 
+        /// </summary>
         public void HandleAddToDBPersonEvent()
         {
             PeopleModel currentPerson = new PeopleModel();
@@ -113,9 +130,36 @@ namespace PeopleSearch
             window.closeWindow();
         }
 
-        public void HandleSearchEvent()
+        public void HandleSearchEvent(string name)
         {
-            //DO WORK. 
+            //List of people with the name. 
+            List<PeopleModel> peopleList = new List<PeopleModel>();
+
+            //DO QUEREY
+            using (var context = new PeopleContext())
+            {
+                // Query for all blogs with names starting with B 
+                var query = from b in context.People
+                            where b.firstName == name ||
+                            b.lastName == name
+                            select b;
+
+                foreach (var item in query)
+                {
+                    peopleList.Add(item);
+                }
+            }
+
+            //If there was no one found display message for user. 
+            if(peopleList.Count == 0)
+            {
+                window.showMessageMain("Sorry there was no people found for the given name!");
+            }
+            //If there is atleast one person then show there given info. 
+            else
+            {
+                window.showPeople(peopleList);
+            }
         }
 
         public void HandleAddPersonEvent()

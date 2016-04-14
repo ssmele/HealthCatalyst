@@ -1,0 +1,28 @@
+﻿<Window x:Class="PeopleSearch.helpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PeopleSearch"
+        mc:Ignorable="d"
+        Title="Help" Height="300" Width="300">
+    <Grid>
+        <RichTextBox x:Name="richTextBox" HorizontalAlignment="Left" Height="250" Margin="10,10,0,0" VerticalAlignment="Top" Width="274">
+            <FlowDocument>
+
+                <Paragraph>
+                    <Run Text="Hi! Welcome to the peopleSearch application. It is very easy to use."/>
+                </Paragraph>
+
+                <Paragraph>
+                    <Run Text="To search for a person type in either a first name or last name and press search. If there is a person that has a matching name any information relating to them will be displayed."/>
+                </Paragraph>
+
+                <Paragraph>
+                    <Run Text="If you want to add people to the database click on File -> Add Person. A new window will pop up and you can enter in the persons information and press Add Person and that user will be added to the database."/>
+                </Paragraph>
+            </FlowDocument>
+        </RichTextBox>
+
+    </Grid>
+</Window>

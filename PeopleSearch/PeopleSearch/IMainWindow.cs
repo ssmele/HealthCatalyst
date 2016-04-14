@@ -9,9 +9,16 @@ namespace PeopleSearch
     interface IMainWindow
     {
 
-        event Action SearchEvent;
+        event Action<string> SearchEvent;
         event Action addPersonEvent;
         event Action CloseEvent;
+        event Action ResetEvent;
+        event Action HelpEvent;
         void closeWindow();
+        void resetPeople();
+
+        void showPeople(List<PeopleModel> peopleList);
+
+        void showMessageMain(string msg);
     }
 }
