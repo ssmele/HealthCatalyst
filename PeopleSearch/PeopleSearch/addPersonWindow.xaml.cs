@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 
+//TODO: GET DATABASE WORKING, Add REset to addperson window. Make sure reset of addperson keeps default picture. 
+
 namespace PeopleSearch
 {
     /// <summary>
@@ -108,6 +110,14 @@ namespace PeopleSearch
         public addPersonWindow()
         {
             InitializeComponent();
+
+            //Sets default image. 
+            BitmapImage myBitmapImage = new BitmapImage();
+            myBitmapImage.BeginInit();
+            myBitmapImage.UriSource = new Uri(@"C:\Users\Stone\Source\Repos\HealthCatalyst\PeopleSearch\PeopleSearch\images\facebook-default-no-profile-pic.jpg");
+            myBitmapImage.DecodePixelWidth = 200;
+            myBitmapImage.EndInit();
+            this.image.Source = myBitmapImage;
         }
 
         public event Action CloseEventAddPerson;
