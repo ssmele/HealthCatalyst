@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 
-//TODO: GET DATABASE WORKING, Add REset to addperson window. Make sure reset of addperson keeps default picture. 
+//TODO: GET DATABASE WORKING, Add REset to addperson window. Make sure reset of addperson keeps default picture. GET GENERIC FILENAME WORKING. 
 
 namespace PeopleSearch
 {
