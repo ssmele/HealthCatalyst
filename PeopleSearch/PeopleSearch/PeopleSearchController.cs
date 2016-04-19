@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
-
+using System.Threading;
 
 namespace PeopleSearch
 {
@@ -188,7 +188,8 @@ namespace PeopleSearch
             //Add the person to the database.
             try
             {
-                await addPerson(currentPerson);
+                Thread thread = new Thread(() => addPerson(currentPerson));
+                thread.Start();
             }
             catch(Exception)
             {
@@ -201,7 +202,7 @@ namespace PeopleSearch
         /// </summary>
         /// <param name="newPerson"></param>
         /// <returns></returns>
-        public async Task addPerson(Person newPerson)
+        public void addPerson(Person newPerson)
         {
             //Adding person to DB. 
             using (var db = new PersonDBContext())
@@ -226,7 +227,7 @@ namespace PeopleSearch
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public async Task<List<Person>> personQuery(string name)
+        public  List<Person> personQuery(string name)
         {
             //List of people with the name. 
             List<Person> peopleList = new List<Person>();
@@ -250,16 +251,18 @@ namespace PeopleSearch
         }
 
         //Does a query to search for people in the DB. 
-        public async void HandleSearchEvent(string name)
+        public  void HandleSearchEvent(string name)
         {
             //List of people with the name. 
             List<Person> peopleList = new List<Person>();
 
-            //Do the query asyn
-            peopleList = await personQuery(name);
+
+            //Get the list of people with same name. 
+            peopleList =  personQuery(name);
+   
 
             //If there was no one found display message for user. 
-            if(peopleList.Count == 0)
+            if (peopleList.Count == 0)
             {
                 window.showMessageMain("Sorry there was no people found for the given name!");
 

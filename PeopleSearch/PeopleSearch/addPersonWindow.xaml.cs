@@ -116,12 +116,12 @@ namespace PeopleSearch
             InitializeComponent();
 
             //Sets default image. 
-            BitmapImage myBitmapImage = new BitmapImage();
-            myBitmapImage.BeginInit();
-            myBitmapImage.UriSource = new Uri(@"C:\Users\Stone\Source\Repos\HealthCatalyst\PeopleSearch\PeopleSearch\images\facebook-default-no-profile-pic.jpg");
-            myBitmapImage.DecodePixelWidth = 200;
-            myBitmapImage.EndInit();
-            this.image.Source = myBitmapImage;
+            //BitmapImage myBitmapImage = new BitmapImage();
+            //myBitmapImage.BeginInit();
+            //myBitmapImage.UriSource = new Uri(@"C:\Users\Stone\Source\Repos\HealthCatalyst\PeopleSearch\PeopleSearch\images\facebook-default-no-profile-pic.jpg");
+            //myBitmapImage.DecodePixelWidth = 200;
+            //myBitmapImage.EndInit();
+            this.image.Source = null;
         }
 
         /// <summary>
@@ -137,12 +137,12 @@ namespace PeopleSearch
         /// </summary>
         public void resetWindowImage()
         {
-            BitmapImage myBitmapImage = new BitmapImage();
-            myBitmapImage.BeginInit();
-            myBitmapImage.UriSource = new Uri(@"C:\Users\Stone\Source\Repos\HealthCatalyst\PeopleSearch\PeopleSearch\images\facebook-default-no-profile-pic.jpg");
-            myBitmapImage.DecodePixelWidth = 200;
-            myBitmapImage.EndInit();
-            this.image.Source = myBitmapImage;
+            //BitmapImage myBitmapImage = new BitmapImage();
+            //myBitmapImage.BeginInit();
+            //myBitmapImage.UriSource = new Uri(@"C:\Users\Stone\Source\Repos\HealthCatalyst\PeopleSearch\PeopleSearch\images\facebook-default-no-profile-pic.jpg");
+            //myBitmapImage.DecodePixelWidth = 200;
+            //myBitmapImage.EndInit();
+            this.image.Source = null; //myBitmapImage;
         }
 
 

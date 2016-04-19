@@ -37,5 +37,6 @@
             </ListView.View>
         </ListView>
         <Button x:Name="resetButton" Content="Reset" Margin="0,0,353,9.8" RenderTransformOrigin="0.513,-1.637" HorizontalAlignment="Right" Width="64" Click="resetButton_Click" Height="25" VerticalAlignment="Bottom"/>
+        <DataGrid x:Name="dataGrid" HorizontalAlignment="Left" Height="38" Margin="851,35,-223,0" VerticalAlignment="Top" Width="112"/>
     </Grid>
 </Window>
