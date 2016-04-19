@@ -108,7 +108,7 @@ namespace PeopleSearch
         /// This will take the current information from the addPerson window and construct an object representing that person. It will then add that PeopleModel object
         /// to the database. 
         /// </summary>
-        public async void HandleAddToDBPersonEvent()
+        public void HandleAddToDBPersonEvent()
         {
             Person currentPerson = new Person();
 
