@@ -1,4 +1,7 @@
-﻿using System;
+﻿///By: Salvatore Stone Mele
+///4/19/16
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,15 +25,21 @@ namespace PeopleSearch
     public partial class MainWindow : Window, IMainWindow
     {
 
+        /// <summary>
+        /// Sets up the window. and calls constructor for two windows. 
+        /// </summary>
         public MainWindow()
         {   
             //Setting up controller. 
             InitializeComponent();
+            //Setting up constructor for controller. 
             IAddPersonWindow addPersonWindow = new addPersonWindow();
             new PeopleSearchController(this,addPersonWindow);
+            //Starting the gridView to an empty list. 
             List<Person> x = new List<Person>();
         }
 
+        //Events
         public event Action CloseEvent;
         public event Action<string> SearchEvent;
         public event Action addPersonEvent;
@@ -38,7 +47,9 @@ namespace PeopleSearch
         public event Action HelpEvent;
         public event Action SearchTextPressed;
 
-
+        /// <summary>
+        /// Gettter and setter for the search textBox. 
+        /// </summary>
         public string SearchTextBox
         {
             get
@@ -52,7 +63,9 @@ namespace PeopleSearch
         }
 
 
-        //Closes the main window. 
+        /// <summary>
+        /// Closes the main window. 
+        /// </summary>
         public void closeWindow()
         {
             this.Close();
@@ -62,7 +75,7 @@ namespace PeopleSearch
         /// <summary>
         /// This method will display a message to the user. 
         /// </summary>
-        /// <param name="msg"></param>
+        /// <param name="msg">Message intended for the user. </param>
         public void showMessageMain(string msg)
         {
             MessageBox.Show(msg);
@@ -86,6 +99,11 @@ namespace PeopleSearch
             listView.ItemsSource = null;
         }
 
+        /// <summary>
+        /// This method fires the CloseEvent() when the close button is clicked. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CloseMenu_Click(object sender, RoutedEventArgs e)
         {
             if (CloseEvent != null)
@@ -94,6 +112,11 @@ namespace PeopleSearch
             }
         }
 
+        /// <summary>
+        /// THis method fires when the Search button is clicked. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
             if(SearchEvent != null)
@@ -102,6 +125,9 @@ namespace PeopleSearch
             }
         }
 
+        /// <summary>
+        /// THis method fires when the addPerson is clicked in the file Menu. 
+        /// </summary>
         private void AddPerson_Click(object sender, RoutedEventArgs e)
         {
             if(addPersonEvent != null)
@@ -110,6 +136,12 @@ namespace PeopleSearch
             }
         }
 
+
+        /// <summary>
+        /// This method fires when the reset button is clicked. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void resetButton_Click(object sender, RoutedEventArgs e)
         {
             if(resetButton != null)
@@ -118,6 +150,11 @@ namespace PeopleSearch
             }
         }
 
+        /// <summary>
+        /// This method fires when the help button is clicked. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void HelpMenu_Click(object sender, RoutedEventArgs e)
         {
             if(HelpEvent != null)
@@ -126,6 +163,11 @@ namespace PeopleSearch
             }
         }
 
+        /// <summary>
+        /// This method fires when the searchButton is actually clicked. It will clear the text if its the first click to it.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SearchText_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
             if(SearchTextPressed != null)

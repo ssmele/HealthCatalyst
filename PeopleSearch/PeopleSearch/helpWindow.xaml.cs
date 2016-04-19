@@ -1,4 +1,8 @@
-﻿using System;
+﻿///By: Salvatore Stone Mele
+///4/19/16
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +23,10 @@ namespace PeopleSearch
     /// </summary>
     public partial class helpWindow : Window
     {
+
+        /// <summary>
+        /// This is a simple window to display a help message. 
+        /// </summary>
         public helpWindow()
         {
             InitializeComponent();

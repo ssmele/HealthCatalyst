@@ -1,11 +1,14 @@
+///By: Salvatore Stone Mele
+///4/19/16
+
+
 namespace PeopleSearch
 {
-    using System;
-    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data.Entity.Spatial;
 
+    /// <summary>
+    /// Class that describes the Person object for the dataBase. 
+    /// </summary>
     public partial class Person
     {
         public int Id { get; set; }

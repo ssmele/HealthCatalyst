@@ -1,48 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿/////By: Salvatore Stone Mele
+/////4/19/16
 
-namespace PeopleSearch
-{
-    class PeopleSearchContext 
-    {
+//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Text;
+//using System.Threading.Tasks;
+//using System.Windows;
 
-        private int windowCount = 0;
+//namespace PeopleSearch
+//{
+//    class PeopleSearchContext 
+//    {
 
-        private static PeopleSearchContext context;
+//        private int windowCount = 0;
 
-        private PeopleSearchContext()
-        {
-        }
+//        private static PeopleSearchContext context;
 
-        public static PeopleSearchContext GetContext()
-        {
-            if (context == null)
-            {
-                context = new PeopleSearchContext();
-            }
-            return context;
-        }
+//        private PeopleSearchContext()
+//        {
+//        }
 
-        public void RunNew()
-        {
-            MainWindow window = new MainWindow();
+//        public static PeopleSearchContext GetContext()
+//        {
+//            if (context == null)
+//            {
+//                context = new PeopleSearchContext();
+//            }
+//            return context;
+//        }
 
-            //After Controller is implemented
-            //new PeopleSearchController(window);
+//        public void RunNew()
+//        {
+//            MainWindow window = new MainWindow();
 
-            //Increment windowCount
-            windowCount++;
+//            //After Controller is implemented
+//            //new PeopleSearchController(window);
 
-            //When this window closes fire an event and if window count equals zero
-            //close the thread.
-            //window.Closed += (o, e) => { if (--windowCount <= 0) ExitThread(); };
+//            //Increment windowCount
+//            windowCount++;
 
-            //Start the new form
-            window.Show();
-        }
-    }
-}
+//            //When this window closes fire an event and if window count equals zero
+//            //close the thread.
+//            //window.Closed += (o, e) => { if (--windowCount <= 0) ExitThread(); };
+
+//            //Start the new form
+//            window.Show();
+//        }
+//    }
+//}

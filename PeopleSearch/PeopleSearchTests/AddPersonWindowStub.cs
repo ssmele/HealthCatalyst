@@ -1,4 +1,7 @@
-﻿using System;
+﻿///By: Salvatore Stone Mele
+///4/19/16
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -68,7 +71,7 @@ namespace PeopleSearchTests
             throw new NotImplementedException();
         }
 
-        public void resetWindow()
+        public void resetWindowImage()
         {
             throw new NotImplementedException();
         }

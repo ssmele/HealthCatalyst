@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿///By: Salvatore Stone Mele
+///4/19/16
+
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -18,6 +17,8 @@ namespace PeopleSearch
     /// </summary>
     public partial class addPersonWindow : Window, IAddPersonWindow
     {
+        //Getters and setters for aspects of the addPersoWindow.
+
         public string imagePath
         {
             get;
@@ -68,6 +69,7 @@ namespace PeopleSearch
         {
             get
             {
+                //Ensures we have a number if not just set text box to zero so an error is thrown. 
                 int age;
                 if(int.TryParse(ageTextBox.Text, out age) == true)
                 {
@@ -86,6 +88,7 @@ namespace PeopleSearch
         {
             get
             {
+                //Have to do some tricky stuff to get text out of richText Box. 
                 string interestString = new TextRange(intTextBox.Document.ContentStart, intTextBox.Document.ContentEnd).Text;
                 return interestString;
             }
@@ -104,6 +107,10 @@ namespace PeopleSearch
             }
         }
 
+
+        /// <summary>
+        /// This constructor initializes the window, and sets the default image.
+        /// </summary>
         public addPersonWindow()
         {
             InitializeComponent();
@@ -117,12 +124,18 @@ namespace PeopleSearch
             this.image.Source = myBitmapImage;
         }
 
+        /// <summary>
+        /// Events available to fire for this window. 
+        /// </summary>
         public event Action CloseEventAddPerson;
         public event Action AddPersonEvent;
         public event Action ResetAddPersonEvent;
 
 
-        public void resetWindow()
+        /// <summary>
+        /// This method resets the default method. 
+        /// </summary>
+        public void resetWindowImage()
         {
             BitmapImage myBitmapImage = new BitmapImage();
             myBitmapImage.BeginInit();
@@ -131,21 +144,35 @@ namespace PeopleSearch
             myBitmapImage.EndInit();
             this.image.Source = myBitmapImage;
         }
+
+
+        /// <summary>
+        /// THis method simply hides the addPersonWindow.
+        /// </summary>
         public void hideWidndow()
         {
             this.Hide();
         }
 
+        /// <summary>
+        /// This method simply opens the addPersonWindow.
+        /// </summary>
         public void showWindow()
         {
             this.Show();
         }
 
+        /// <summary>
+        /// THis method clowses the window. 
+        /// </summary>
         public void closeWindow()
         {
             this.Close();
         }
 
+        /// <summary>
+        /// Event that is fired when close is clicked.
+        /// </summary>
         private void CloseMenu_Click(object sender, RoutedEventArgs e)
         {
             if(CloseEventAddPerson != null)
@@ -154,6 +181,9 @@ namespace PeopleSearch
             }
         }
 
+        /// <summary>
+        /// Gets the image file and displays it in the image panel. 
+        /// </summary>
         private void fileDialogButton_Click(object sender, RoutedEventArgs e)
         {
             //Open File dialog and get the result. 
@@ -168,22 +198,38 @@ namespace PeopleSearch
                 return;
             }
 
-            //If Image was there then format it and add it to the image source. 
-            imagePath = dialog.FileName;
-            BitmapImage myBitmapImage = new BitmapImage();
-            myBitmapImage.BeginInit();
-            myBitmapImage.UriSource = new Uri(dialog.FileName);
-            myBitmapImage.DecodePixelWidth = 200;
-            myBitmapImage.EndInit();
-            //set image source
-            this.image.Source = myBitmapImage;
+            //Trys to display given image. If cant display message. 
+            try
+            {
+                //If Image was there then format it and add it to the image source. 
+                imagePath = dialog.FileName;
+                BitmapImage myBitmapImage = new BitmapImage();
+                myBitmapImage.BeginInit();
+                myBitmapImage.UriSource = new Uri(dialog.FileName);
+                myBitmapImage.DecodePixelWidth = 200;
+                myBitmapImage.EndInit();
+                //set image source
+                this.image.Source = myBitmapImage;
+            }
+            catch(Exception)
+            {
+                this.showInAddPersonWindowMessage("Could not use given image please try again!");
+            }
         }
 
+        /// <summary>
+        /// Display a message box to user from addPersonWindow. 
+        /// </summary>
+        /// <param name="msg"></param>
         public void showInAddPersonWindowMessage(string msg)
         {
             MessageBox.Show(msg);
         }
 
+
+        /// <summary>
+        /// This event is fired when the addPersonButton is clicked. 
+        /// </summary>
         private void addPersonButton_Click(object sender, RoutedEventArgs e)
         {
             if(AddPersonEvent != null)
@@ -192,6 +238,9 @@ namespace PeopleSearch
             }
         }
 
+        /// <summary>
+        /// This event is fired when the reset button is clicked. 
+        /// </summary>
         private void resetButton_Click(object sender, RoutedEventArgs e)
         {
             if(ResetAddPersonEvent != null)

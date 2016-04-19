@@ -1,13 +1,19 @@
-﻿using System;
+﻿///By: Salvatore Stone Mele
+///4/19/16
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
 
 namespace PeopleSearch
 {
+
+    /// <summary>
+    /// This is the class that controls mainWindow, and addPersonWidnow. 
+    /// </summary>
     public class PeopleSearchController
     {
         /// <summary>
@@ -54,6 +60,9 @@ namespace PeopleSearch
             windowAddPerson.ResetAddPersonEvent += HandleResetAddPersonEvent;
         }
 
+        /// <summary>
+        /// This method is fired to determine if its the first time clicking the search box. If it is then it will clear the box so user can type. 
+        /// </summary>
         public void HandleSearchTextPressed()
         {
             if (window.SearchTextBox == "Type in a first or last name.")
@@ -62,6 +71,9 @@ namespace PeopleSearch
             }
         }
 
+        /// <summary>
+        /// Resets all the text boxes in the addPersonWindow. 
+        /// </summary>
         public void HandleResetAddPersonEvent()
         {
             //Reseting all text boxes.
@@ -72,15 +84,21 @@ namespace PeopleSearch
             windowAddPerson.Lastname = "";
             windowAddPerson.Interests = "";
             windowAddPerson.imagePath = "";
-            windowAddPerson.resetWindow();
+            windowAddPerson.resetWindowImage();
         }
 
+        /// <summary>
+        /// Displays the help window for the user. 
+        /// </summary>
         public void HandleHelpEvent()
         {
             helpWindow hw = new helpWindow();
             hw.Show();
         }
 
+        /// <summary>
+        /// Calls the resetPeople method in the mainWindow to reset the people displayed. 
+        /// </summary>
         public void HandleResetEvent()
         {
             window.resetPeople();
@@ -178,7 +196,11 @@ namespace PeopleSearch
             }
         }
 
-
+        /// <summary>
+        /// Method to add the currentPerson information to the database. 
+        /// </summary>
+        /// <param name="newPerson"></param>
+        /// <returns></returns>
         public async Task addPerson(Person newPerson)
         {
             //Adding person to DB. 
@@ -189,12 +211,21 @@ namespace PeopleSearch
             }
         }
 
+        /// <summary>
+        /// This method calls
+        /// </summary>
         public void HandleCloseEvent()
         {
             window.closeWindow();
         }
 
 
+
+        /// <summary>
+        /// This method returns a list of people in the DB that have a matching first or last name. 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public async Task<List<Person>> personQuery(string name)
         {
             //List of people with the name. 
@@ -218,6 +249,7 @@ namespace PeopleSearch
             return peopleList;
         }
 
+        //Does a query to search for people in the DB. 
         public async void HandleSearchEvent(string name)
         {
             //List of people with the name. 
@@ -230,25 +262,38 @@ namespace PeopleSearch
             if(peopleList.Count == 0)
             {
                 window.showMessageMain("Sorry there was no people found for the given name!");
+
+                //Resets the window. 
+                window.resetPeople();
             }
             //If there is atleast one person then show there given info. 
             else
             {
                 window.showPeople(peopleList);
             }
+
         }
 
-
+        /// <summary>
+        /// This is the handler for when the AddPerson button is clicked in the File Menu. It will display the window. 
+        /// </summary>
         public void HandleAddPersonEvent()
         {
             windowAddPerson.showWindow();
         }
 
+        /// <summary>
+        /// This is the handler for when the AddPerson button is closed. It will close the window. 
+        /// </summary>
         public void HandleMainCloseAddPersonWindow()
         {
             windowAddPerson.closeWindow();
         }
 
+
+        /// <summary>
+        /// This is the handle for when the close button is clicked form the addPerson window. It will hide the window. 
+        /// </summary>
         public void HandleAddPersonWindowCloseEvent()
         {
             windowAddPerson.hideWidndow();

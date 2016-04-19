@@ -1,10 +1,12 @@
+///By: Salvatore Stone Mele
+///4/19/16
+
+
 namespace PeopleSearch
 {
-    using System;
     using System.Data.Entity;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Linq;
 
+    //Class used to set up the entity database. 
     public partial class PersonDBContext : DbContext
     {
         public PersonDBContext()
