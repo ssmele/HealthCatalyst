@@ -29,7 +29,7 @@ namespace PeopleSearch
         public string Interests { get; set; }
 
         [Required]
-        [StringLength(100)]
+        [StringLength(300)]
         public string ImagePath { get; set; }
     }
 }

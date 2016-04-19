@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+
 
 namespace PeopleSearch
 {
@@ -11,7 +13,10 @@ namespace PeopleSearch
 
         private IMainWindow window;
         private IAddPersonWindow windowAddPerson;
-        //private static PeopleContext peopleDB = new PeopleContext();
+
+
+        private string imageFolderPath = AppDomain.CurrentDomain.BaseDirectory + "\\images";
+        private static int seed = 0;
 
         public PeopleSearchController(IMainWindow window,IAddPersonWindow windowAddPerson)
         {
@@ -66,7 +71,7 @@ namespace PeopleSearch
         /// This will take the current information from the addPerson window and construct an object representing that person. It will then add that PeopleModel object
         /// to the database. 
         /// </summary>
-        public async void HandleAddToDBPersonEvent()
+        public void HandleAddToDBPersonEvent()
         {
             Person currentPerson = new Person();
 
@@ -122,13 +127,32 @@ namespace PeopleSearch
                 windowAddPerson.showInAddPersonWindowMessage("Please provide a valid image and try again.");
                 return;
             }
-            currentPerson.ImagePath = filePath;
 
-            await addPerson(currentPerson);
+            //If the image folder doesnt exist then create it.
+            if (!Directory.Exists(imageFolderPath))
+            {
+                Directory.CreateDirectory(imageFolderPath);
+            }
+
+            //Make a unique file name out of the given data. Also include a seed to account for the same name and age.
+            string uniqueFilePath = windowAddPerson.FirstName + windowAddPerson.Lastname + windowAddPerson.Age + seed + ".jpg";
+            string destFile = Path.Combine(imageFolderPath, uniqueFilePath);
+            seed++;
+
+
+            //COPY given file to destFile
+            File.Copy(windowAddPerson.imagePath, destFile, true);
+            int x = destFile.Length;
+            
+            //NEED TO SET THIS TO THE IMAGE IN THE IMAGE FOLDER.
+            currentPerson.ImagePath = destFile;
+
+
+            addPerson(currentPerson);
         }
 
 
-        public async Task addPerson(Person newPerson)
+        public void addPerson(Person newPerson)
         {
             //Then reset the window for the next person. 
             HandleResetAddPersonEvent();
@@ -139,7 +163,6 @@ namespace PeopleSearch
                 db.People.Add(newPerson);
                 db.SaveChanges();
             }
-            return;
         }
 
         public void HandleCloseEvent()
