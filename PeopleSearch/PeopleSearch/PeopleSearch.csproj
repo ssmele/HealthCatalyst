@@ -82,7 +82,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Person.cs" />
-    <Compile Include="Table.cs" />
     <Compile Include="personDBContext.cs" />
     <Page Include="addPersonWindow.xaml">
       <SubType>Designer</SubType>

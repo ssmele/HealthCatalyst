@@ -7,7 +7,7 @@ using System.Windows.Controls;
 
 namespace PeopleSearch
 {
-    interface IAddPersonWindow
+    public interface IAddPersonWindow
     {
         event Action CloseEventAddPerson;
         event Action AddPersonEvent;
@@ -24,7 +24,7 @@ namespace PeopleSearch
         string Lastname { get; set; }
         string Address { get; set; }
         int Age { get; set; }
-        string interests { get; set; }
+        string Interests { get; set; }
         string imagePath { get; set; }
         Image imageObject { set; }
     }

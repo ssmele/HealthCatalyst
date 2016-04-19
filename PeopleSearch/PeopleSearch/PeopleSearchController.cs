@@ -8,21 +8,40 @@ using System.IO;
 
 namespace PeopleSearch
 {
-    class PeopleSearchController
+    public class PeopleSearchController
     {
-
+        /// <summary>
+        /// This is the MainWindow for the program.
+        /// </summary>
         private IMainWindow window;
+
+        /// <summary>
+        /// This is the addPerson window that can be opened and closed for the program. 
+        /// </summary>
         private IAddPersonWindow windowAddPerson;
 
-
+        /// <summary>
+        /// This is the folder path for the image folder. 
+        /// </summary>
         private string imageFolderPath = AppDomain.CurrentDomain.BaseDirectory + "\\images";
+
+        /// <summary>
+        /// Seed to ensure that files match up with people. 
+        /// </summary>
         private static int seed = 0;
 
+        /// <summary>
+        /// Controller for the program that sets up the windows, and subscribes the events. 
+        /// </summary>
+        /// <param name="window"></param>
+        /// <param name="windowAddPerson"></param>
         public PeopleSearchController(IMainWindow window,IAddPersonWindow windowAddPerson)
         {
+            //Setting up the windows. 
             this.window = window;
             this.windowAddPerson = windowAddPerson;
 
+            //Subscribing all the events.
             window.CloseEvent += HandleCloseEvent;
             window.SearchEvent += HandleSearchEvent;
             window.CloseEvent += HandleMainCloseAddPersonWindow;
@@ -51,7 +70,7 @@ namespace PeopleSearch
             windowAddPerson.FirstName = "";
             windowAddPerson.Lastname = "";
             windowAddPerson.Lastname = "";
-            windowAddPerson.interests = "";
+            windowAddPerson.Interests = "";
             windowAddPerson.imagePath = "";
             windowAddPerson.resetWindow();
         }
@@ -71,7 +90,7 @@ namespace PeopleSearch
         /// This will take the current information from the addPerson window and construct an object representing that person. It will then add that PeopleModel object
         /// to the database. 
         /// </summary>
-        public void HandleAddToDBPersonEvent()
+        public async void HandleAddToDBPersonEvent()
         {
             Person currentPerson = new Person();
 
@@ -112,7 +131,7 @@ namespace PeopleSearch
             currentPerson.LastName = ln;
 
             //Checking interests.
-            string interests = windowAddPerson.interests;
+            string interests = windowAddPerson.Interests;
             if (interests == null || interests.Length == 0)
             {
                 windowAddPerson.showInAddPersonWindowMessage("Please provide a valid interests and try again.");
@@ -139,24 +158,29 @@ namespace PeopleSearch
             string destFile = Path.Combine(imageFolderPath, uniqueFilePath);
             seed++;
 
-
             //COPY given file to destFile
             File.Copy(windowAddPerson.imagePath, destFile, true);
-            int x = destFile.Length;
             
-            //NEED TO SET THIS TO THE IMAGE IN THE IMAGE FOLDER.
+            //Setting file for the database to the destFile. 
             currentPerson.ImagePath = destFile;
 
-
-            addPerson(currentPerson);
-        }
-
-
-        public void addPerson(Person newPerson)
-        {
             //Then reset the window for the next person. 
             HandleResetAddPersonEvent();
 
+            //Add the person to the database.
+            try
+            {
+                await addPerson(currentPerson);
+            }
+            catch(Exception)
+            {
+                windowAddPerson.showInAddPersonWindowMessage("Something went wrong when adding the person please try again.");
+            }
+        }
+
+
+        public async Task addPerson(Person newPerson)
+        {
             //Adding person to DB. 
             using (var db = new PersonDBContext())
             {
@@ -181,8 +205,8 @@ namespace PeopleSearch
             {
                 // Query for all blogs with names starting with B 
                 var query = from b in context.People
-                            where b.FirstName == name ||
-                            b.LastName == name
+                            where b.FirstName.Trim().ToUpper() == name.Trim().ToUpper() ||
+                            b.LastName.Trim().ToUpper() == name.Trim().ToUpper()
                             select b;
 
                 foreach (var item in query)
@@ -213,6 +237,7 @@ namespace PeopleSearch
                 window.showPeople(peopleList);
             }
         }
+
 
         public void HandleAddPersonEvent()
         {

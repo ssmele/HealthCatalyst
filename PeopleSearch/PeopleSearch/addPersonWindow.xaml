@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PeopleSearch"
         mc:Ignorable="d"
-        Title="addPersonWindow" Height="550" Width="700">
+        Title="addPersonWindow" Height="575" Width="700">
     <Grid>
         <Menu x:Name="menu" Height="26" VerticalAlignment="Top" Margin="0,0,-0.4,0">
             <MenuItem Header="File" Height="26">

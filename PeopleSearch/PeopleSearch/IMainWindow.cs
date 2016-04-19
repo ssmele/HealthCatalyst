@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PeopleSearch
 {
-    interface IMainWindow
+    public interface IMainWindow
     {
 
         event Action<string> SearchEvent;

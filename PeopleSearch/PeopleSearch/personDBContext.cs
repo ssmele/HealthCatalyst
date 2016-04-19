@@ -13,7 +13,6 @@ namespace PeopleSearch
         }
 
         public virtual DbSet<Person> People { get; set; }
-        public virtual DbSet<Table> Tables { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -34,26 +33,6 @@ namespace PeopleSearch
                 .IsUnicode(false);
 
             modelBuilder.Entity<Person>()
-                .Property(e => e.ImagePath)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<Table>()
-                .Property(e => e.FirstName)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<Table>()
-                .Property(e => e.LastName)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<Table>()
-                .Property(e => e.Address)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<Table>()
-                .Property(e => e.Interests)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<Table>()
                 .Property(e => e.ImagePath)
                 .IsUnicode(false);
         }
