@@ -11,9 +11,12 @@ namespace PeopleSearch
     {
         event Action CloseEventAddPerson;
         event Action AddPersonEvent;
+        event Action ResetAddPersonEvent;
+
         void showWindow();
         void hideWidndow();
         void closeWindow();
+        void resetWindow();
         void showInAddPersonWindowMessage(string msg);
 
 

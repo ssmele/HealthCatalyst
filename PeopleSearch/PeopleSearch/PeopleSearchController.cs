@@ -11,29 +11,44 @@ namespace PeopleSearch
 
         private IMainWindow window;
         private IAddPersonWindow windowAddPerson;
-        private PeopleContext boggleDB;
+        //private static PeopleContext peopleDB = new PeopleContext();
 
         public PeopleSearchController(IMainWindow window,IAddPersonWindow windowAddPerson)
         {
-            //boggleDB = new PeopleContext();
-            //using (boggleDB)
-            //{
-            //    boggleDB.People.
-            //}
-
             this.window = window;
             this.windowAddPerson = windowAddPerson;
 
             window.CloseEvent += HandleCloseEvent;
             window.SearchEvent += HandleSearchEvent;
             window.CloseEvent += HandleMainCloseAddPersonWindow;
+            window.SearchTextPressed += HandleSearchTextPressed;
             window.addPersonEvent += HandleAddPersonEvent;
             windowAddPerson.CloseEventAddPerson += HandleAddPersonWindowCloseEvent;
             windowAddPerson.AddPersonEvent += HandleAddToDBPersonEvent;
             window.ResetEvent += HandleResetEvent;
             window.HelpEvent += HandleHelpEvent;
+            windowAddPerson.ResetAddPersonEvent += HandleResetAddPersonEvent;
+        }
 
+        public void HandleSearchTextPressed()
+        {
+            if (window.SearchTextBox == "Type in a first or last name.")
+            {
+                window.SearchTextBox = "";
+            }
+        }
 
+        public void HandleResetAddPersonEvent()
+        {
+            //Reseting all text boxes.
+            windowAddPerson.Address = "";
+            windowAddPerson.Age = 0;
+            windowAddPerson.FirstName = "";
+            windowAddPerson.Lastname = "";
+            windowAddPerson.Lastname = "";
+            windowAddPerson.interests = "";
+            windowAddPerson.imagePath = "";
+            windowAddPerson.resetWindow();
         }
 
         public void HandleHelpEvent()
@@ -51,9 +66,9 @@ namespace PeopleSearch
         /// This will take the current information from the addPerson window and construct an object representing that person. It will then add that PeopleModel object
         /// to the database. 
         /// </summary>
-        public void HandleAddToDBPersonEvent()
+        public async void HandleAddToDBPersonEvent()
         {
-            PeopleModel currentPerson = new PeopleModel();
+            Person currentPerson = new Person();
 
             //Checking address.
             string address = windowAddPerson.Address;
@@ -62,7 +77,7 @@ namespace PeopleSearch
                 windowAddPerson.showInAddPersonWindowMessage("Please provide a valid address and try again.");
                 return;
             }
-            currentPerson.address = address;
+            currentPerson.Address = address;
 
             //Checking age.
             int age = windowAddPerson.Age;
@@ -71,7 +86,7 @@ namespace PeopleSearch
                 windowAddPerson.showInAddPersonWindowMessage("Please provide a valid age and try again.");
                 return;
             }
-            currentPerson.age = age;
+            currentPerson.Age = age;
 
             //Checking first name.
             string fn = windowAddPerson.FirstName;
@@ -80,7 +95,7 @@ namespace PeopleSearch
                 windowAddPerson.showInAddPersonWindowMessage("Please provide a valid first name and try again.");
                 return;
             }
-            currentPerson.firstName = fn;
+            currentPerson.FirstName = fn;
 
             //Checking last name.
             string ln = windowAddPerson.Lastname;
@@ -89,7 +104,7 @@ namespace PeopleSearch
                 windowAddPerson.showInAddPersonWindowMessage("Please provide a valid last name and try again.");
                 return;
             }
-            currentPerson.lastName = ln;
+            currentPerson.LastName = ln;
 
             //Checking interests.
             string interests = windowAddPerson.interests;
@@ -98,8 +113,7 @@ namespace PeopleSearch
                 windowAddPerson.showInAddPersonWindowMessage("Please provide a valid interests and try again.");
                 return;
             }
-            currentPerson.interests = interests;
-            currentPerson.interests = "swag";
+            currentPerson.Interests = interests;
 
             //Checking imagePath
             string filePath = windowAddPerson.imagePath;
@@ -108,21 +122,24 @@ namespace PeopleSearch
                 windowAddPerson.showInAddPersonWindowMessage("Please provide a valid image and try again.");
                 return;
             }
-            currentPerson.imagePath = filePath;
+            currentPerson.ImagePath = filePath;
 
-            //boggleDB.addPersonToDB(currentPerson);
+            await addPerson(currentPerson);
+        }
 
 
+        public async Task addPerson(Person newPerson)
+        {
+            //Then reset the window for the next person. 
+            HandleResetAddPersonEvent();
 
-            //Clear all input texts boxes now.
-            windowAddPerson.Address = "";
-            windowAddPerson.Age = 0;
-            windowAddPerson.FirstName = "";
-            windowAddPerson.Lastname = "";
-            windowAddPerson.Lastname = "";
-            windowAddPerson.interests = "";
-            windowAddPerson.imagePath = "";
-            windowAddPerson.imageObject = null;
+            //Adding person to DB. 
+            using (var db = new PersonDBContext())
+            {
+                db.People.Add(newPerson);
+                db.SaveChanges();
+            }
+            return;
         }
 
         public void HandleCloseEvent()
@@ -130,18 +147,19 @@ namespace PeopleSearch
             window.closeWindow();
         }
 
-        public void HandleSearchEvent(string name)
+
+        public async Task<List<Person>> personQuery(string name)
         {
             //List of people with the name. 
-            List<PeopleModel> peopleList = new List<PeopleModel>();
+            List<Person> peopleList = new List<Person>();
 
             //DO QUEREY
-            using (var context = new PeopleContext())
+            using (var context = new PersonDBContext())
             {
                 // Query for all blogs with names starting with B 
                 var query = from b in context.People
-                            where b.firstName == name ||
-                            b.lastName == name
+                            where b.FirstName == name ||
+                            b.LastName == name
                             select b;
 
                 foreach (var item in query)
@@ -149,6 +167,17 @@ namespace PeopleSearch
                     peopleList.Add(item);
                 }
             }
+
+            return peopleList;
+        }
+
+        public async void HandleSearchEvent(string name)
+        {
+            //List of people with the name. 
+            List<Person> peopleList = new List<Person>();
+
+            //Do the query asyn
+            peopleList = await personQuery(name);
 
             //If there was no one found display message for user. 
             if(peopleList.Count == 0)

@@ -8,7 +8,7 @@
         Title="People Search" Height="534.375" Width="750">
     <Grid Margin="0,0,4,-5.2">
         <Button x:Name="SearchButton" Content="Search" Margin="503,37,0,0" Click="SearchButton_Click" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" Width="53"/>
-        <TextBox x:Name="SearchText" Margin="347,37,0,0" Text="Type in a first or last name." Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" Width="151" />
+        <TextBox x:Name="SearchText" Margin="347,37,0,0" Text="Type in a first or last name." Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" Width="151" PreviewMouseUp="SearchText_PreviewMouseUp" />
         <Label x:Name="SearchLabel" Content="Searh for someone!" HorizontalAlignment="Left" Margin="220,35,0,437" Width="113"/>
         <Menu x:Name="menu" Height="23" VerticalAlignment="Top">
             <MenuItem Header="File" Height="23" Width="60" >
@@ -21,15 +21,15 @@
         <ListView x:Name="listView" Margin="0,74,0,39.8">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="First Name"  DisplayMemberBinding="{Binding firstName}"/>
-                    <GridViewColumn Header="Last Name"  DisplayMemberBinding="{Binding lastName}"/>
-                    <GridViewColumn Header="Age"  DisplayMemberBinding="{Binding age}"/>
-                    <GridViewColumn Header="Address"  DisplayMemberBinding="{Binding address}"/>
-                    <GridViewColumn Header="Interests"  DisplayMemberBinding="{Binding interests}"/>
-                    <GridViewColumn Header="Picture">
+                    <GridViewColumn Header="First Name"  DisplayMemberBinding="{Binding FirstName}"/>
+                    <GridViewColumn Header="Last Name"  DisplayMemberBinding="{Binding LastName}"/>
+                    <GridViewColumn Header="Age"  DisplayMemberBinding="{Binding Age}"/>
+                    <GridViewColumn Header="Address"  DisplayMemberBinding="{Binding Address}"/>
+                    <GridViewColumn Header="Interests"  DisplayMemberBinding="{Binding Interests}"/>
+                    <GridViewColumn Header="Picture" Width="50">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <Image Source="{Binding imagePath}" Width="50" Height="50"/>
+                                <Image Source="{Binding ImagePath}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -37,6 +37,5 @@
             </ListView.View>
         </ListView>
         <Button x:Name="resetButton" Content="Reset" Margin="0,0,353,9.8" RenderTransformOrigin="0.513,-1.637" HorizontalAlignment="Right" Width="64" Click="resetButton_Click" Height="25" VerticalAlignment="Bottom"/>
-
     </Grid>
 </Window>

@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Microsoft.Win32;
 
 //TODO: GET DATABASE WORKING, Add REset to addperson window. Make sure reset of addperson keeps default picture. GET GENERIC FILENAME WORKING. 
+//TODO: GENERIC FILENAMES, ASYNC, RICKTEXTBOX THING!!! GET DB TO UPDATE!!!! IMAGES IN IMAGES FOLDER. 
 
 namespace PeopleSearch
 {
@@ -122,7 +123,18 @@ namespace PeopleSearch
 
         public event Action CloseEventAddPerson;
         public event Action AddPersonEvent;
+        public event Action ResetAddPersonEvent;
 
+
+        public void resetWindow()
+        {
+            BitmapImage myBitmapImage = new BitmapImage();
+            myBitmapImage.BeginInit();
+            myBitmapImage.UriSource = new Uri(@"C:\Users\Stone\Source\Repos\HealthCatalyst\PeopleSearch\PeopleSearch\images\facebook-default-no-profile-pic.jpg");
+            myBitmapImage.DecodePixelWidth = 200;
+            myBitmapImage.EndInit();
+            this.image.Source = myBitmapImage;
+        }
         public void hideWidndow()
         {
             this.Hide();
@@ -148,11 +160,19 @@ namespace PeopleSearch
 
         private void fileDialogButton_Click(object sender, RoutedEventArgs e)
         {
+            //Open File dialog and get the result. 
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.DefaultExt = ".jpeg";
             dialog.Filter = "Image (.jpg)| *.jpg";
-            dialog.ShowDialog();
+            var result = dialog.ShowDialog();
 
+            //Check to make sure image there before creating it. 
+            if (result.Value == false)
+            {
+                return;
+            }
+
+            //If Image was there then format it and add it to the image source. 
             imagePath = dialog.FileName;
             BitmapImage myBitmapImage = new BitmapImage();
             myBitmapImage.BeginInit();
@@ -173,6 +193,14 @@ namespace PeopleSearch
             if(AddPersonEvent != null)
             {
                 AddPersonEvent();
+            }
+        }
+
+        private void resetButton_Click(object sender, RoutedEventArgs e)
+        {
+            if(ResetAddPersonEvent != null)
+            {
+                ResetAddPersonEvent();
             }
         }
     }

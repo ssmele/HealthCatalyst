@@ -14,11 +14,15 @@ namespace PeopleSearch
         event Action CloseEvent;
         event Action ResetEvent;
         event Action HelpEvent;
+        event Action SearchTextPressed;
+
+
         void closeWindow();
         void resetPeople();
-
-        void showPeople(List<PeopleModel> peopleList);
-
+        void showPeople(List<Person> peopleList);
         void showMessageMain(string msg);
+
+        string SearchTextBox { get; set; }
+
     }
 }

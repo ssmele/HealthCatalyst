@@ -22,36 +22,13 @@ namespace PeopleSearch
     public partial class MainWindow : Window, IMainWindow
     {
 
-
-        public class PeopleTest
-        {
-
-            //displaying at least name, address, age, interests, and a picture
-            public string firstName { get; set; }
-            public string lastName { get; set; }
-        }
-
         public MainWindow()
         {   
+            //Setting up controller. 
             InitializeComponent();
             IAddPersonWindow addPersonWindow = new addPersonWindow();
             new PeopleSearchController(this,addPersonWindow);
-
-            //Test init = new Test();
-            //init.FirstName = new TextBox();
-            //init.LastName = new TextBox();
-            //init.Age = new TextBox();
-
-            //init.FirstName.Text = "swag";
-            //init.LastName.Text = "yung";
-            //init.Age.Text = "15";
-            PeopleModel tester = new PeopleModel();
-            tester.firstName = "yo";
-            tester.lastName = "swag";
-
-            List<PeopleModel> x = new List<PeopleModel>();
-            x.Add(new PeopleModel() { firstName = "swag", lastName = "yellow" ,imagePath = @"C:\Users\Stone\Pictures\zucchini-1.jpg",address = "395 East Odell lane",age = 3,interests = "playing fun wiht my frineds /n i love to jump \n in the mud"});
-            this.listView.ItemsSource = x;
+            List<Person> x = new List<Person>();
         }
 
         public event Action CloseEvent;
@@ -59,6 +36,21 @@ namespace PeopleSearch
         public event Action addPersonEvent;
         public event Action ResetEvent;
         public event Action HelpEvent;
+        public event Action SearchTextPressed;
+
+
+        public string SearchTextBox
+        {
+            get
+            {
+                return SearchText.Text;
+            }
+            set
+            {
+                SearchText.Text = value;
+            }
+        }
+
 
         //Closes the main window. 
         public void closeWindow()
@@ -81,7 +73,7 @@ namespace PeopleSearch
         /// This method sets the listViews source to the current peopleList.
         /// </summary>
         /// <param name="peopleList"></param>
-        public void showPeople(List<PeopleModel> peopleList)
+        public void showPeople(List<Person> peopleList)
         {
             listView.ItemsSource = peopleList;
         }
@@ -131,6 +123,14 @@ namespace PeopleSearch
             if(HelpEvent != null)
             {
                 HelpEvent();
+            }
+        }
+
+        private void SearchText_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if(SearchTextPressed != null)
+            {
+                SearchTextPressed();
             }
         }
     }

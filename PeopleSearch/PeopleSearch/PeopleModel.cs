@@ -12,7 +12,6 @@ namespace PeopleSearch
 
         public PeopleModel()
         {
-
         }
         //displaying at least name, address, age, interests, and a picture
         public string firstName { get; set; }
@@ -26,22 +25,17 @@ namespace PeopleSearch
     public class PeopleContext : DbContext
     {
 
+
+
         public PeopleContext() : base ("PeopleDB")
         {
-
+            this.Database.CreateIfNotExists();
         }
 
         public DbSet<PeopleModel> People { get;set; }
 
-        //public void addPersonToDB(PeopleModel data)
-        //{
-        //    using(var db = new PeopleContext())
-        //    {
-        //        db.People.Add(data);
-        //        db.SaveChanges();
-        //    }
-        //}
     }
-    
 
-    }
+
+
+}

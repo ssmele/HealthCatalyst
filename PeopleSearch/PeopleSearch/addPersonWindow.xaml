@@ -29,10 +29,9 @@
         </RichTextBox>
         <TextBox x:Name="ageTextBox" HorizontalAlignment="Left" Height="22" Margin="385,45,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="100"/>
         <Label x:Name="imagaLabel" Content="Image:" HorizontalAlignment="Left" Height="26" Margin="276,91,0,0" VerticalAlignment="Top" Width="72"/>
-        <Button x:Name="addPersonButton" Content="Add Person" HorizontalAlignment="Center" Height="32" Margin="288,479,283.6,0" VerticalAlignment="Top" Width="122" Click="addPersonButton_Click"/>
+        <Button x:Name="addPersonButton" Content="Add Person" HorizontalAlignment="Center" Height="32" Margin="199,479,372.6,0" VerticalAlignment="Top" Width="122" Click="addPersonButton_Click"/>
         <Image x:Name="image"  HorizontalAlignment="Left" Height="335" Margin="276,117,0,0" VerticalAlignment="Top" Width="392"/>
         <Button x:Name="fileDialogButton" Content="Find Image" HorizontalAlignment="Left" Margin="335,93,0,0" VerticalAlignment="Top" Width="75" Click="fileDialogButton_Click"/>
-
-
+        <Button x:Name="resetButton" Content="Reset" HorizontalAlignment="Left" Height="32" Margin="385,479,0,0" VerticalAlignment="Top" Width="131" Click="resetButton_Click"/>
     </Grid>
 </Window>
